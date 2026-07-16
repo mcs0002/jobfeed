@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Jobfeed{% endblock %}</title>
+  <link rel="stylesheet" href="/static/style.css?v={{ asset_v }}">
+  <script src="/static/htmx.min.js"></script>
+  <script>
+    // Apply the saved theme before first paint so there's no light-mode flash
+    // on a dark-mode load. Mirrors the prototype's localStorage key.
+    (function () {
+      try {
+        var t = localStorage.getItem("jsui.theme");
+        if (t === "dark") document.documentElement.setAttribute("data-theme", "dark");
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body class="{% block body_class %}{% endblock %}{% if request.session.get('role') == 'guest' %} guest{% endif %}">
+  <header class="topbar">
+    <div class="topbar-left">
+      <a class="brand" href="/">Jobfeed</a>
+      <nav class="topnav">
+        <a href="/" class="{% if active_nav == 'browse' %}on{% endif %}">Browse</a>
+        <a href="/sources" class="{% if active_nav == 'sources' %}on{% endif %}">Sources</a>
+        <a href="/stats" class="{% if active_nav == 'stats' %}on{% endif %}">Stats</a>
+      </nav>
+    </div>
+    <div class="topbar-right">
+      {% block topbar_extra %}{% endblock %}
+      <button type="button" class="theme-toggle" onclick="window.__toggleTheme()" title="Toggle dark mode" aria-label="Toggle dark mode"></button>
+      {% if request.session.get('role') == 'guest' %}<span class="role-badge" title="Guest access — browsing only, no changes">guest</span>{% endif %}
+      <form method="post" action="/logout" class="logout-form"><button type="submit" title="Log out" aria-label="Log out">⏻</button></form>
+    </div>
+  </header>
+  <main class="{% block main_class %}{% endblock %}">
+    {% block content %}{% endblock %}
+  </main>
+  <nav class="bottomnav" aria-label="Sections">
+    <a href="/" class="{% if active_nav == 'browse' %}on{% endif %}"><span class="bn-ico">▤</span>Browse</a>
+    <a href="/sources" class="{% if active_nav == 'sources' %}on{% endif %}"><span class="bn-ico">⛁</span>Sources</a>
+    <a href="/stats" class="{% if active_nav == 'stats' %}on{% endif %}"><span class="bn-ico">∿</span>Stats</a>
+  </nav>
+  <script>
+    // Theme toggle: swap [data-theme] on <html>, persist, and refresh the
+    // button glyph. Server ships light; dark is the same token set the
+    // prototype used, expressed as CSS custom properties in style.css.
+    (function () {
+      function icon() {
+        var dark = document.documentElement.getAttribute("data-theme") === "dark";
+        document.querySelectorAll(".theme-toggle").forEach(function (b) {
+          b.textContent = dark ? "☀" : "◐";
+        });
+      }
+      window.__toggleTheme = function () {
+        var dark = document.documentElement.getAttribute("data-theme") === "dark";
+        if (dark) document.documentElement.removeAttribute("data-theme");
+        else document.documentElement.setAttribute("data-theme", "dark");
+        try { localStorage.setItem("jsui.theme", dark ? "light" : "dark"); } catch (e) {}
+        icon();
+      };
+      icon();
+    })();
+  </script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

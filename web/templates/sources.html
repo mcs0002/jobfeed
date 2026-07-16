@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% block title %}Sources — Jobfeed{% endblock %}
+{% block main_class %}page{% endblock %}
+{% block content %}
+
+<div class="summary-cards">
+  <div class="scard"><div class="k">Sources</div><div class="v">{{ totals.sources }}</div></div>
+  <div class="scard"><div class="k">Automated</div><div class="v good">{{ totals.automated }}</div></div>
+  {% if totals.unverified %}<div class="scard help" title="ATS configured but verified:false — the scheduled scan skips these until a passing scrape flips them live (see SOURCE_HEALTH.md Tier 0b)."><div class="k">Unverified</div><div class="v" style="color:var(--warn)">{{ totals.unverified }}</div></div>{% endif %}
+  <div class="scard help" title="verified:true but the last scan errored or collapsed far below its baseline — wired, was working, now producing nothing. Fix needed (see SOURCE_HEALTH.md)."><div class="k">Stalled</div><div class="v bad">{{ totals.stalled }}</div></div>
+  <div class="scard help" title="ats: manual/unknown — no auto-scrapable board (blocked WAF, API-disabled, or no public ATS). Checked by hand."><div class="k">Manual</div><div class="v">{{ totals.manual }}</div></div>
+</div>
+
+<div class="about">
+  Every role passes a three-step pipeline: <b>scope</b> (most boards pulled in full; a negative filter drops unambiguous noise — back-office, ops, IT, HR, retail. A few non-finance "island" firms like commodity merchants and energy houses are instead positively scoped to their finance arm) → <b>tag</b> (an LLM labels division, desk, seniority, location, work mode) → <b>filter</b> (your reversible toggles on <a href="/">Browse</a>). Toggling a firm or category off here greys it and drops its roles from Browse and Stats.
+  <br><span class="scope full">Full board</span> pull everything, filter + tag · <span class="scope facet">Positive facet</span> isolate the finance arm · <span class="scope search">Search scope</span> server-side query · <span class="scope manual">Manual</span> checked by hand · <span class="heavy">heavy</span> = killable subprocess for big/slow boards. Markers: <span class="ext">↗</span> career site · <span class="srcnote">ⓘ</span> note (hover) · 🎓 separate graduate scheme on the firm's own site.
+</div>
+
+<input type="search" id="srcsearch" class="src-search" placeholder="Filter sources… (company, ATS, scope, category)" autocomplete="off">
+
+{% for category, rows in groups %}
+<div class="srcgroup" data-category="{{ category }}">
+  <div class="srccat" data-category="{{ category }}">
+    <span class="caret" aria-hidden="true">
+      <svg viewBox="0 0 16 16" width="13" height="13"><path d="M4 6.5l4 4 4-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </span>
+    <span class="catname">{{ category }}</span>
+    <span class="srccount">{{ rows|length }}</span>
+    <label class="switch catswitch" title="Show / hide this whole category">
+      <input type="checkbox" class="catcheck" checked>
+      <span class="slider"></span>
+    </label>
+  </div>
+  <div class="srcrows">
+    {% for r in rows %}
+    <div class="srcrow"
+         data-fullname="{{ r.name }}" data-name="{{ r.name|lower }}" data-ats="{{ r.ats|lower }}" data-scope="{{ r.scope_label|lower }}">
+      <div class="firmcell">
+        <span class="firmname">{% if r.finance %}<a href="/?company={{ r.name|urlencode }}&amp;area=">{{ r.name }}</a>{% else %}{{ r.name }}{% endif %}</span>
+        {% if r.board_url %}<a class="ext" href="{{ r.board_url|safe_url }}" target="_blank" rel="noopener" title="Career site">↗</a>{% endif %}
+        {% if r.notes %}<span class="srcnote" title="{{ r.notes }}">ⓘ</span>{% endif %}
+        {% if r.grad_scheme %}<a class="gradscheme" href="{{ r.grad_scheme_url|safe_url }}" target="_blank" rel="noopener" title="Separate graduate scheme on the firm's own site — not posted on the scraped board. Apply directly.">🎓</a>{% endif %}
+        {% if not r.verified and r.ats not in ('manual','unknown') %}<span class="firm-flag unverified"> unverified</span>{% endif %}
+        {% if r.stalled %}<span class="firm-flag stalled"> ⚠ stalled</span>{% endif %}
+        <div class="firmsub">{{ r.ats }}{% if r.last_seen %} · last seen {{ r.last_seen }}{% endif %}</div>
+      </div>
+      <span class="scope {{ r.scope_slug }}">{{ r.scope_label }}</span>
+      {% if r.heavy %}<span class="heavy" title="Heavy: run in a killable subprocess (big/slow board). Execution mode, not a scope.">heavy</span>{% endif %}
+      {% if r.scope_slug != 'manual' %}
+      <label class="switch" title="Show or hide this firm in Browse">
+        <input type="checkbox" class="firmcheck" checked>
+        <span class="slider"></span>
+      </label>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endfor %}
+
+<p id="srcnomatch" class="srcnomatch" hidden>No sources match your filter.</p>
+
+<script>
+(function () {
+  var LS_COLLAPSED = "src.collapsed.v1";
+
+  // Hidden firms/categories live in the src_hidden cookie (not localStorage) so
+  // the server reads the same set and drops those firms' roles from Browse.
+  function readHidden() {
+    var m = document.cookie.match(/(?:^|;\s*)src_hidden=([^;]*)/);
+    var o = {};
+    if (m) { try { o = JSON.parse(decodeURIComponent(m[1])); } catch (e) {} }
+    return { firms: new Set(o.firms || []), cats: new Set(o.cats || []) };
+  }
+  function writeHidden(h) {
+    var o = { firms: Array.from(h.firms), cats: Array.from(h.cats) };
+    document.cookie = "src_hidden=" + encodeURIComponent(JSON.stringify(o)) +
+      ";path=/;max-age=31536000;samesite=lax";
+  }
+  function loadSet(key) { try { return new Set(JSON.parse(localStorage.getItem(key) || "[]")); } catch (e) { return new Set(); } }
+  function saveSet(key, set) { try { localStorage.setItem(key, JSON.stringify(Array.from(set))); } catch (e) {} }
+
+  var hidden = readHidden();
+  var search = document.getElementById("srcsearch");
+  var noMatch = document.getElementById("srcnomatch");
+  var groups = Array.prototype.slice.call(document.querySelectorAll(".srcgroup"));
+
+  var collapsed;
+  if (localStorage.getItem(LS_COLLAPSED) === null) {
+    collapsed = new Set(groups.map(function (g) { return g.getAttribute("data-category"); }));
+    saveSet(LS_COLLAPSED, collapsed);
+  } else {
+    collapsed = loadSet(LS_COLLAPSED);
+  }
+
+  function apply() {
+    var q = (search.value || "").trim().toLowerCase();
+    var anyVisible = false;
+    groups.forEach(function (g) {
+      var cat = g.getAttribute("data-category");
+      var catOff = hidden.cats.has(cat);
+      g.classList.toggle("cat-off", catOff);
+      g.classList.toggle("collapsed", collapsed.has(cat) && !q);
+      var cc = g.querySelector(".catcheck");
+      if (cc) cc.checked = !catOff;
+
+      var visibleRows = 0;
+      Array.prototype.forEach.call(g.querySelectorAll(".srcrow"), function (row) {
+        var full = row.getAttribute("data-fullname");
+        var firmOff = hidden.firms.has(full);
+        row.classList.toggle("firm-off", firmOff || catOff);
+        var fc = row.querySelector(".firmcheck");
+        if (fc) { fc.checked = !firmOff; fc.disabled = catOff; }
+        var matches = !q || (
+          (row.getAttribute("data-name") || "").indexOf(q) !== -1 ||
+          (row.getAttribute("data-ats") || "").indexOf(q) !== -1 ||
+          (row.getAttribute("data-scope") || "").indexOf(q) !== -1 ||
+          cat.toLowerCase().indexOf(q) !== -1
+        );
+        row.style.display = matches ? "" : "none";
+        if (matches) visibleRows++;
+      });
+      g.style.display = visibleRows > 0 ? "" : "none";
+      if (visibleRows > 0) anyVisible = true;
+    });
+    noMatch.hidden = anyVisible;
+  }
+
+  search.addEventListener("input", apply);
+
+  document.addEventListener("click", function (e) {
+    if (e.target.closest && e.target.closest(".switch")) return;
+    var head = e.target.closest ? e.target.closest(".srccat") : null;
+    if (!head) return;
+    var cat = head.getAttribute("data-category");
+    if (collapsed.has(cat)) collapsed.delete(cat); else collapsed.add(cat);
+    saveSet(LS_COLLAPSED, collapsed);
+    apply();
+  });
+
+  document.addEventListener("change", function (e) {
+    var t = e.target;
+    if (t.classList.contains("firmcheck")) {
+      var full = t.closest(".srcrow").getAttribute("data-fullname");
+      if (t.checked) hidden.firms.delete(full); else hidden.firms.add(full);
+      writeHidden(hidden); apply();
+    } else if (t.classList.contains("catcheck")) {
+      var cat = t.closest(".srcgroup").getAttribute("data-category");
+      if (t.checked) hidden.cats.delete(cat); else hidden.cats.add(cat);
+      writeHidden(hidden); apply();
+    }
+  });
+
+  apply();
+})();
+</script>
+{% endblock %}

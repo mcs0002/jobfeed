@@ -1,0 +1,328 @@
+{% extends "base.html" %}
+{% block body_class %}browse{% endblock %}
+{% block main_class %}browse-split{% endblock %}
+
+{% block topbar_extra %}
+<span class="search-slot" id="search-slot-desktop"><input class="head-search" id="head-search" type="search" name="q"
+  value="{{ params.get('q','') }}" placeholder="Search title or company…  ( / )"
+  autocomplete="off"
+  hx-get="/partials/jobs" hx-target="#results" hx-swap="innerHTML"
+  hx-trigger="input changed delay:350ms, search"
+  hx-include="#filter-form" hx-sync="body:replace"></span>
+{% endblock %}
+
+{% block content %}
+<div class="list-pane">
+  {% if scan_stale_days %}
+  <div class="stale-banner" role="alert">
+    No scan has run for {{ scan_stale_days }} days — the nightly job on the M1 may be dead
+    (check deliver.log / launchctl).
+  </div>
+  {% endif %}
+  <div class="list-head">
+    <span class="search-slot" id="search-slot-mobile"></span>
+    {% include "_tabs.html" %}
+
+    <div class="list-toolbar">
+      <button type="button" class="filters-btn" id="filters-btn" aria-expanded="false"
+        onclick="window.__toggleFilters()">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="6" x2="20" y2="6"></line><line x1="7" y1="12" x2="17" y2="12"></line><line x1="10" y1="18" x2="14" y2="18"></line></svg>
+        Filters<span class="fbadge" id="filters-badge" hidden></span>
+        <span class="caret" id="filters-caret">▼</span>
+      </button>
+      <a class="link-reset" id="reset-link" href="/" title="Reset all filters"{% if not chips %} hidden{% endif %}>
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>Reset</a>
+      {% include "_list_count.html" %}
+    </div>
+
+    {% include "_chips.html" %}
+
+    <form class="filter-panel" id="filter-form" hidden
+      hx-get="/partials/jobs" hx-target="#results" hx-swap="innerHTML"
+      hx-trigger="change" hx-include="#head-search" hx-sync="body:replace">
+      <input type="hidden" name="area" value="{{ params.get('area','') }}">
+
+      {% macro facet(name, label) %}
+      <select name="{{ name }}" aria-label="{{ label }}">
+        <option value="">{{ label }}: any</option>
+        {% for v in facets[name] %}
+          <option value="{{ v }}" {% if params.get(name)==v %}selected{% endif %}>{{ v }}</option>
+        {% endfor %}
+      </select>
+      {% endmacro %}
+
+      <div class="fp-label">Role</div>
+      <div class="fp-grid cols-3">
+        {{ facet('category', 'Firm type') }}
+        <select name="employ" aria-label="Type" title="All roles (default), full-time only, or internships only">
+          <option value="" {% if params.get('employ') not in ('intern','fulltime') %}selected{% endif %}>All roles</option>
+          <option value="fulltime" {% if params.get('employ')=='fulltime' %}selected{% endif %}>Full-time</option>
+          <option value="intern" {% if params.get('employ')=='intern' %}selected{% endif %}>Internships</option>
+        </select>
+        {{ facet('desk', 'Desk') }}
+      </div>
+
+      <div class="fp-label">Location</div>
+      {% include "_loc_facets.html" %}
+
+      {% set lang_names = {'de':'German','fr':'French','it':'Italian','es':'Spanish','nl':'Dutch','da':'Danish','sv':'Swedish','no':'Norwegian','fi':'Finnish','pt':'Portuguese','pl':'Polish','zh':'Chinese','ja':'Japanese','ko':'Korean','ar':'Arabic','ru':'Russian','tr':'Turkish','el':'Greek','cs':'Czech','hu':'Hungarian','ro':'Romanian'} %}
+      <div class="fp-label">Requirements</div>
+      <div class="fp-grid cols-2">
+        {{ facet('education', 'Education') }}
+        <select name="lang_req" aria-label="Language" title="Roles requiring this language (beyond English)">
+          <option value="">Language: any</option>
+          <option value="none" {% if params.get('lang_req')=='none' %}selected{% endif %}>English only</option>
+          {% for v in facets['lang_req'] %}
+            <option value="{{ v }}" {% if params.get('lang_req')==v %}selected{% endif %}>{{ lang_names.get(v, v) }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="fp-label">Recency &amp; start</div>
+      <div class="fp-grid cols-3">
+        <select name="days" aria-label="Posted">
+          <option value="">Posted: any</option>
+          {% for d,l in [('7','7d'),('14','14d'),('30','30d')] %}
+            <option value="{{ d }}" {% if params.get('days')==d %}selected{% endif %}>Last {{ l }}</option>
+          {% endfor %}
+        </select>
+        <select name="start" aria-label="Start" title="Roles with this start date (untagged roles are excluded while active)">
+          <option value="">Start: any</option>
+          <option value="asap" {% if params.get('start')=='asap' %}selected{% endif %}>ASAP</option>
+          {% for y in facets['start_years'] %}
+            <option value="{{ y }}" {% if params.get('start')==y %}selected{% endif %}>{{ y }}</option>
+          {% endfor %}
+        </select>
+        {{ facet('status', 'Status') }}
+      </div>
+
+      <div class="fp-label">Show</div>
+      <div class="fp-toggles">
+        <label class="fp-toggle" title="Show only roles you've starred">
+          <input type="checkbox" name="fav" value="1" {% if params.get('fav') in ['1','true','on'] %}checked{% endif %}>★ Favorites
+        </label>
+        <label class="fp-toggle" title="Show roles requiring 3+ years of experience (hidden by default)">
+          <input type="checkbox" name="show_senior" value="1" {% if params.get('show_senior') in ['1','true','on'] %}checked{% endif %}>Senior 3y+
+        </label>
+        <label class="fp-toggle" title="Show associate-rung roles (entry at PE / asset managers / consulting; post-analyst at banks). Hidden by default.">
+          <input type="checkbox" name="assoc" value="1" {% if params.get('assoc') in ['1','true','on'] %}checked{% endif %}>Associates
+        </label>
+        <label class="fp-toggle" title="Show roles no longer on their company's board (still badged 'delisted'). Hidden by default.">
+          <input type="checkbox" name="show_expired" value="1" {% if params.get('show_expired') in ['1','true','on'] %}checked{% endif %}>Delisted
+        </label>
+      </div>
+
+      <div class="fp-saved">
+        <span class="saved-label">Saved:</span>
+        <span id="saved-views"></span>
+        <button type="button" class="btn-save-view" id="save-view-btn" onclick="window.__saveView()" hidden>+ Save current</button>
+        <a class="btn-reset-filters" href="/" title="Reset all filters">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>Reset filters</a>
+      </div>
+    </form>
+  </div>
+
+  <div class="role-list" id="results">
+    {% include "_role_list.html" %}
+  </div>
+</div>
+
+<div class="sheet-backdrop" onclick="window.__closeSheet()"></div>
+<div class="detail-pane" id="detail-pane">
+  {% if sel_job %}{% with job=sel_job %}{% include "_detail.html" %}{% endwith %}
+  {% else %}<div class="dp-empty">No roles match these filters.</div>{% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+  var LS_VIEWS = "jsui.savedViews";
+
+  // ── Responsive search placement: one input, relocated between the topbar
+  // (desktop) and the list header (mobile) so htmx wiring and the "/"
+  // shortcut always target the same node. ──────────────────────────────────
+  (function () {
+    var mq = window.matchMedia("(max-width: 859px)");
+    function place() {
+      var s = document.getElementById("head-search");
+      var host = document.getElementById(mq.matches ? "search-slot-mobile" : "search-slot-desktop");
+      if (s && host && s.parentElement !== host) host.appendChild(s);
+    }
+    if (mq.addEventListener) mq.addEventListener("change", place);
+    else mq.addListener(place);
+    place();
+  })();
+
+  // ── Filter panel disclosure ──────────────────────────────────────────────
+  window.__toggleFilters = function () {
+    var form = document.getElementById("filter-form");
+    var btn = document.getElementById("filters-btn");
+    var caret = document.getElementById("filters-caret");
+    var open = form.hasAttribute("hidden");
+    if (open) { form.removeAttribute("hidden"); btn.classList.add("on"); caret.textContent = "▲"; btn.setAttribute("aria-expanded", "true"); }
+    else { form.setAttribute("hidden", ""); btn.classList.remove("on"); caret.textContent = "▼"; btn.setAttribute("aria-expanded", "false"); }
+  };
+
+  // ── URL sync: reflect the live filter state into the address bar so a
+  // refresh restores it (and Saved views can capture it). ──────────────────
+  function currentParams() {
+    var form = document.getElementById("filter-form");
+    var p = new URLSearchParams(new FormData(form));
+    var q = (document.getElementById("head-search") || {}).value || "";
+    if (q.trim()) p.set("q", q.trim()); else p.delete("q");
+    // Drop empty values so the URL and saved views stay clean.
+    Array.from(p.keys()).forEach(function (k) { if (!p.get(k)) p.delete(k); });
+    return p;
+  }
+  function syncUrl() {
+    var p = currentParams();
+    var sel = document.querySelector(".role-card.sel");
+    if (sel) p.set("sel", sel.getAttribute("data-id"));
+    var qs = p.toString();
+    history.replaceState({}, "", qs ? "/?" + qs : "/");
+  }
+
+  // ── Selection / detail loading ───────────────────────────────────────────
+  function isMobile() { return window.matchMedia("(max-width: 859px)").matches; }
+  window.__closeSheet = function () { document.body.classList.remove("sheet-open"); };
+
+  function markSelected(card) {
+    document.querySelectorAll(".role-card.sel").forEach(function (c) { c.classList.remove("sel"); });
+    if (card) card.classList.add("sel");
+  }
+
+  document.addEventListener("click", function (e) {
+    var star = e.target.closest ? e.target.closest(".role-card .star") : null;
+    if (star) { e.preventDefault(); e.stopPropagation(); toggleStar(star.getAttribute("data-id")); return; }
+    var card = e.target.closest ? e.target.closest(".role-card") : null;
+    if (!card) return;
+    markSelected(card);
+    if (isMobile()) document.body.classList.add("sheet-open");
+    syncUrl();
+  });
+
+  // ── Optimistic star / status updates (server posts fire via htmx) ─────────
+  // Guests: controls are CSS-hidden and the server 403s, but the optimistic UI
+  // must not lie either — every mutator is a no-op for the guest role.
+  var IS_GUEST = document.body.classList.contains("guest");
+  function toggleStar(id) {
+    if (IS_GUEST) return;
+    var on = null;
+    document.querySelectorAll('[data-star-id="' + cssq(id) + '"]').forEach(function (b) {
+      if (on === null) on = !b.classList.contains("on");
+      b.classList.toggle("on", on);
+      b.textContent = on ? "★" : "☆";
+    });
+    postForm("/job/" + encodeURIComponent(id) + "/favorite", {});
+  }
+  window.__toggleStarPane = toggleStar;
+  window.__setStatus = function (id, val) {
+    if (IS_GUEST) return;
+    document.querySelectorAll('.role-card[data-id="' + cssq(id) + '"] .rc-status').forEach(function (el) {
+      el.textContent = val; el.className = "rc-status st-" + val;
+    });
+    var dot = document.querySelector('.detail-pane .status-select .dot[data-status-id="' + cssq(id) + '"]');
+    if (dot) dot.style.background = statusColor(val);
+    var sel = document.querySelector('.detail-pane select[data-status-id="' + cssq(id) + '"]');
+    if (sel) sel.value = val;
+    postForm("/job/" + encodeURIComponent(id) + "/status", { status: val });
+  };
+  function statusColor(v) {
+    return getComputedStyle(document.documentElement).getPropertyValue("--st-" + v).trim() || "var(--muted)";
+  }
+  function cssq(s) { return String(s).replace(/"/g, '\\"'); }
+  function postForm(url, data) {
+    var body = new URLSearchParams(data);
+    fetch(url, { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: body, credentials: "same-origin" });
+  }
+
+  // ── Keyboard nav (mirrors the prototype: j/k move, f fav, e ignore, a
+  // applied, / focuses search) ─────────────────────────────────────────────
+  document.addEventListener("keydown", function (e) {
+    var tag = e.target.tagName;
+    if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") {
+      if (e.key === "Escape" && tag !== "SELECT") e.target.blur();
+      return;
+    }
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    var cards = Array.prototype.slice.call(document.querySelectorAll(".role-card"));
+    if (!cards.length && e.key !== "/") return;
+    var cur = document.querySelector(".role-card.sel");
+    var idx = cards.indexOf(cur);
+    if (e.key === "j" || e.key === "ArrowDown") { open(cards[Math.min(idx + 1, cards.length - 1)]); e.preventDefault(); }
+    else if (e.key === "k" || e.key === "ArrowUp") { open(cards[Math.max(idx - 1, 0)] || cards[0]); e.preventDefault(); }
+    else if (e.key === "f" && cur) { toggleStar(cur.getAttribute("data-id")); e.preventDefault(); }
+    else if (e.key === "e" && cur) { window.__setStatus(cur.getAttribute("data-id"), "ignored"); e.preventDefault(); }
+    else if (e.key === "a" && cur) { window.__setStatus(cur.getAttribute("data-id"), "applied"); e.preventDefault(); }
+    else if (e.key === "/") { var s = document.getElementById("head-search"); if (s) { s.focus(); e.preventDefault(); } }
+  });
+  function open(card) {
+    if (!card) return;
+    markSelected(card);
+    card.scrollIntoView({ block: "nearest" });
+    htmx.ajax("GET", card.getAttribute("data-detail"), { target: "#detail-pane", swap: "innerHTML" });
+    syncUrl();
+  }
+
+  // ── Saved views (localStorage; a view is a stored query string) ──────────
+  function loadViews() { try { return JSON.parse(localStorage.getItem(LS_VIEWS) || "[]"); } catch (e) { return []; } }
+  function saveViews(v) { try { localStorage.setItem(LS_VIEWS, JSON.stringify(v)); } catch (e) {} }
+  function activeSummary() {
+    var chips = Array.prototype.map.call(document.querySelectorAll("#chips .chip"), function (c) {
+      return c.textContent.replace(/\s*✕\s*$/, "").trim();
+    });
+    var areaTab = document.querySelector(".area-tab.on");
+    var area = areaTab && areaTab.getAttribute("data-area") ? areaTab.childNodes[0].nodeValue.trim() : "";
+    var parts = (area ? [area] : []).concat(chips).filter(Boolean);
+    var s = parts.join(" · ");
+    return s.length > 42 ? s.slice(0, 40) + "…" : s;
+  }
+  window.__saveView = function () {
+    var p = currentParams();
+    var area = (document.querySelector('#filter-form [name="area"]') || {}).value;
+    if (area) p.set("area", area);
+    var qs = p.toString();
+    if (!qs) return;
+    var views = loadViews();
+    views.push({ id: String(Date.now()), name: activeSummary() || "Custom view", qs: qs });
+    saveViews(views); renderViews();
+  };
+  function renderViews() {
+    var host = document.getElementById("saved-views");
+    if (!host) return;
+    var views = loadViews();
+    host.innerHTML = "";
+    views.forEach(function (v) {
+      var wrap = document.createElement("span");
+      wrap.className = "saved-view";
+      var apply = document.createElement("button");
+      apply.type = "button"; apply.className = "apply"; apply.textContent = v.name;
+      apply.onclick = function () { window.location = "/?" + v.qs; };
+      var del = document.createElement("button");
+      del.type = "button"; del.className = "del"; del.title = "Delete saved view"; del.textContent = "✕";
+      del.onclick = function (ev) { ev.stopPropagation(); saveViews(loadViews().filter(function (x) { return x.id !== v.id; })); renderViews(); };
+      wrap.appendChild(apply); wrap.appendChild(del); host.appendChild(wrap);
+    });
+  }
+
+  // ── Filters badge + Save-current visibility, refreshed after each swap ───
+  function refreshChrome() {
+    var n = document.querySelectorAll("#chips .chip").length;
+    var badge = document.getElementById("filters-badge");
+    if (badge) { badge.textContent = n; badge.hidden = n === 0; }
+    var reset = document.getElementById("reset-link");
+    if (reset) reset.hidden = n === 0;
+    var save = document.getElementById("save-view-btn");
+    var hasArea = !!(document.querySelector('#filter-form [name="area"]') || {}).value;
+    if (save) save.hidden = !(n > 0 || hasArea);
+  }
+
+  document.body.addEventListener("htmx:afterSwap", function (e) {
+    if (e.detail.target && e.detail.target.id === "results") { syncUrl(); refreshChrome(); }
+  });
+
+  renderViews(); refreshChrome();
+})();
+</script>
+{% endblock %}

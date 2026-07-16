@@ -1,0 +1,5299 @@
+[
+  {
+    "name": "J.P. Morgan",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://careers.jpmorgan.com/global/en/students",
+    "category": "Global Investment Banks",
+    "ats": "oracle_hcm",
+    "oracle_hcm": {
+      "base_url": "https://jpmc.fa.oraclecloud.com",
+      "site": "CX_1001"
+    },
+    "verified": true,
+    "heavy": true
+  },
+  {
+    "name": "Goldman Sachs",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.goldmansachs.com/careers/students",
+    "category": "Global Investment Banks",
+    "ats": "goldman",
+    "goldman": {
+      "experience_groups": [
+        [
+          "CAMPUS"
+        ],
+        [
+          "EARLY_CAREER",
+          "PROFESSIONAL"
+        ]
+      ]
+    },
+    "verified": true,
+    "career_url": "https://higher.gs.com/results",
+    "alumni": true
+  },
+  {
+    "name": "Morgan Stanley",
+    "category": "Global Investment Banks",
+    "ats": "workday",
+    "workday": {
+      "tenant": "ms",
+      "version": "wd5",
+      "board": "External"
+    },
+    "verified": true,
+    "career_url": "https://morganstanley.wd1.myworkdayjobs.com/Experienced_Jobs"
+  },
+  {
+    "name": "Citigroup",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://jobs.citi.com/students-and-graduates",
+    "category": "Global Investment Banks",
+    "ats": "talentbrew",
+    "talentbrew": {
+      "base_url": "https://jobs.citi.com",
+      "page_size": 100,
+      "facet_filter_sets": [
+        [
+          {
+            "ID": "5 Markets [L2]",
+            "FacetType": 5,
+            "Display": "5 Markets [L2]",
+            "IsApplied": "true",
+            "FieldName": "custom_fields.MS_Level_2"
+          }
+        ],
+        [
+          {
+            "ID": "12214 Investment Banking [L3]",
+            "FacetType": 5,
+            "Display": "12214 Investment Banking [L3]",
+            "IsApplied": "true",
+            "FieldName": "custom_fields.MS_Level_3"
+          }
+        ]
+      ]
+    },
+    "verified": true
+  },
+  {
+    "name": "Bank of America",
+    "category": "Global Investment Banks",
+    "ats": "workday",
+    "workday": {
+      "tenant": "ghr",
+      "version": "wd1",
+      "board": "Lateral-US"
+    },
+    "verified": true,
+    "notes": "Widened markets-only -> full US lateral board (~1655, 9s) per the full-finance-portfolio intent; negative filter + Haiku tags sort divisions. Was search_text='Global Markets' (73)."
+  },
+  {
+    "name": "Barclays",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://search.jobs.barclays/early-careers",
+    "category": "Global Investment Banks",
+    "ats": "workday",
+    "workday": {
+      "tenant": "barclays",
+      "version": "wd3",
+      "board": "External_Career_Site_Barclays"
+    },
+    "verified": true
+  },
+  {
+    "name": "Deutsche Bank",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://careers.db.com/students-graduates/",
+    "category": "Global Investment Banks",
+    "ats": "beesite",
+    "verified": true,
+    "career_url": "https://deutschebank.wd3.myworkdayjobs.com/DB_External_Career_Site",
+    "beesite": {
+      "tenant": "deutschebank",
+      "endpoint": "search"
+    }
+  },
+  {
+    "name": "BNP Paribas",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://group.bnpparibas/en/careers/students-graduates",
+    "category": "Global Investment Banks",
+    "ats": "bnpparibas_paced",
+    "verified": true,
+    "heavy": true,
+    "career_url": "https://group.bnpparibas/en/careers/all-job-offers"
+  },
+  {
+    "name": "Société Générale",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://careers.societegenerale.com/en/students-graduates",
+    "category": "Global Investment Banks",
+    "ats": "societegenerale",
+    "verified": true
+  },
+  {
+    "name": "UBS",
+    "category": "Global Investment Banks",
+    "ats": "brassring_hosted",
+    "brassring_hosted": {
+      "search_url": "https://jobs.ubs.com/TGnewUI/Search/Home/HomeWithPreLoad?partnerid=25008&siteid=5012&PageType=searchResults&SearchType=linkquery&LinkID=0",
+      "partner_id": 25008,
+      "site_id": 5012,
+      "link_id": 0,
+      "location_field": "formtext23"
+    },
+    "verified": true,
+    "career_url": "https://jobs.ubs.com/TGnewUI/Search/Home/Home?partnerid=25008&siteid=5012"
+  },
+  {
+    "name": "HSBC",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.hsbc.com/careers/students-and-graduates",
+    "category": "Global Investment Banks",
+    "ats": "eightfold",
+    "eightfold": {
+      "base_url": "https://hsbc.eightfold.ai",
+      "domain": "hsbc.com"
+    },
+    "verified": true
+  },
+  {
+    "name": "Nomura",
+    "category": "Global Investment Banks",
+    "ats": "successfactors",
+    "base_url": "https://careers.nomura.com/Nomura",
+    "verified": true
+  },
+  {
+    "name": "Mizuho (EMEA)",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.mizuhogroup.com/emea/careers",
+    "category": "Global Investment Banks",
+    "ats": "successfactors",
+    "base_url": "https://careers.mizuhoemea.com",
+    "verified": true,
+    "career_url": "https://www.mizuhogroup.com/emea/careers"
+  },
+  {
+    "name": "Mizuho (Americas)",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.mizuhogroup.com/americas/careers/campus-recruiting",
+    "category": "Global Investment Banks",
+    "ats": "workday",
+    "workday": {
+      "tenant": "mizuho",
+      "version": "wd1",
+      "board": "mizuhoamericas"
+    },
+    "verified": true,
+    "career_url": "https://mizuho.wd1.myworkdayjobs.com/mizuhoamericas"
+  },
+  {
+    "name": "MUFG",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://mufgcampus.com/",
+    "category": "Global Investment Banks",
+    "ats": "workday",
+    "workday": {
+      "tenant": "mufgub",
+      "version": "wd3",
+      "board": "MUFG-Careers"
+    },
+    "verified": true
+  },
+  {
+    "name": "Macquarie Group",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.macquarie.com/uk/en/careers/graduates-and-interns/our-programmes.html",
+    "category": "Global Investment Banks",
+    "ats": "avature",
+    "search_url": "https://recruitment.macquarie.com/en_US/careers/SearchJobs/",
+    "verified": true,
+    "notes": "Single Avature board (recruitment.macquarie.com) covers the WHOLE group including Macquarie Asset Management (~21 AM-tagged of ~533). The standalone 'Macquarie Asset Management' target was deleted 2026-06-29 (Tier X — covered by parent; no separate iCIMS board exists)."
+  },
+  {
+    "name": "Crédit Agricole CIB",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.ca-cib.com/en/careers/students-and-young-graduates",
+    "category": "European & Regional Banks",
+    "ats": "talentsoft",
+    "talentsoft": {
+      "board_url": "https://jobs.ca-cib.com/job/list-of-jobs.aspx",
+      "locale": 2057
+    },
+    "verified": true
+  },
+  {
+    "name": "Natixis CIB",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://home.cib.natixis.com/shape-your-career",
+    "category": "European & Regional Banks",
+    "ats": "bpce",
+    "bpce": {
+      "base_url": "https://recrutement.natixis.com/app",
+      "tenant": "natixis",
+      "lang": "en",
+      "page_size": 500
+    },
+    "career_url": "https://recrutement.natixis.com/en",
+    "verified": true
+  },
+  {
+    "name": "ABN AMRO",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.werkenbijabnamro.nl/en/traineeships",
+    "category": "European & Regional Banks",
+    "ats": "abnamro",
+    "verified": true
+  },
+  {
+    "name": "ING Wholesale Banking",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://careers.ing.com/en",
+    "category": "European & Regional Banks",
+    "ats": "talentbrew",
+    "talentbrew": {
+      "base_url": "https://careers.ing.com/en",
+      "page_size": 100,
+      "item_selector": ".vacancy-item",
+      "link_selector": "a[data-job-id]",
+      "title_selector": ".vacancy-item__title",
+      "location_selector": ".vacancy-item__meta"
+    },
+    "verified": true,
+    "notes": "Negative full-board (ING is finance-native). Previously carried a 'Business & Wholesale Banking Specialism' facet that collapsed the 793-role board to 2; removed 2026-06-28 so filter.py + the tagger sort the full board."
+  },
+  {
+    "name": "UniCredit CIB",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.unicreditgroup.eu/en/careers/join-unicredit/unicredit-graduate-program.html",
+    "category": "European & Regional Banks",
+    "ats": "avature",
+    "search_url": "https://careers.unicredit.eu/en_GB/jobsuche/SearchJobs/",
+    "page_size": 100,
+    "verified": true,
+    "heavy": true,
+    "notes": "Avature crawl hangs on a blocking socket (~223s, unkillable by signal) — runs under the heavy subprocess executor (SIGKILL-able, 1200s cap). Re-enabled 2026-06-28; was the one June-20 hang-batch firm left disabled. HypoVereinsbank (HVB) roles also post to this same board — no separate HVB entry needed."
+  },
+  {
+    "name": "Intesa Sanpaolo IMI CIB",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://group.intesasanpaolo.com/en/careers",
+    "category": "European & Regional Banks",
+    "ats": "successfactors",
+    "base_url": "https://jobs.intesasanpaolo.com",
+    "search_params": {
+      "department": "Business - Corporate & Investment Banking"
+    },
+    "verified": true
+  },
+  {
+    "name": "Mediobanca",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.mediobanca.com/en/work-with-us/talent-program.html",
+    "category": "European & Regional Banks",
+    "ats": "intervieweb",
+    "feed_url": "https://mediobanca.intervieweb.it/annunci.php?lang=it&d=mediobanca.com&k=5d5fe2bade7b20b3eeff504912a9afa0&format=json_en",
+    "verified": true
+  },
+  {
+    "name": "Santander CIB",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.santander.com/en/careers",
+    "category": "European & Regional Banks",
+    "ats": "workday",
+    "workday": {
+      "tenant": "santander",
+      "version": "wd3",
+      "board": "SantanderCareers"
+    },
+    "verified": true,
+    "alumni": true
+  },
+  {
+    "name": "BBVA CIB",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.bbva.com/en/careers/",
+    "category": "European & Regional Banks",
+    "ats": "workday",
+    "workday": {
+      "tenant": "bbva",
+      "version": "wd3",
+      "board": "BBVA"
+    },
+    "verified": true
+  },
+  {
+    "name": "CaixaBank",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://caixabankcareers.com/content/-Talent-Program/?locale=en_US",
+    "category": "European & Regional Banks",
+    "ats": "successfactors",
+    "base_url": "https://caixabankcareers.com",
+    "verified": true,
+    "alumni": true
+  },
+  {
+    "name": "Lloyds Banking Group",
+    "category": "European & Regional Banks",
+    "ats": "workday",
+    "workday": {
+      "tenant": "lbg",
+      "version": "wd3",
+      "board": "lbg_Careers"
+    },
+    "verified": true
+  },
+  {
+    "name": "Standard Chartered",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.sc.com/en/global-careers/early-careers/",
+    "category": "European & Regional Banks",
+    "ats": "successfactors_api",
+    "successfactors_api": {
+      "base_url": "https://jobs.standardchartered.com",
+      "locale": "en_GB"
+    },
+    "verified": true,
+    "alumni": true
+  },
+  {
+    "name": "RBC Capital Markets",
+    "category": "European & Regional Banks",
+    "ats": "workday",
+    "heavy": true,
+    "workday": {
+      "tenant": "rbc",
+      "version": "wd3",
+      "board": "RBCGLOBAL1"
+    },
+    "verified": true,
+    "notes": "Widened markets-only -> full board (~1518). heavy:true — this tenant is slow (~49s, over the 30s light-pool timeout). Was search_text='Capital Markets' (434)."
+  },
+  {
+    "name": "TD Securities",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://careers.td.com/student-new-grads/early-talent-programs/",
+    "category": "European & Regional Banks",
+    "ats": "workday",
+    "workday": {
+      "tenant": "td",
+      "version": "wd3",
+      "board": "TD_Bank_Careers"
+    },
+    "verified": true
+  },
+  {
+    "name": "Jefferies",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.jefferies.com/careers/students-and-graduates/",
+    "category": "European & Regional Banks",
+    "ats": "oracle_hcm",
+    "oracle_hcm": {
+      "base_url": "https://hdid.fa.us2.oraclecloud.com",
+      "site": "CX_1"
+    },
+    "verified": true
+  },
+  {
+    "name": "Wells Fargo Securities",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.wellsfargojobs.com/en/early-careers/undergraduate-programs/corporate-investment-banking/",
+    "category": "European & Regional Banks",
+    "ats": "wellsfargo",
+    "verified": true
+  },
+  {
+    "name": "Nordea Markets",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.nordea.com/en/careers/nordea-graduate-programme",
+    "category": "European & Regional Banks",
+    "ats": "successfactors",
+    "base_url": "https://careers.nordea.com",
+    "verified": true,
+    "notes": "Covers Nordea Asset Management — NAM roles share this SuccessFactors tenant (no separate NAM source)."
+  },
+  {
+    "name": "DNB Markets",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.dnb.no/en/about-us/careers/dnb-markets-career",
+    "category": "European & Regional Banks",
+    "ats": "successfactors",
+    "base_url": "https://jobb.dnb.no",
+    "search_params": {
+      "locale": "nb_NO"
+    },
+    "verified": true,
+    "notes": "SuccessFactors (career2). Needs locale=nb_NO — the default locale returns 0 jobs; nb_NO returns ~13."
+  },
+  {
+    "name": "Swedbank Markets",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.swedbank.com/work-with-us/students-and-graduates.html",
+    "category": "European & Regional Banks",
+    "ats": "teamtailor",
+    "base_url": "https://jobs.swedbank.com",
+    "verified": true
+  },
+  {
+    "name": "Handelsbanken Capital Markets",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.handelsbanken.co.uk/en/about-us/careers/early-careers",
+    "category": "European & Regional Banks",
+    "ats": "peoplebank",
+    "category_url": "https://jobs.handelsbanken.co.uk/jobs/category/144",
+    "verified": true,
+    "notes": "UK Capital Markets desk (peoplebank). The group-wide feed is the separate Handelsbanken (Group) target on Jobylon."
+  },
+  {
+    "name": "SMBC (EMEA)",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.smbcgroup.com/emea/careers/Emerging-talent",
+    "category": "Global Investment Banks",
+    "ats": "successfactors",
+    "base_url": "https://careersemea.smbcgroup.com",
+    "verified": true,
+    "career_url": "https://www.smbcgroup.com/emea/careers"
+  },
+  {
+    "name": "SMBC (Americas)",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.smbcgroup.com/americas/careers",
+    "category": "Global Investment Banks",
+    "ats": "successfactors",
+    "base_url": "https://careers.smbcgroup.com",
+    "verified": true,
+    "career_url": "https://www.smbcgroup.com/americas/careers",
+    "notes": "Consolidated US board (incl. SMBC Capital Markets, Nikko Securities America). Same SuccessFactors family as EMEA."
+  },
+  {
+    "name": "SMBC (APAC)",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.smbc.co.jp/asia/careers/university-recruiting/",
+    "category": "Global Investment Banks",
+    "ats": "successfactors",
+    "base_url": "https://careerasia.smbc.co.jp",
+    "verified": true,
+    "career_url": "https://careerasia.smbc.co.jp"
+  },
+  {
+    "name": "Jane Street",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.janestreet.com/join-jane-street/internships/",
+    "category": "Prop Trading & Market Makers",
+    "ats": "janestreet",
+    "verified": true
+  },
+  {
+    "name": "Citadel Securities",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.citadelsecurities.com/careers/internships/",
+    "category": "Systematic HFs & Quant AMs",
+    "ats": "citadel",
+    "citadel": {
+      "base_url": "https://www.citadelsecurities.com",
+      "prefix": "citsec"
+    },
+    "verified": true
+  },
+  {
+    "name": "Optiver",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://optiver.com/join-us/graduate/",
+    "category": "Prop Trading & Market Makers",
+    "ats": "greenhouse",
+    "slug": "optiverus",
+    "verified": true,
+    "notes": "slug optiverus (optiver returned 0). optiverprivate is a 2nd small board."
+  },
+  {
+    "name": "IMC Trading",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.imc.com/us/careers/student-graduates/graduate-traineeship",
+    "category": "Prop Trading & Market Makers",
+    "ats": "greenhouse",
+    "slug": "imc",
+    "verified": true
+  },
+  {
+    "name": "SIG (Susquehanna)",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://sig.com/careers/interns-co-ops/",
+    "category": "Prop Trading & Market Makers",
+    "ats": "jibe",
+    "jibe": {
+      "base_url": "https://careers.sig.com",
+      "company_id": "sig"
+    },
+    "verified": true
+  },
+  {
+    "name": "Akuna Capital",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://akunacapital.com/work-with-us/internships/",
+    "category": "Prop Trading & Market Makers",
+    "ats": "greenhouse",
+    "slug": "akunacapital",
+    "verified": true
+  },
+  {
+    "name": "Flow Traders",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.flowtraders.com/careers/graduates/",
+    "category": "Prop Trading & Market Makers",
+    "ats": "greenhouse",
+    "slug": "flowtraders",
+    "verified": true
+  },
+  {
+    "name": "Virtu Financial",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://job-boards.greenhouse.io/virtu",
+    "category": "Prop Trading & Market Makers",
+    "ats": "greenhouse",
+    "slug": "virtu",
+    "verified": true
+  },
+  {
+    "name": "XTX Markets",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://job-boards.greenhouse.io/xtxmarketstechnologies",
+    "category": "Prop Trading & Market Makers",
+    "ats": "greenhouse",
+    "slug": "xtxmarketstechnologies",
+    "verified": true
+  },
+  {
+    "name": "Tower Research Capital",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://tower-research.com/internships/",
+    "category": "Prop Trading & Market Makers",
+    "ats": "greenhouse",
+    "slug": "towerresearchcapital",
+    "verified": true
+  },
+  {
+    "name": "Hudson River Trading",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.hudsonrivertrading.com/student-opportunities/",
+    "category": "Prop Trading & Market Makers",
+    "ats": "greenhouse",
+    "slug": "wehrtyou",
+    "verified": true,
+    "notes": "Real board token is 'wehrtyou' (~74 roles, from the careers page's greenhouse embed for=wehrtyou). The old 'hrttalentcommunity' slug was only the talent-pool board (3 generic entries)."
+  },
+  {
+    "name": "Jump Trading",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.jumptrading.com/hr/students-new-grads",
+    "category": "Prop Trading & Market Makers",
+    "ats": "greenhouse",
+    "slug": "jumptrading",
+    "verified": true
+  },
+  {
+    "name": "DRW",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.drw.com/work-at-drw/university",
+    "category": "Prop Trading & Market Makers",
+    "ats": "greenhouse",
+    "slug": "drweng",
+    "verified": true
+  },
+  {
+    "name": "Geneva Trading",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.genevatrading.com/trading-internship/",
+    "category": "Prop Trading & Market Makers",
+    "ats": "greenhouse",
+    "slug": "genevatrading",
+    "verified": true
+  },
+  {
+    "name": "Belvedere Trading",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.belvederetrading.com/new-graduates-campus-recruiting",
+    "category": "Prop Trading & Market Makers",
+    "ats": "lever",
+    "slug": "belvederetrading",
+    "verified": true
+  },
+  {
+    "name": "Chicago Trading Company",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.chicagotrading.com/campus",
+    "category": "Prop Trading & Market Makers",
+    "ats": "generic",
+    "url": "https://www.chicagotrading.com/search.php",
+    "selectors": {
+      "container": "a.job",
+      "title": "h3",
+      "link": ":self",
+      "location": ".job-meta span:last-child"
+    },
+    "verified": true
+  },
+  {
+    "name": "Da Vinci Derivatives",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://job-boards.greenhouse.io/davinciderivatives",
+    "category": "Prop Trading & Market Makers",
+    "ats": "greenhouse",
+    "slug": "davinciderivatives",
+    "verified": true
+  },
+  {
+    "name": "Mako Trading",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.mako.com/early-careers",
+    "category": "Prop Trading & Market Makers",
+    "ats": "greenhouse",
+    "slug": "mako",
+    "verified": true,
+    "url_template": "https://www.mako.com/opportunities/job-listing?gh_jid={id}"
+  },
+  {
+    "name": "B2C2",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.b2c2.com/team/careers",
+    "category": "Prop Trading & Market Makers",
+    "ats": "greenhouse",
+    "slug": "b2c2",
+    "career_url": "https://www.b2c2.com/join-b2c2/careers",
+    "verified": true
+  },
+  {
+    "name": "Maven Securities",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.mavensecurities.com/emerging-talent/",
+    "category": "Prop Trading & Market Makers",
+    "ats": "greenhouse",
+    "slug": "mavensecuritiesholdingltd",
+    "verified": true
+  },
+  {
+    "name": "Tibra Global Securities",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.tibra.com/careers/",
+    "category": "Prop Trading & Market Makers",
+    "ats": "workable",
+    "account": "tibra-capital-1",
+    "verified": true
+  },
+  {
+    "name": "Old Mission Capital",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.oldmissioncapital.com/careers/",
+    "category": "Prop Trading & Market Makers",
+    "ats": "greenhouse",
+    "slug": "oldmissioncapital",
+    "verified": true
+  },
+  {
+    "name": "Qube Research & Technologies",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://boards.greenhouse.io/quberesearchandtechnologies",
+    "category": "Prop Trading & Market Makers",
+    "ats": "greenhouse",
+    "slug": "quberesearchandtechnologies",
+    "verified": true
+  },
+  {
+    "name": "Two Sigma",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://careers.twosigma.com/careers/InternshipsAndEarlyCareers",
+    "category": "Systematic HFs & Quant AMs",
+    "ats": "avature",
+    "search_url": "https://careers.twosigma.com/careers/OpenRoles/",
+    "page_size": 10,
+    "verified": true
+  },
+  {
+    "name": "D.E. Shaw",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.deshaw.com/careers/internships",
+    "category": "Systematic HFs & Quant AMs",
+    "ats": "deshaw",
+    "verified": true
+  },
+  {
+    "name": "AQR Capital Management",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.aqr.com/About-Us/For-Students",
+    "category": "Systematic HFs & Quant AMs",
+    "ats": "greenhouse",
+    "slug": "aqr",
+    "verified": true
+  },
+  {
+    "name": "Man Group / Man AHL",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.man.com/graduate-programmes",
+    "category": "Systematic HFs & Quant AMs",
+    "ats": "greenhouse",
+    "slug": "mangroup",
+    "verified": true,
+    "notes": "Covers Man Numeric — its Boston quant-equity roles post on this greenhouse board (no separate Man Numeric source)."
+  },
+  {
+    "name": "Winton Group",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.winton.com/opportunities",
+    "category": "Systematic HFs & Quant AMs",
+    "ats": "greenhouse",
+    "slug": "winton",
+    "verified": true
+  },
+  {
+    "name": "Aspect Capital",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.aspectcapital.com/about/team/summer-internships-with-aspect-capital/",
+    "category": "Systematic HFs & Quant AMs",
+    "ats": "hibob",
+    "hibob": {
+      "base_url": "https://aspectcapital-94a5ce.careers.hibob.com",
+      "company_identifier": "aspectcapital-94a5ce"
+    },
+    "verified": true
+  },
+  {
+    "name": "Systematica Investments",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://systematica.pinpointhq.com/",
+    "category": "Systematic HFs & Quant AMs",
+    "ats": "pinpoint",
+    "feed_url": "https://systematica.pinpointhq.com/jobs.rss",
+    "verified": true
+  },
+  {
+    "name": "Squarepoint Capital",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.squarepoint-capital.com/early-careers",
+    "category": "Systematic HFs & Quant AMs",
+    "ats": "greenhouse",
+    "slug": "squarepointcapital",
+    "verified": true
+  },
+  {
+    "name": "Brevan Howard",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.brevanhoward.com/careers/",
+    "category": "Discretionary Macro HFs",
+    "ats": "workday",
+    "workday": {
+      "tenant": "brevanhoward",
+      "version": "wd3",
+      "board": "BH_ExternalCareers"
+    },
+    "verified": true,
+    "career_url": "https://brevanhoward.wd3.myworkdayjobs.com/BH_ExternalCareers"
+  },
+  {
+    "name": "BlueCrest Capital",
+    "category": "Discretionary Macro HFs",
+    "ats": "greenhouse",
+    "slug": "bluecrestcapitalmanagement",
+    "verified": true
+  },
+  {
+    "name": "Caxton Associates",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.caxton.com/careers/",
+    "category": "Discretionary Macro HFs",
+    "ats": "workable",
+    "account": "caxton",
+    "verified": true
+  },
+  {
+    "name": "Tudor Investment Corp",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://job-boards.greenhouse.io/tudorgroup",
+    "category": "Discretionary Macro HFs",
+    "ats": "greenhouse",
+    "slug": "tudorgroup",
+    "verified": true
+  },
+  {
+    "name": "Millennium Management",
+    "category": "Discretionary Macro HFs",
+    "ats": "eightfold",
+    "eightfold": {
+      "base_url": "https://career.mlp.com",
+      "domain": "mlp.com"
+    },
+    "verified": true
+  },
+  {
+    "name": "Citadel (HF)",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.citadel.com/careers/internships/",
+    "category": "Systematic HFs & Quant AMs",
+    "ats": "citadel",
+    "citadel": {
+      "base_url": "https://www.citadel.com",
+      "prefix": "citadel"
+    },
+    "verified": true
+  },
+  {
+    "name": "Point72 Asset Management",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://point72.com/students-early-career/",
+    "category": "Discretionary Macro HFs",
+    "ats": "greenhouse",
+    "slug": "point72",
+    "verified": true
+  },
+  {
+    "name": "Balyasny Asset Management",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.bamfunds.com/careers/early-career",
+    "category": "Discretionary Macro HFs",
+    "ats": "balyasny",
+    "verified": true,
+    "career_url": "https://bambusdev.my.site.com/s/"
+  },
+  {
+    "name": "ExodusPoint Capital",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://job-boards.greenhouse.io/exoduspoint",
+    "category": "Discretionary Macro HFs",
+    "ats": "greenhouse",
+    "slug": "exoduspoint",
+    "verified": true,
+    "notes": "Confirmed 2026-06-28: greenhouse/exoduspoint is correct; the firm genuinely posts ~2 public roles (verified against its own careers page). Not a bug."
+  },
+  {
+    "name": "Rokos Capital Management",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.rokoscapital.com/careers",
+    "category": "Discretionary Macro HFs",
+    "ats": "kernel",
+    "career_url": "https://www.rokoscapital.com/careers",
+    "kernel": {
+      "company_slug": "rokos-capital-management",
+      "careers_url": "https://www.rokoscapital.com/careers"
+    },
+    "verified": true,
+    "notes": "Kernel ATS (api.apptrkr.io). Annual-rot solved: kernel.py discovers the live campaign slug from the careers page JS bundle each run (year-proof). ~3 roles. Wired 2026-06-29."
+  },
+  {
+    "name": "Graham Capital Management",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.grahamcapital.com/careers/",
+    "category": "Discretionary Macro HFs",
+    "ats": "greenhouse",
+    "slug": "grahamcapitalmanagement",
+    "verified": true
+  },
+  {
+    "name": "BlackRock",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://careers.blackrock.com/students-and-graduates-emea",
+    "category": "Traditional Asset Managers",
+    "ats": "talentbrew",
+    "talentbrew": {
+      "base_url": "https://careers.blackrock.com",
+      "page_size": 100,
+      "results_module": "Section 3 - Search Results",
+      "filters_module": "Section 3 - Search Filters",
+      "item_selector": ".section3__search-results-li",
+      "link_selector": "a.section3__search-results-a",
+      "title_selector": ".section3__job-title",
+      "location_selector": ".section3__job-location .section3__job-info"
+    },
+    "verified": true
+  },
+  {
+    "name": "PIMCO",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.pimco.com/us/en/about-us/careers/students/internships",
+    "category": "Traditional Asset Managers",
+    "ats": "workday",
+    "workday": {
+      "tenant": "pimco",
+      "version": "wd1",
+      "board": "pimco-careers"
+    },
+    "verified": true
+  },
+  {
+    "name": "Vanguard",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.vanguardjobs.com/students/",
+    "category": "Traditional Asset Managers",
+    "ats": "workday",
+    "workday": {
+      "tenant": "vanguard",
+      "version": "wd5",
+      "board": "vanguard_external"
+    },
+    "verified": true
+  },
+  {
+    "name": "Fidelity International",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://careers.fidelityinternational.com/early-careers-overview/interns-and-insights/internships/",
+    "category": "Traditional Asset Managers",
+    "ats": "talnet",
+    "board_url": "https://fidelityinternational.tal.net/vx/lang-en-GB/mobile-0/brand-5/candidate/jobboard/vacancy/1/adv/",
+    "verified": true
+  },
+  {
+    "name": "Schroders",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.schroders.com/en-gb/uk/individual/about-us/careers/internships-and-placements/",
+    "category": "Traditional Asset Managers",
+    "ats": "oracle_hcm",
+    "oracle_hcm": {
+      "base_url": "https://ekbq.fa.em2.oraclecloud.com",
+      "site": "CX_2"
+    },
+    "verified": true
+  },
+  {
+    "name": "Amundi",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://about.amundi.com/our-student-experience-amundi",
+    "category": "Traditional Asset Managers",
+    "ats": "talentsoft",
+    "talentsoft": {
+      "board_url": "https://jobs.amundi.com/job/list-of-jobs.aspx",
+      "locale": 2057
+    },
+    "verified": true,
+    "career_url": "https://jobs.amundi.com/homepage.aspx?LCID=2057"
+  },
+  {
+    "name": "DWS Group",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.dws-earlycareers.groupgti.com/",
+    "category": "Traditional Asset Managers",
+    "ats": "workday",
+    "workday": {
+      "tenant": "db",
+      "version": "wd3",
+      "board": "DWSWebsite"
+    },
+    "verified": true
+  },
+  {
+    "name": "Allianz Global Investors",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://careers.allianz.com/global/en/allianz-global-investors",
+    "category": "Traditional Asset Managers",
+    "ats": "phenom_widgets",
+    "phenom_widgets": {
+      "widgets_url": "https://careers.allianz.com/widgets",
+      "base_url": "https://careers.allianz.com/global/en",
+      "source_id": "allianzgi",
+      "selected_fields": {
+        "unit": [
+          "Allianz Global Investors"
+        ]
+      },
+      "lang": "en_global",
+      "country": "global"
+    },
+    "verified": true
+  },
+  {
+    "name": "LGIM",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://careers.legalandgeneral.com/graduate-scheme",
+    "category": "Traditional Asset Managers",
+    "ats": "attrax",
+    "attrax": {
+      "search_url": "https://careers.legalandgeneral.com/jobs",
+      "business_unit": "Legal & General Investment Management"
+    },
+    "verified": true
+  },
+  {
+    "name": "Aviva Investors",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://careers.aviva.co.uk/early-careers/graduates/",
+    "category": "Traditional Asset Managers",
+    "ats": "workday",
+    "workday": {
+      "tenant": "aviva",
+      "version": "wd1",
+      "board": "Aviva_Investors_External"
+    },
+    "verified": true
+  },
+  {
+    "name": "Robeco",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.robeco.com/en-int/careers/global-investment-traineeship",
+    "category": "Traditional Asset Managers",
+    "ats": "workday",
+    "workday": {
+      "tenant": "robeco",
+      "version": "wd3",
+      "board": "robecoexternalcareers"
+    },
+    "verified": true
+  },
+  {
+    "name": "Union Investment",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://karriere.union-investment.de/nachwuchskraefte/studienbegleitend",
+    "category": "Traditional Asset Managers",
+    "ats": "beesite",
+    "beesite": {
+      "base_url": "https://jobapi.union-investment.de/search/",
+      "language": "DE",
+      "search_criteria": [
+        {
+          "CriterionName": "PublicationChannel.Code",
+          "CriterionValue": [
+            "12"
+          ]
+        }
+      ]
+    },
+    "verified": true
+  },
+  {
+    "name": "MEAG (Munich Re AM)",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.meag.com/en/apply/trainees.html",
+    "category": "Traditional Asset Managers",
+    "ats": "radancy",
+    "search_url": "https://careers.munichre.com/en/search_jobs?acm=ALL&alrpm=ALL&ascf=%5B%7B%22key%22%3A%22custom_fields.BrandTheme%22%2C%22value%22%3A%22MEAG%22%7D%5D",
+    "verified": true
+  },
+  {
+    "name": "Deka Investments",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://karriere.deka.de/de/de/berufseinsteigerinnen-berufseinsteiger",
+    "category": "Traditional Asset Managers",
+    "ats": "successfactors",
+    "base_url": "https://karriere.deka.de",
+    "verified": true
+  },
+  {
+    "name": "Trafigura",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.trafigura.com/careers/early-career-opportunities/",
+    "category": "Physical Commodity Merchants",
+    "ats": "workday",
+    "slug": "trafigura",
+    "verified": true,
+    "workday": {
+      "tenant": "trafigura",
+      "version": "wd3",
+      "board": "TrafiguraCareerSite"
+    }
+  },
+  {
+    "name": "Glencore",
+    "category": "Physical Commodity Merchants",
+    "ats": "glencore",
+    "glencore": {
+      "keyword": "trading"
+    },
+    "verified": true,
+    "scope_note": "Finance-island: the feed is the mining/refinery-ops body (~298). keyword=trading isolates the trading arm (~14); no division facet exists."
+  },
+  {
+    "name": "Vitol",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.vitol.com/vitol-early-careers/",
+    "category": "Physical Commodity Merchants",
+    "ats": "smartrecruiters",
+    "slug": "Vitol",
+    "verified": true
+  },
+  {
+    "name": "Gunvor Group",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://gunvorgroup.com/careers/graduate-program/",
+    "category": "Physical Commodity Merchants",
+    "ats": "workday",
+    "workday": {
+      "tenant": "gunvor",
+      "version": "wd3",
+      "board": "Gunvor_Careers"
+    },
+    "verified": true
+  },
+  {
+    "name": "Mercuria Energy Group",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://mercuria.com/careers/",
+    "category": "Physical Commodity Merchants",
+    "ats": "wp_job",
+    "verified": true,
+    "career_url": "https://mercuria.com/careers/",
+    "wp_job": {
+      "base_url": "https://mercuria.com",
+      "post_type": "job",
+      "tenant": "mercuria",
+      "page_size": 100
+    },
+    "scope_note": "Finance-island: self-hosted WordPress 'job' feed. mercuria.com ships an incomplete TLS chain (missing intermediate) that requests/certifi/curl_cffi reject — so wp_job.py fetches via system curl (AIA-completes the chain). ~8 roles, mostly back/middle-office today; commodity trading/finance roles isolated downstream by the negative filter + Haiku tags."
+  },
+  {
+    "name": "Cargill",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://careers.cargill.com/en/university",
+    "category": "Physical Commodity Merchants",
+    "ats": "talentbrew",
+    "talentbrew": {
+      "base_url": "https://careers.cargill.com/en",
+      "page_size": 100,
+      "item_selector": "#search-results-list li",
+      "link_selector": "a[data-job-id]",
+      "title_selector": "h3",
+      "location_selector": ".job-location",
+      "facet_filters": [
+        {
+          "ID": "8144240",
+          "FacetType": 1,
+          "Display": "TRADING",
+          "IsApplied": "true",
+          "FieldName": ""
+        }
+      ]
+    },
+    "verified": true
+  },
+  {
+    "name": "ADM",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.adm.com/en-us/culture-and-careers/early-careers/",
+    "category": "Physical Commodity Merchants",
+    "ats": "brassring",
+    "brassring": {
+      "search_url": "https://sjobs.brassring.com/TGnewUI/Search/home/HomeWithPreLoad?partnerid=25416&siteid=5429&PageType=searchResults&SearchType=linkquery&LinkID=4393911",
+      "partner_id": 25416,
+      "site_id": 5429,
+      "link_id": 4393911
+    },
+    "verified": true
+  },
+  {
+    "name": "Bunge",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.bunge.com/Careers/Early-Talent-Programs",
+    "category": "Physical Commodity Merchants",
+    "ats": "successfactors",
+    "base_url": "https://jobs.bunge.com",
+    "search_params": {
+      "q": "trader"
+    },
+    "verified": true,
+    "scope_note": "Finance-island: ag-processing body (~736). q=trader isolates the commercial desks (~21); SF dept facet is AJAX-only/unusable."
+  },
+  {
+    "name": "Freepoint Commodities",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.freepoint.com/life-at-freepoint/",
+    "category": "Physical Commodity Merchants",
+    "ats": "manual",
+    "career_url": "https://www.freepoint.com/life-at-freepoint/",
+    "manual_reason": "No ATS board: careers is a static \"Join Our Team\" section (/life-at-freepoint/#jobs) with no ATS host in the HTML; hiring via LinkedIn/direct. Greenwich CT energy & commodities merchant."
+  },
+  {
+    "name": "Hartree Partners",
+    "category": "Physical Commodity Merchants",
+    "ats": "manual",
+    "career_url": "https://www.hartreepartners.com/",
+    "manual_reason": "No careers page or board: site has zero career/join links, /careers 404s. LinkedIn/direct only. NY/London energy & commodities merchant."
+  },
+  {
+    "name": "Sucden Financial",
+    "category": "Prop Trading & Market Makers",
+    "ats": "manual",
+    "career_url": "https://www.sucdenfinancial.com/en/about/careers/opportunities/",
+    "notes": "No ATS. Opportunities page is server-rendered HTML (the empty-state string is in the raw response), currently showing 0 roles ('no opportunities available, email HR'). Re-probe when a role is live to capture the row selector, then wire via the generic CSS scraper. Re-probed 2026-06-29.",
+    "manual_reason": "No on-site board: careers moved to /careers/ (old /en/ path 404s), zero listings — hiring via LinkedIn only (confirmed 2026-07-16)."
+  },
+  {
+    "name": "Marex",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.marex.com/careers/student-graduate-careers",
+    "category": "Physical Commodity Merchants",
+    "ats": "breezy",
+    "account": "marex",
+    "verified": true
+  },
+  {
+    "name": "RWE Supply & Trading",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.rwe.com/en/rwe-careers-portal/early-careers/graduate-programmes/commercial-graduate-programme/",
+    "category": "Energy Utilities w/ Trading",
+    "ats": "rwe",
+    "rwe": {
+      "company": "RWE Supply & Trading"
+    },
+    "verified": true
+  },
+  {
+    "name": "Uniper",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.uniper.energy/career/your-start-uniper/students-and-graduates",
+    "category": "Energy Utilities w/ Trading",
+    "ats": "uniper",
+    "verified": true
+  },
+  {
+    "name": "Statkraft",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.statkraft.com/careers/students-and-graduates/international-trainee-programme/",
+    "category": "Energy Utilities w/ Trading",
+    "ats": "smartrecruiters",
+    "slug": "Statkraft1",
+    "verified": true
+  },
+  {
+    "name": "Axpo Group",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.axpo.com/ch/en/people-and-careers/students-and-graduates.html",
+    "category": "Energy Utilities w/ Trading",
+    "ats": "teamtailor",
+    "base_url": "https://careers.axpo.com",
+    "verified": true
+  },
+  {
+    "name": "EnBW",
+    "category": "Energy Utilities w/ Trading",
+    "ats": "phenom",
+    "phenom": {
+      "search_url": "https://careers.enbw.com/de/de/search-results",
+      "base_url": "https://careers.enbw.com/de/de",
+      "source_id": "enbw"
+    },
+    "verified": true
+  },
+  {
+    "name": "Vattenfall Energy Trading",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://careers.vattenfall.com/vattenfall-international-trainee-programme",
+    "category": "Energy Utilities w/ Trading",
+    "ats": "attrax",
+    "attrax": {
+      "search_url": "https://careers.vattenfall.com/global/jobs?q=trading"
+    },
+    "verified": true,
+    "alumni": true,
+    "scope_note": "Finance-island: whole-Vattenfall Attrax board (~233). ?q=trading full-text scopes to the energy-trading arm (~9)."
+  },
+  {
+    "name": "Shell Trading & Supply",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.shell.com/careers/about-careers-at-shell/our-business-at-a-glance/trader-development-programme.html",
+    "category": "Energy Utilities w/ Trading",
+    "ats": "workday",
+    "workday": {
+      "tenant": "shell",
+      "version": "wd3",
+      "board": "ShellCareers"
+    },
+    "verified": true
+  },
+  {
+    "name": "BP Supply & Trading",
+    "category": "Physical Commodity Merchants",
+    "ats": "workday",
+    "workday": {
+      "tenant": "bpinternational",
+      "version": "wd3",
+      "board": "bpCareers",
+      "applied_facets": {
+        "jobFamilyGroup": [
+          "8dcc06b8afc401e47a89dcd9dc3c1006",
+          "8dcc06b8afc4017d72a4ded9dc3c1806"
+        ]
+      }
+    },
+    "verified": true,
+    "career_url": "https://careers.bp.com/listing",
+    "scope_note": "Finance-island: whole-bp tenant (~404). jobFamilyGroup=Supply & Trading + Shipping isolates S&T (~16); zero Castrol/retail/upstream noise."
+  },
+  {
+    "name": "BP Supply & Trading (Early Careers)",
+    "category": "Physical Commodity Merchants",
+    "ats": "workday",
+    "workday": {
+      "tenant": "bpinternational",
+      "version": "wd3",
+      "board": "bpEarlyCareers",
+      "applied_facets": {
+        "jobFamilyGroup": [
+          "8dcc06b8afc401e47a89dcd9dc3c1006",
+          "8dcc06b8afc4017d72a4ded9dc3c1806"
+        ]
+      }
+    },
+    "verified": true,
+    "career_url": "https://careers.bp.com/early-careers",
+    "scope_note": "Distinct early-careers board (bpEarlyCareers), same S&T jobFamilyGroup facet as the main board — isolates the Supply, Trading & Shipping Graduate Program from all-BP campus intake."
+  },
+  {
+    "name": "TotalEnergies Trading",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://trading.totalenergies.com/en/careers/graduate-program/",
+    "category": "Energy Utilities w/ Trading",
+    "ats": "avature",
+    "search_url": "https://jobs.totalenergies.com/en_US/careers/SearchJobs/?jobSearch=Trading",
+    "page_size": 20,
+    "follow_until_empty": true,
+    "verified": true,
+    "scope_note": "Finance-island: whole-TotalEnergies Avature board (~1059) hangs the sequential probe. ?jobSearch=Trading full-text scopes to ~98 (trading/trade-support arm) and pulls fast; tagger sorts residual marketing noise."
+  },
+  {
+    "name": "Equinor Energy Trading",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.equinor.com/careers/graduates",
+    "category": "Energy Utilities w/ Trading",
+    "ats": "workday",
+    "workday": {
+      "tenant": "equinor",
+      "version": "wd3",
+      "board": "EQNR"
+    },
+    "verified": true
+  },
+  {
+    "name": "Enel Global Trading",
+    "category": "Energy Utilities w/ Trading",
+    "ats": "avature",
+    "search_url": "https://jobs.enel.com/en_US/careers/JobOpenings/",
+    "page_size": 6,
+    "verified": true
+  },
+  {
+    "name": "EDF Trading",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.edftrading.com/careers/graduates-interns",
+    "category": "Energy Utilities w/ Trading",
+    "ats": "workday",
+    "workday": {
+      "tenant": "edftrading",
+      "version": "wd1",
+      "board": "EDFTrading"
+    },
+    "verified": true
+  },
+  {
+    "name": "Engie Global Markets",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.engie.co.uk/graduates/",
+    "category": "Energy Utilities w/ Trading",
+    "ats": "successfactors_api",
+    "successfactors_api": {
+      "base_url": "https://jobs.engie.com",
+      "locale": "en_US",
+      "facet_filters": {
+        "cust_job_Family": [
+          "Trading / Portfolio Management"
+        ]
+      }
+    },
+    "verified": true,
+    "scope_note": "Finance-island: whole-Engie SuccessFactors board (~439). cust_job_Family=Trading / Portfolio Management isolates the trading arm (~35)."
+  },
+  {
+    "name": "OMV Gas & Power",
+    "category": "Energy Utilities w/ Trading",
+    "ats": "successfactors",
+    "base_url": "https://careers.omv.com",
+    "verified": true
+  },
+  {
+    "name": "Centrica Energy Marketing",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://centricaenergy.com/career/early-career/graduate-programme/",
+    "category": "Energy Utilities w/ Trading",
+    "ats": "workday",
+    "workday": {
+      "tenant": "centrica",
+      "version": "wd3",
+      "board": "centrica"
+    },
+    "verified": true
+  },
+  {
+    "name": "World Bank Group",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.worldbank.org/ext/en/careers/talent-programs/young-professionals-program",
+    "category": "MDBs, Central Banks & IFIs",
+    "ats": "csod",
+    "csod": {
+      "tenant": "worldbankgroup",
+      "site_id": 1,
+      "custom_field_dropdowns": [
+        {
+          "id": 29,
+          "options": [
+            120,
+            122,
+            123,
+            3473
+          ]
+        }
+      ]
+    },
+    "verified": true,
+    "career_url": "https://worldbankgroup.csod.com/ux/ats/careersite/1/home?c=worldbankgroup"
+  },
+  {
+    "name": "IFC",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.ifc.org/en/about/careers/global-internship-program",
+    "category": "MDBs, Central Banks & IFIs",
+    "ats": "csod",
+    "csod": {
+      "tenant": "worldbankgroup",
+      "site_id": 1,
+      "custom_field_dropdowns": [
+        {
+          "id": 29,
+          "options": [
+            121
+          ]
+        }
+      ]
+    },
+    "verified": true,
+    "career_url": "https://worldbankgroup.csod.com/ux/ats/careersite/1/home?c=worldbankgroup"
+  },
+  {
+    "name": "European Investment Bank",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.eib.org/en/about/careers/categories/graduate-programme",
+    "category": "MDBs, Central Banks & IFIs",
+    "ats": "eib",
+    "eib": {
+      "business_unit": "European Investment Bank"
+    },
+    "verified": true,
+    "career_url": "https://erecruitment.eib.org/psc/hr/EIBJOBS/CAREERS/c/HRS_HRAM_FL.HRS_CG_SEARCH_FL.GBL?Page=HRS_APP_SCHJOB_FL&Action=U&FOCUS=Applicant&SiteId=1"
+  },
+  {
+    "name": "European Investment Fund",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.eif.org/jobs/grad/index.htm",
+    "category": "MDBs, Central Banks & IFIs",
+    "ats": "eib",
+    "eib": {
+      "business_unit": "European Investment Fund"
+    },
+    "verified": true,
+    "career_url": "https://erecruitment.eib.org/psc/hr/EIBJOBS/CAREERS/c/HRS_HRAM_FL.HRS_CG_SEARCH_FL.GBL?Page=HRS_APP_SCHJOB_FL&Action=U&FOCUS=Applicant&SiteId=1"
+  },
+  {
+    "name": "EBRD",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.ebrd.com/home/work-with-us/ebrd-careers/ebrd-international-professionals-programme.html",
+    "category": "MDBs, Central Banks & IFIs",
+    "ats": "successfactors",
+    "base_url": "https://jobs.ebrd.com",
+    "verified": true
+  },
+  {
+    "name": "IMF",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.imf.org/en/about/recruitment/working-at-the-imf/economist-program",
+    "category": "MDBs, Central Banks & IFIs",
+    "ats": "workday",
+    "workday": {
+      "tenant": "imf",
+      "version": "wd5",
+      "board": "IMF"
+    },
+    "verified": true
+  },
+  {
+    "name": "BIS",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.bis.org/careers/graduate_programme.htm",
+    "category": "MDBs, Central Banks & IFIs",
+    "ats": "bis",
+    "verified": true
+  },
+  {
+    "name": "European Central Bank",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.ecb.europa.eu/careers/what-we-offer/graduate/html/index.en.html",
+    "category": "MDBs, Central Banks & IFIs",
+    "ats": "avature",
+    "search_url": "https://talent.ecb.europa.eu/careers/SearchJobs/",
+    "verified": true,
+    "alumni": true
+  },
+  {
+    "name": "Deutsche Bundesbank",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.bundesbank.de/de/karriere/einstiegsoptionen/traineeprogramme/master/traineeprogramm-master--606738",
+    "category": "MDBs, Central Banks & IFIs",
+    "ats": "bundesbank",
+    "verified": true
+  },
+  {
+    "name": "Euroclear",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.euroclear.com/careers/en/graduates-and-interns.html",
+    "category": "Market Infrastructure & Fintech",
+    "ats": "oracle_hcm",
+    "oracle_hcm": {
+      "base_url": "https://don.fa.em2.oraclecloud.com",
+      "site": "CX_1003"
+    },
+    "verified": true
+  },
+  {
+    "name": "Tradeweb",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.tradeweb.com/who-we-are/tradeweb-summer-internship-program/",
+    "category": "Market Infrastructure & Fintech",
+    "ats": "directemployers",
+    "directemployers": {
+      "host": "tradeweb.dejobs.org"
+    },
+    "verified": true
+  },
+  {
+    "name": "LSEG",
+    "category": "Market Infrastructure & Fintech",
+    "ats": "workday",
+    "workday": {
+      "tenant": "lseg",
+      "version": "wd3",
+      "board": "Careers"
+    },
+    "verified": true
+  },
+  {
+    "name": "Euronext",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.euronext.com/en/about/careers/early-careers-euronext",
+    "category": "Market Infrastructure & Fintech",
+    "ats": "euronext",
+    "verified": true
+  },
+  {
+    "name": "Deutsche Börse / Eurex",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://careers.deutsche-boerse.com/students",
+    "category": "Market Infrastructure & Fintech",
+    "ats": "deutscheboerse",
+    "verified": true,
+    "notes": "Covers Clearstream — Clearstream legal-entity roles appear on this group careers board (no separate Clearstream source)."
+  },
+  {
+    "name": "CME Group",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.cmegroup.com/careers/students-and-graduates.html",
+    "category": "Market Infrastructure & Fintech",
+    "ats": "workday",
+    "workday": {
+      "tenant": "cmegroup",
+      "version": "wd1",
+      "board": "CME_Careers"
+    },
+    "verified": true
+  },
+  {
+    "name": "ICE",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.ice.com/careers/intern",
+    "category": "Market Infrastructure & Fintech",
+    "ats": "jibe",
+    "jibe": {
+      "base_url": "https://careers.ice.com",
+      "company_id": "ice",
+      "page_size": 100,
+      "domain": "ice.jibeapply.com"
+    },
+    "verified": true
+  },
+  {
+    "name": "Adyen",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://careers.adyen.com/career-types/student",
+    "category": "Market Infrastructure & Fintech",
+    "ats": "greenhouse",
+    "slug": "adyen",
+    "verified": true
+  },
+  {
+    "name": "Coinbase Institutional",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.coinbase.com/careers/university",
+    "category": "Market Infrastructure & Fintech",
+    "ats": "greenhouse",
+    "slug": "coinbase",
+    "verified": true
+  },
+  {
+    "name": "Commerzbank AG",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.commerzbank.de/konzern/karriere/studierende/trainee/",
+    "category": "European & Regional Banks",
+    "ats": "beesite",
+    "beesite": {
+      "tenant": "commerzbank",
+      "base_url": "https://api-jobs.commerzbank.com/search/",
+      "language": "DE"
+    },
+    "career_url": "https://jobs.commerzbank.com/index.php?ac=search_result",
+    "alumni": true,
+    "verified": true,
+    "notes": "Milch&Zucker global-jobboard over the modern BeeSite REST API (api-jobs.commerzbank.com/search/, gjbAddress in gjb_scripts.js). The public index.php page is only the old PHP shell; the REST contract is identical to Deutsche Bank / KfW, scraped by beesite.py as-is. ~310 roles."
+  },
+  {
+    "name": "DZ Bank",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://karriere.dzbank.de/",
+    "category": "European & Regional Banks",
+    "ats": "successfactors",
+    "base_url": "https://jobs.dzbank.de",
+    "verified": true
+  },
+  {
+    "name": "Helaba",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.helaba.com/de/karriere/",
+    "category": "European & Regional Banks",
+    "ats": "guidecom",
+    "guidecom": {
+      "tenant": "helaba"
+    },
+    "verified": true
+  },
+  {
+    "name": "Rabobank",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://rabobank.jobs/en/students/",
+    "category": "European & Regional Banks",
+    "ats": "workday",
+    "workday": {
+      "tenant": "rabobank",
+      "version": "wd3",
+      "board": "jobs"
+    },
+    "verified": true
+  },
+  {
+    "name": "NatWest Markets",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://jobs.natwestgroup.com/pages/natwest-markets-graduate-programmes",
+    "category": "European & Regional Banks",
+    "ats": "workday",
+    "workday": {
+      "tenant": "rbs",
+      "version": "wd3",
+      "board": "RBS",
+      "applied_facets": {
+        "jobFamilyGroup": [
+          "fd2c157204cd0141235ee393c30c641d"
+        ]
+      }
+    },
+    "verified": true,
+    "notes": "Markets-specific subset via jobFamilyGroup=Front Office Markets on the shared NatWest Group Workday tenant."
+  },
+  {
+    "name": "SEB",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://sebgroup.com/career/graduates-and-students",
+    "category": "European & Regional Banks",
+    "ats": "lever",
+    "slug": "seb",
+    "api_base": "https://api.eu.lever.co",
+    "verified": true,
+    "notes": "SEB is on Lever's EU region — api.eu.lever.co, not the global host."
+  },
+  {
+    "name": "Louis Dreyfus Company",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.ldc.com/careers/graduates/global-graduate-programs/",
+    "category": "Physical Commodity Merchants",
+    "ats": "smartrecruiters",
+    "slug": "LouisDreyfusCompany",
+    "query": "trading",
+    "verified": true,
+    "scope_note": "Finance-island: ag plant/warehouse body (~448). q=trading isolates the commercial+adjacent finance footprint (~62: traders, trade support, research, trading grads) without the back-office flood; SR function facet has no Trading value."
+  },
+  {
+    "name": "Castleton Commodities International",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.cci.com/careers/students/",
+    "category": "Physical Commodity Merchants",
+    "ats": "workday",
+    "workday": {
+      "tenant": "osv_cci",
+      "version": "wd1",
+      "board": "CCICareers",
+      "host": "osv-cci.wd1.myworkdayjobs.com"
+    },
+    "verified": true,
+    "notes": "Host hyphenated (osv-cci) but CXS path uses underscore tenant (osv_cci)."
+  },
+  {
+    "name": "MarketAxess",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.marketaxess.com/careers/early-careers",
+    "category": "Market Infrastructure & Fintech",
+    "ats": "greenhouse",
+    "slug": "marketaxesscorporation",
+    "verified": true
+  },
+  {
+    "name": "Koch Supply & Trading",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.kochinc.com/early-careers",
+    "category": "Physical Commodity Merchants",
+    "ats": "koch_avature",
+    "koch_avature": {
+      "filter_params": {
+        "732": "6319",
+        "732_format": "1077",
+        "listFilterMode": "1"
+      }
+    },
+    "verified": true,
+    "career_url": "https://jobs.koch.com/",
+    "notes": "KST-only via Avature facet 732=6319. Behind AWS WAF — needs an aws-waf-token recaptured ~weekly into secrets/koch_cookies.json (KOCH_CAPTURE.md, 60s in Chrome). Re-enabled 2026-06-29 to retry: koch_avature fails SOFT (logs KOCH_COOKIES_EXPIRED, returns []) while the token is stale, and works automatically the moment a fresh token is captured. Current token expired (2026-06-14)."
+  },
+  {
+    "name": "Five Rings",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://fiverings.com/campus-recruiting/",
+    "category": "Prop Trading & Market Makers",
+    "ats": "greenhouse",
+    "slug": "fiveringsllc",
+    "verified": true
+  },
+  {
+    "name": "Radix Trading",
+    "category": "Prop Trading & Market Makers",
+    "ats": "greenhouse",
+    "slug": "radixexperienced",
+    "verified": true
+  },
+  {
+    "name": "Radix Trading (Campus)",
+    "category": "Prop Trading & Market Makers",
+    "ats": "greenhouse",
+    "slug": "radixuniversity",
+    "verified": true
+  },
+  {
+    "name": "Headlands Technologies",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.headlandstech.com/careers/",
+    "category": "Prop Trading & Market Makers",
+    "ats": "greenhouse",
+    "slug": "headlandstechnologiesllc",
+    "verified": true
+  },
+  {
+    "name": "PEAK6",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://peak6.com/campus/",
+    "category": "Prop Trading & Market Makers",
+    "ats": "workday",
+    "workday": {
+      "tenant": "peak6group",
+      "version": "wd1",
+      "board": "apexfintechsolutions"
+    },
+    "career_url": "https://peak6group.wd1.myworkdayjobs.com/apexfintechsolutions",
+    "verified": true
+  },
+  {
+    "name": "Wolverine Trading",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.wolve.com/careers",
+    "category": "Prop Trading & Market Makers",
+    "ats": "pinpoint",
+    "feed_url": "https://wolve.pinpointhq.com/jobs.rss",
+    "verified": true
+  },
+  {
+    "name": "GSA Capital",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.gsacapital.com/join-us",
+    "category": "Systematic HFs & Quant AMs",
+    "ats": "greenhouse",
+    "slug": "gsacapital",
+    "verified": true,
+    "url_template": "https://boards.greenhouse.io/embed/job_app?for=gsacapital&token={id}"
+  },
+  {
+    "name": "Schonfeld",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.schonfeld.com/careers/students-and-early-career/",
+    "category": "Systematic HFs & Quant AMs",
+    "ats": "greenhouse",
+    "slug": "schonfeld",
+    "verified": true
+  },
+  {
+    "name": "Marshall Wace",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.mwam.com/join-us/",
+    "category": "Systematic HFs & Quant AMs",
+    "ats": "manual",
+    "career_url": "https://www.mwam.com/join-us/",
+    "manual_reason": "No scrapable job board — the careers site lists graduate/internship PROGRAMMES as prose, not individual reqs on an ATS. The old greenhouse/marshallwace board held only 2 generic entries. Apply directly to the programme. Tracked in GRAD_SCHEMES.md.",
+    "verified": false
+  },
+  {
+    "name": "Verition Fund Management",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.verition.com/careers",
+    "category": "Systematic HFs & Quant AMs",
+    "ats": "greenhouse",
+    "slug": "veritiongroupllc",
+    "verified": true
+  },
+  {
+    "name": "Walleye Capital",
+    "category": "Systematic HFs & Quant AMs",
+    "ats": "greenhouse",
+    "slug": "walleyecapital-external-fulltime",
+    "verified": true
+  },
+  {
+    "name": "Walleye Capital (Students)",
+    "category": "Systematic HFs & Quant AMs",
+    "ats": "greenhouse",
+    "slug": "walleyecapital-external-students",
+    "verified": true
+  },
+  {
+    "name": "Magnetar Capital",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.magnetar.com/careers/opportunities",
+    "category": "Systematic HFs & Quant AMs",
+    "ats": "greenhouse",
+    "slug": "magnetar",
+    "verified": true
+  },
+  {
+    "name": "Capula Investment Management",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://careers.capulaglobal.com/graduates/",
+    "category": "Systematic HFs & Quant AMs",
+    "ats": "workable",
+    "account": "capula-investment-management-ltd",
+    "verified": true
+  },
+  {
+    "name": "Wellington Management",
+    "category": "Traditional Asset Managers",
+    "ats": "workday",
+    "workday": {
+      "tenant": "wellington",
+      "version": "wd5",
+      "board": "External"
+    },
+    "verified": true,
+    "career_url": "https://wellington.wd5.myworkdayjobs.com/External"
+  },
+  {
+    "name": "Capital Group",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.capitalgroup.com/about-us/careers/students.html",
+    "category": "Traditional Asset Managers",
+    "ats": "workday",
+    "workday": {
+      "tenant": "capgroup",
+      "version": "wd1",
+      "board": "capitalgroupcareers"
+    },
+    "verified": true,
+    "career_url": "https://capgroup.wd1.myworkdayjobs.com/capitalgroupcareers"
+  },
+  {
+    "name": "T. Rowe Price",
+    "category": "Traditional Asset Managers",
+    "ats": "workday",
+    "workday": {
+      "tenant": "troweprice",
+      "version": "wd5",
+      "board": "TRowePrice"
+    },
+    "verified": true,
+    "career_url": "https://troweprice.wd5.myworkdayjobs.com/TRowePrice"
+  },
+  {
+    "name": "T. Rowe Price (International)",
+    "category": "Traditional Asset Managers",
+    "ats": "workday",
+    "workday": {
+      "tenant": "troweprice",
+      "version": "wd5",
+      "board": "TRowePriceInternational"
+    },
+    "verified": true,
+    "career_url": "https://troweprice.wd5.myworkdayjobs.com/TRowePriceInternational"
+  },
+  {
+    "name": "Invesco",
+    "category": "Traditional Asset Managers",
+    "ats": "workday",
+    "workday": {
+      "tenant": "invesco",
+      "version": "wd1",
+      "board": "IVZ"
+    },
+    "verified": true,
+    "career_url": "https://invesco.wd1.myworkdayjobs.com/IVZ"
+  },
+  {
+    "name": "abrdn",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.aberdeenplc.com/en-gb/careers/early-careers/summer-internships-and-graduate-programmes",
+    "category": "Traditional Asset Managers",
+    "ats": "workday",
+    "workday": {
+      "tenant": "abrdn",
+      "version": "wd3",
+      "board": "abrdn"
+    },
+    "verified": true,
+    "career_url": "https://abrdn.wd3.myworkdayjobs.com/abrdn"
+  },
+  {
+    "name": "M&G plc",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.mandg.com/careers/routes-into-mandg/early-careers/graduate-schemes/vacancies",
+    "category": "Traditional Asset Managers",
+    "ats": "workday",
+    "workday": {
+      "tenant": "mgpru",
+      "version": "wd3",
+      "board": "mandgprudential"
+    },
+    "verified": true,
+    "career_url": "https://mgpru.wd3.myworkdayjobs.com/mandgprudential"
+  },
+  {
+    "name": "Baillie Gifford",
+    "category": "Traditional Asset Managers",
+    "ats": "workday",
+    "workday": {
+      "tenant": "bailliegifford",
+      "version": "wd3",
+      "board": "BaillieGiffordCareers"
+    },
+    "verified": true,
+    "career_url": "https://bailliegifford.wd3.myworkdayjobs.com/BaillieGiffordCareers"
+  },
+  {
+    "name": "State Street Global Advisors (SSGA)",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://careers.statestreet.com/global/en/state-street-early-careers",
+    "category": "Traditional Asset Managers",
+    "ats": "workday",
+    "workday": {
+      "tenant": "statestreet",
+      "version": "wd1",
+      "board": "Global",
+      "search_text": "Global Advisors"
+    },
+    "verified": true,
+    "career_url": "https://statestreet.wd1.myworkdayjobs.com/Global"
+  },
+  {
+    "name": "Insight Investment",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.insightinvestment.com/uk/nav/careers/early-careers/",
+    "category": "Traditional Asset Managers",
+    "ats": "workable",
+    "account": "insight-investment",
+    "verified": true,
+    "career_url": "https://apply.workable.com/insight-investment/"
+  },
+  {
+    "name": "Nasdaq",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.nasdaq.com/about/careers/nasdaq-internship-program",
+    "category": "Market Infrastructure & Fintech",
+    "ats": "workday",
+    "workday": {
+      "tenant": "nasdaq",
+      "version": "wd1",
+      "board": "Global_External_Site"
+    },
+    "verified": true,
+    "career_url": "https://nasdaq.wd1.myworkdayjobs.com/Global_External_Site"
+  },
+  {
+    "name": "Cboe Global Markets",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://careers.cboe.com/us/en/student",
+    "category": "Market Infrastructure & Fintech",
+    "ats": "workday",
+    "workday": {
+      "tenant": "cboe",
+      "version": "wd1",
+      "board": "External_Career_CBOE"
+    },
+    "verified": true,
+    "career_url": "https://cboe.wd1.myworkdayjobs.com/External_Career_CBOE"
+  },
+  {
+    "name": "TP ICAP",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://tpicap.com/tpicap/careers",
+    "category": "Market Infrastructure & Fintech",
+    "ats": "workday",
+    "workday": {
+      "tenant": "tp",
+      "version": "wd107",
+      "board": "TP-ICAP"
+    },
+    "verified": true,
+    "career_url": "https://tp.wd107.myworkdayjobs.com/TP-ICAP"
+  },
+  {
+    "name": "SIX Group",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.six-group.com/en/careers/students-graduates.html",
+    "category": "Market Infrastructure & Fintech",
+    "ats": "successfactors",
+    "base_url": "https://jobs.six-group.com",
+    "verified": true,
+    "career_url": "https://jobs.six-group.com/viewalljobs/?locale=en_US"
+  },
+  {
+    "name": "BGC Group",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.bgcg.com/careers/",
+    "category": "Market Infrastructure & Fintech",
+    "ats": "oracle_hcm",
+    "oracle_hcm": {
+      "base_url": "https://hdow.fa.us6.oraclecloud.com",
+      "site": "CX_1003"
+    },
+    "verified": true,
+    "career_url": "https://hdow.fa.us6.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1003/jobs"
+  },
+  {
+    "name": "Bloomberg L.P.",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.bloomberg.com/company/early-careers/",
+    "category": "Market Infrastructure & Fintech",
+    "ats": "avature",
+    "verified": true,
+    "career_url": "https://bloomberg.avature.net/careers/SearchJobs",
+    "search_url": "https://bloomberg.avature.net/careers/SearchJobs",
+    "page_size": 50,
+    "notes": "Classic Avature board, server-rendered (~425, all divisions incl. heavy SWE). GET works via avature.py, no form-POST needed. Negative filter + Haiku area tags isolate markets/IBD. The separate Workday board is only the Bloomberg Industry Group affiliate."
+  },
+  {
+    "name": "Wintermute",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.wintermute.com/company/opportunities",
+    "category": "Prop Trading & Market Makers",
+    "ats": "lever",
+    "slug": "wintermute-trading",
+    "verified": true,
+    "career_url": "https://jobs.lever.co/wintermute-trading"
+  },
+  {
+    "name": "Galaxy Digital",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://job-boards.greenhouse.io/galaxydigitalservices",
+    "category": "Prop Trading & Market Makers",
+    "ats": "greenhouse",
+    "slug": "galaxydigitalservices",
+    "verified": true,
+    "career_url": "https://job-boards.greenhouse.io/galaxydigitalservices"
+  },
+  {
+    "name": "Kraken",
+    "category": "Prop Trading & Market Makers",
+    "ats": "ashby",
+    "slug": "kraken.com",
+    "verified": true,
+    "career_url": "https://jobs.ashbyhq.com/kraken.com"
+  },
+  {
+    "name": "Onyx Capital Group",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://onyxcapitalgroup.com/careers",
+    "category": "Physical Commodity Merchants",
+    "ats": "workable",
+    "account": "onyx-capital-group",
+    "verified": true,
+    "career_url": "https://apply.workable.com/onyx-capital-group/"
+  },
+  {
+    "name": "Olam Group",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://careers.olamgroup.com/",
+    "category": "Physical Commodity Merchants",
+    "ats": "successfactors",
+    "base_url": "https://careers.olamgroup.com",
+    "verified": true,
+    "career_url": "https://careers.olamgroup.com/search/"
+  },
+  {
+    "name": "COFCO International",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.cofcointernational.com/careers/commercial-graduate-programme/",
+    "category": "Physical Commodity Merchants",
+    "ats": "successfactors",
+    "base_url": "https://careers.cofcointernational.com",
+    "verified": true,
+    "career_url": "https://careers.cofcointernational.com/"
+  },
+  {
+    "name": "BMO Capital Markets",
+    "category": "European & Regional Banks",
+    "ats": "workday",
+    "workday": {
+      "tenant": "bmo",
+      "version": "wd3",
+      "board": "External",
+      "applied_facets": {
+        "jobFamilyGroup": [
+          "c3170091f3cd0175d9fe606ad000bc20"
+        ]
+      }
+    },
+    "verified": true,
+    "career_url": "https://bmo.wd3.myworkdayjobs.com/External",
+    "scope_note": "jobFamilyGroup=Capital Mrkts Sales & Service — full GBM division (IBD+trading+research), cleaner than the markets-only full-text search."
+  },
+  {
+    "name": "CIBC Capital Markets",
+    "category": "European & Regional Banks",
+    "ats": "workday",
+    "workday": {
+      "tenant": "cibc",
+      "version": "wd3",
+      "board": "search"
+    },
+    "verified": true,
+    "career_url": "https://cibc.wd3.myworkdayjobs.com/search",
+    "notes": "Widened markets-only -> full board (~555, 4s). Was search_text='Global Markets' (55)."
+  },
+  {
+    "name": "Danske Bank",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://danskebank.com/careers/students-and-graduates",
+    "category": "European & Regional Banks",
+    "ats": "oracle_hcm",
+    "oracle_hcm": {
+      "base_url": "https://ejqi.fa.ocs.oraclecloud.eu",
+      "site": "CX_1001"
+    },
+    "verified": true,
+    "career_url": "https://danskebank.com/careers/apply"
+  },
+  {
+    "name": "Erste Group Bank",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.erstegroup.com/en/career",
+    "category": "European & Regional Banks",
+    "ats": "erste_btp",
+    "verified": true,
+    "career_url": "https://www.erstegroup.com/en/career/positions-offered",
+    "erste_btp": {
+      "config_page": "https://www.erstegroup.com/en/career/positions-offered",
+      "detail_base": "https://www.erstegroup.com/en/career/positions-offered/job-detail"
+    },
+    "notes": "Custom SAP BTP app (NOT SuccessFactors). List URL + Basic-auth creds read from the page's data-cid=joblist gem-json each run (rotation-safe). ~151 roles, mostly Sparkasse AT retail — tagger sorts relevance."
+  },
+  {
+    "name": "Scotiabank Global Banking and Markets",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.scotiabank.com/careers/en/careers/careers-students-and-new-grads.html",
+    "category": "European & Regional Banks",
+    "ats": "successfactors",
+    "base_url": "https://jobs.scotiabank.com",
+    "search_params": {
+      "q": "\"Global Banking and Markets\""
+    },
+    "verified": true,
+    "career_url": "https://jobs.scotiabank.com/",
+    "scope_note": "SuccessFactors RMK (jobs2web), NOT Phenom. No GBM facet/category exists; quoted phrase q scopes to GBM (~182 of ~1832 full-bank). Unquoted q is a loose OR (~1413) — keep the quotes."
+  },
+  {
+    "name": "KBC Group",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.kbc.global/about/careers/graduates/",
+    "category": "European & Regional Banks",
+    "ats": "successfactors_api",
+    "verified": true,
+    "career_url": "https://careers.kbc-group.com/search/",
+    "successfactors_api": {
+      "base_url": "https://careers.kbc-group.com",
+      "locale": "en_GB"
+    },
+    "notes": "Classic SF (career5, company C0016941732P) redirects its listing to this branded RMK front, which successfactors_api handles. ~53 English roles (classic DWR shows ~251 incl. CZ/NL local retail). The old 'returns 0' no longer holds."
+  },
+  {
+    "name": "IXM",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.ixmetals.com/join-us",
+    "category": "Physical Commodity Merchants",
+    "ats": "manual",
+    "career_url": "https://www.ixmetals.com/join-us-professional-areas/",
+    "manual_reason": "No public scrapable board/API. Careers slug moved to /join-us-professional-areas/ (a descriptive 'professional areas' page); the full 8.7MB response has zero ATS signatures and no jobs JSON. Jobs surface only via LinkedIn. Re-probed 2026-06-29."
+  },
+  {
+    "name": "PwC",
+    "category": "Consulting & Advisory",
+    "ats": "workday",
+    "workday": {
+      "tenant": "pwc",
+      "version": "wd3",
+      "board": "Global_Experienced_Careers",
+      "search_text": "Deals"
+    },
+    "verified": true,
+    "career_url": "https://pwc.wd3.myworkdayjobs.com/Global_Experienced_Careers",
+    "scope_note": "Huge multi-service-line board (audit/tax/advisory). search_text='Deals' first-pass scope to the M&A/transaction-services side; refine empirically. Campus board: Global_Campus_Careers."
+  },
+  {
+    "name": "Strategy&",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.strategyand.pwc.com/uk/en/careers/graduates-and-interns.html",
+    "category": "Consulting & Advisory",
+    "ats": "workday",
+    "workday": {
+      "tenant": "pwc",
+      "version": "wd3",
+      "board": "Global_Strategyand_Careers"
+    },
+    "verified": true,
+    "career_url": "https://pwc.wd3.myworkdayjobs.com/Global_Strategyand_Careers",
+    "notes": "Dedicated standalone Strategy& board on the PwC Workday tenant (~43 roles); no keyword scope needed."
+  },
+  {
+    "name": "Alvarez & Marsal",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://careers.alvarezandmarsal.com/pages/early-careers",
+    "category": "Consulting & Advisory",
+    "ats": "sitemap_jobs",
+    "verified": true,
+    "career_url": "https://alvarezandmarsal.wd1.myworkdayjobs.com/alvarezandmarsalp",
+    "sitemap_jobs": {
+      "sitemap_url": "https://careers.alvarezandmarsal.com/sitemap.xml",
+      "path_contains": "/jobs/",
+      "exclude_contains": "/search/",
+      "require_id": true,
+      "fetch": "cffi",
+      "prefix": "am"
+    },
+    "notes": "Cloudflare-gated site; the sitemap is NOT gated (curl_cffi) and lists ~100 indexed job pages, title from slug. Full 2400-board needs Turnstile."
+  },
+  {
+    "name": "Baker Tilly",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://careers.bakertilly.com/student-opportunities",
+    "category": "Consulting & Advisory",
+    "ats": "workday",
+    "workday": {
+      "tenant": "bakertilly",
+      "version": "wd5",
+      "board": "BTCareers"
+    },
+    "verified": true,
+    "career_url": "https://bakertilly.wd5.myworkdayjobs.com/BTCareers",
+    "notes": "Baker Tilly US, single combined board (~365); jobFamilyGroup facet Tax/Audit/Advisory."
+  },
+  {
+    "name": "NERA Economic Consulting",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.nera.com/open-roles.html",
+    "category": "Consulting & Advisory",
+    "ats": "workday",
+    "workday": {
+      "tenant": "mmc",
+      "version": "wd1",
+      "board": "MMC",
+      "search_text": "NERA"
+    },
+    "verified": true,
+    "career_url": "https://careers.marsh.com/global/en/nera-search",
+    "notes": "NERA is on the shared Marsh McLennan (MMC) Workday board; search_text='NERA' scopes to it. Strongly finance/economics-relevant."
+  },
+  {
+    "name": "Horváth",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.horvath-partners.com/en/career/your-entry-opportunities/students",
+    "category": "Consulting & Advisory",
+    "ats": "generic",
+    "verified": true,
+    "career_url": "https://www.horvath-partners.com/de/karriere/jobs/jobsuche",
+    "url": "https://www.horvath-partners.com/de/karriere/jobs/jobsuche",
+    "fetch": "cffi",
+    "selectors": {
+      "container": "tr.row-link-new-window",
+      "title": "td:first-of-type",
+      "link": ":self",
+      "link_attr": "data-href",
+      "location": "td:nth-of-type(2)"
+    },
+    "notes": "TYPO3 site, Cloudflare-gated (fetch: cffi). Full job table server-rendered as tr[data-href] rows; the Workday tenant (Horvath_Careers, total=0 via cxs) is only their apply backend. German-language board."
+  },
+  {
+    "name": "EY",
+    "category": "Consulting & Advisory",
+    "ats": "successfactors",
+    "base_url": "https://careers.ey.com/ey",
+    "verified": true,
+    "career_url": "https://careers.ey.com/ey/search/",
+    "notes": "Full RMK board is ~8376 (global audit/tax/consulting/tech) = finance-island flood. search_params q='EY-Parthenon' isolates the Strategy & Transactions / Parthenon arm (~612), the finance-relevant slice. Widen the keyword later for broader transaction-advisory. Subsumes the former EY-Parthenon entry — q='EY-Parthenon' IS the Parthenon arm, so no separate EY-Parthenon source.",
+    "search_params": {
+      "q": "EY-Parthenon"
+    }
+  },
+  {
+    "name": "Roland Berger",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.rolandberger.com/en/Join/Join-Us/Career-Starter/Graduates/",
+    "category": "Consulting & Advisory",
+    "ats": "smartrecruiters",
+    "slug": "RolandBerger",
+    "verified": true,
+    "career_url": "https://careers.smartrecruiters.com/RolandBerger",
+    "notes": "SmartRecruiters API confirmed (~200 postings)."
+  },
+  {
+    "name": "Altman Solon",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.altmansolon.com/careers/student-opportunities",
+    "category": "Consulting & Advisory",
+    "ats": "greenhouse",
+    "slug": "altmansolonuslp",
+    "verified": true,
+    "career_url": "https://www.altmansolon.com/careers/job-opportunities",
+    "notes": "Greenhouse embed (board token 'altmansolonuslp', from the careers page's job_board/js?for=). The old workable/altman-solon account resolved but published 0; the firm actually posts via Greenhouse (~14 roles)."
+  },
+  {
+    "name": "Oliver Wyman",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.oliverwyman.com/careers/entry-level.html",
+    "category": "Consulting & Advisory",
+    "ats": "phenom_widgets",
+    "phenom_widgets": {
+      "widgets_url": "https://careers.marsh.com/widgets",
+      "base_url": "https://careers.marsh.com/global/en",
+      "source_id": "oliverwyman",
+      "keywords": "oliver wyman",
+      "lang": "en_global",
+      "country": "global"
+    },
+    "verified": true,
+    "career_url": "https://careers.marsh.com/global/en/oliver-wyman-search",
+    "notes": "Shared Marsh McLennan Phenom board; keywords='oliver wyman' scopes to OW (~224)."
+  },
+  {
+    "name": "Kroll",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://careers.kroll.com/en/students",
+    "category": "Consulting & Advisory",
+    "ats": "oracle_hcm",
+    "oracle_hcm": {
+      "base_url": "https://hcxs.fa.us2.oraclecloud.com",
+      "site": "CX_1"
+    },
+    "verified": true,
+    "career_url": "https://careers.kroll.com/en/listing-page",
+    "notes": "Oracle HCM CE; ~311 reqs, nearly all finance/advisory (Transaction Advisory, M&A, Transfer Pricing)."
+  },
+  {
+    "name": "Grant Thornton",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.grantthornton.co.uk/careers/early-careers/our-programmes/",
+    "category": "Consulting & Advisory",
+    "ats": "oracle_hcm",
+    "oracle_hcm": {
+      "base_url": "https://ehzq.fa.us2.oraclecloud.com",
+      "site": "CX_1"
+    },
+    "verified": true,
+    "career_url": "https://www.grantthornton.com/careers",
+    "notes": "Grant Thornton US (Advisors LLC) Oracle HCM. NB: GT Australia/Ireland are separate Workday tenants."
+  },
+  {
+    "name": "BDO",
+    "category": "Consulting & Advisory",
+    "ats": "oracle_hcm",
+    "oracle_hcm": {
+      "base_url": "https://ebqb.fa.us2.oraclecloud.com",
+      "site": "BDOExperiencedCareers"
+    },
+    "verified": true,
+    "career_url": "https://www.bdo.com/careers",
+    "notes": "BDO USA Oracle HCM, experienced board (~414). NB: bdo.wd3 is BDO Canada — different entity."
+  },
+  {
+    "name": "Arthur D. Little",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.adlittle.com/en/careers",
+    "category": "Consulting & Advisory",
+    "ats": "icims",
+    "icims": {
+      "base_url": "https://careers-adlittle.icims.com"
+    },
+    "verified": true,
+    "career_url": "https://www.adlittle.com/en/careers",
+    "notes": "iCIMS (careers-adlittle.icims.com), paginated HTML ?pr=N. The prior oracle_hcm/CX_2001 config returned 0 — ADL actually hires on iCIMS."
+  },
+  {
+    "name": "McKinsey",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.mckinsey.com/careers/students",
+    "category": "Consulting & Advisory",
+    "ats": "mckinsey",
+    "career_url": "https://www.mckinsey.com/careers/search-jobs",
+    "verified": true,
+    "notes": "Cracked 2026-07-06: the Avature portalpack WAF was the wrong surface — the real board is the www.mckinsey.com Next.js search, whose gateway API (gateway.mckinsey.com/apigw-x0cceuow60) has no bot gate and returns all ~590 postings with descriptions in one GET. Handler re-derives the gateway id from __NEXT_DATA__ if it rotates."
+  },
+  {
+    "name": "BCG",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://careers.bcg.com/global/en/early-careers",
+    "category": "Consulting & Advisory",
+    "ats": "phenom_widgets",
+    "verified": true,
+    "career_url": "https://careers.bcg.com/global/en/search-results",
+    "phenom_widgets": {
+      "widgets_url": "https://careers.bcg.com/widgets",
+      "base_url": "https://careers.bcg.com/global/en",
+      "source_id": "bcg",
+      "lang": "en_global",
+      "country": "global"
+    },
+    "notes": "Phenom /widgets refineSearch works directly (~878 firm-wide); store broad, tagger sorts relevance."
+  },
+  {
+    "name": "Bain & Company",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.bain.com/careers/work-with-us/internships-programs/associate-consultant-internship/",
+    "category": "Consulting & Advisory",
+    "ats": "avature",
+    "verified": true,
+    "career_url": "https://careers.bain.com/jobs",
+    "search_url": "https://careers.bain.com/jobs/SearchJobs/",
+    "page_size": 10,
+    "notes": "Self-hosted Avature (portal id 24, 'FolderDetail' variant). avature.py sends both job*/folder* paging params + handles FolderDetail links and the subtitle location. (Bain Capital is a separate firm on Workday.)"
+  },
+  {
+    "name": "Deloitte",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.deloitte.com/uk/en/careers/early-careers/early-careers-application-timelines.html",
+    "category": "Consulting & Advisory",
+    "ats": "avature",
+    "verified": true,
+    "heavy": true,
+    "career_url": "https://apply.deloitte.com/en_US/careers/SearchJobs",
+    "search_url": "https://apply.deloitte.com/en_US/careers/SearchJobs/",
+    "page_size": 50,
+    "follow_until_empty": true,
+    "notes": "Global Avature board (apply.deloitte.com, ~878, all member-firm entities incl. Corporate Finance LLC / M&A). follow_until_empty:true is REQUIRED — the listing says 'N jobs' which the avature total regex (items/results) doesn't match, so paging walks until empty. heavy:true — that sequential walk takes ~147s (>60s COMPANY_TIMEOUT). US Phenom/jobs2 board is dead; this is the only live one."
+  },
+  {
+    "name": "KPMG (US)",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.kpmgcareers.co.uk/graduate",
+    "category": "Consulting & Advisory",
+    "ats": "kpmg_us",
+    "verified": true,
+    "career_url": "https://www.kpmguscareers.com/job-search/",
+    "kpmg_us": {
+      "base_url": "https://www.kpmguscareers.com",
+      "page_size": 12
+    },
+    "notes": "US board only (~762; Advisory/Deal Advisory/Valuation/FS Tax). Custom WordPress get-jobs.php JSON (cards embedded as HTML). KPMG UK (Umbraco), DE (Magnolia) and member-firm classic-SF boards are separate and not wired."
+  },
+  {
+    "name": "Kearney",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.kearney.com/careers/opportunities/opportunities-for-students-and-recent-graduates",
+    "category": "Consulting & Advisory",
+    "ats": "recsolu",
+    "career_url": "https://kearney.recsolu.com/job_boards/1",
+    "recsolu": {
+      "base_url": "https://kearney.recsolu.com",
+      "board_id": "1"
+    },
+    "verified": true,
+    "notes": "Yello Enterprise / recsolu JSON board (~180 roles). recsolu.py paginates /job_boards/{id}/search?page_number=N on more_requisitions. Wired 2026-06-29."
+  },
+  {
+    "name": "L.E.K. Consulting",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.lek.com/careers",
+    "category": "Consulting & Advisory",
+    "ats": "talnet",
+    "career_url": "https://lek.tal.net/",
+    "board_url": "https://lek.tal.net/vx/lang-en-GB/mobile-0/appcentre-1/brand-2/candidate/jobboard/vacancy/1/adv/",
+    "verified": true,
+    "notes": "tal.net/WCN (NOT Tribepad — that note was wrong). Newer tile layout; talnet.py tile branch parses it inline. ~7 roles. Wired 2026-06-29."
+  },
+  {
+    "name": "Simon-Kucher & Partners",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.simon-kucher.com/en/careers",
+    "category": "Consulting & Advisory",
+    "career_url": "https://simon-kucher.csod.com/ux/ats/careersite/6/home?c=simon-kucher",
+    "ats": "csod",
+    "csod": {
+      "tenant": "simon-kucher",
+      "site_id": 6
+    },
+    "verified": true
+  },
+  {
+    "name": "OC&C Strategy Consultants",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.occstrategy.com/en/careers/",
+    "category": "Consulting & Advisory",
+    "ats": "eploy",
+    "career_url": "https://careers.occstrategy.com/vacancies/vacancy-search-results.aspx",
+    "eploy": {
+      "base_url": "https://careers.occstrategy.com",
+      "search_path": "/vacancies/vacancy-search-results.aspx"
+    },
+    "verified": true,
+    "notes": "Eploy ASP.NET board (~15 roles). eploy.py uses curl_cffi (verify=False — incomplete cert chain) + WebForms viewstate pagination to get all pages. Wired 2026-06-29."
+  },
+  {
+    "name": "AlixPartners",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.alixpartners.com/careers/students-and-recent-graduates/business-analyst-programme/",
+    "category": "Consulting & Advisory",
+    "ats": "greenhouse",
+    "slug": "alixpartners",
+    "verified": true,
+    "career_url": "https://www.alixpartners.com/careers/job-search/",
+    "notes": "Migrated off Jobvite to Greenhouse (board slug alixpartners, ~103). The careers SPA is Astro+Algolia (app 08NL1Q16GE, index federated:published) but the underlying ATS is Greenhouse (gh_jid in every job URL). Found via the astro-island props."
+  },
+  {
+    "name": "FTI Consulting",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://fticonsult.referrals.selectminds.com/page/uk-student-and-graduate-opportunities-1434",
+    "category": "Consulting & Advisory",
+    "ats": "workday",
+    "verified": true,
+    "career_url": "https://fticonsulting.wd108.myworkdayjobs.com/FTIConsultingCareers",
+    "workday": {
+      "tenant": "fticonsulting",
+      "version": "wd108",
+      "board": "FTIConsultingCareers"
+    },
+    "notes": "Migrated off Taleo to Workday (old SelectMinds/Taleo careersection 302s here). ~205 roles; finance-island consultancy, sorted by negative filter + Haiku tags."
+  },
+  {
+    "name": "Eight Advisory",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://8advisory.recruitee.com/",
+    "category": "Consulting & Advisory",
+    "ats": "recruitee",
+    "slug": "8advisory",
+    "verified": true,
+    "career_url": "https://8advisory.recruitee.com/l/en",
+    "notes": "Recruitee ATS (slug 8advisory) — public JSON API at 8advisory.recruitee.com/api/offers/ (~74 roles). Strongly finance-relevant (Transaction Services, Valuation, M&A, Restructuring)."
+  },
+  {
+    "name": "Ardian",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.ardian.com/join-us",
+    "category": "Private Equity & Private Markets",
+    "ats": "workday",
+    "workday": {
+      "tenant": "ardian",
+      "version": "wd103",
+      "board": "ArdianCareers"
+    },
+    "verified": true,
+    "career_url": "https://ardian.wd103.myworkdayjobs.com/ArdianCareers",
+    "notes": "Own Workday tenant (wd103); ~69 roles incl. Fund Finance / Secondaries / Primaries."
+  },
+  {
+    "name": "Swiss Life Asset Managers",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.swisslife-am.com/en/home/careers/future-talent.html",
+    "category": "Traditional Asset Managers",
+    "ats": "workday",
+    "workday": {
+      "tenant": "swisslife",
+      "version": "wd3",
+      "board": "Swiss_Life_Asset_Managers_Career_Site"
+    },
+    "verified": true,
+    "career_url": "https://swisslife.wd3.myworkdayjobs.com/Swiss_Life_Asset_Managers_Career_Site",
+    "notes": "Dedicated AM board on the Swiss Life Workday tenant (~47 AM roles)."
+  },
+  {
+    "name": "Capvis",
+    "category": "Private Equity & Private Markets",
+    "ats": "manual",
+    "career_url": "https://www.capvis.com/en/jobs.html",
+    "manual_reason": "No ATS; static careers page, applications by email (hr@capvis.com)."
+  },
+  {
+    "name": "CVC Capital Partners",
+    "category": "Private Equity & Private Markets",
+    "ats": "manual",
+    "career_url": "https://www.cvc.com/about/working-at-cvc/",
+    "manual_reason": "Informational careers page only, no ATS/apply widget (hr@cvc.com). NB: CVC Credit Partners on Workable is a distinct entity."
+  },
+  {
+    "name": "Partners Group",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://jobs.partnersgroup.com/content/Financial-Analyst-Program/",
+    "category": "Private Equity & Private Markets",
+    "ats": "successfactors_classic",
+    "verified": true,
+    "alumni": true,
+    "career_url": "https://career5.successfactors.eu/career?company=PartnersGroup",
+    "successfactors_classic": {
+      "base_url": "https://career5.successfactors.eu",
+      "company": "PartnersGroup"
+    },
+    "notes": "Classic SF server-rendered listing (career_ns=job_listing_summary); ~98 roles. New successfactors_classic handler."
+  },
+  {
+    "name": "Waterland Private Equity",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.waterlandpe.com/careers/",
+    "category": "Private Equity & Private Markets",
+    "ats": "generic",
+    "url": "https://www.waterlandpe.com/careers/",
+    "selectors": {
+      "container": "article.c-card",
+      "title": "h3.c-card__title",
+      "link": "a.stretched-link",
+      "location": "span.c-card__category"
+    },
+    "verified": true,
+    "career_url": "https://www.waterlandpe.com/careers/",
+    "notes": "Not Homerun — self-hosted WordPress, server-rendered HTML (~11 roles). Use waterlandpe.com (waterland.nl has a WAF). Descriptions backfilled by enrich_descriptions. Small PE board (Investment Manager / Treasury / PE internships)."
+  },
+  {
+    "name": "Blackstone",
+    "category": "Private Equity & Private Markets",
+    "ats": "workday",
+    "workday": {
+      "tenant": "blackstone",
+      "version": "wd1",
+      "board": "Blackstone_Careers"
+    },
+    "verified": true,
+    "career_url": "https://blackstone.wd1.myworkdayjobs.com/Blackstone_Careers",
+    "notes": "Campus board: Blackstone_Campus_Careers (same tenant). Finance-native — no scoping needed."
+  },
+  {
+    "name": "KKR",
+    "category": "Private Equity & Private Markets",
+    "ats": "greenhouse",
+    "verified": true,
+    "career_url": "https://www.kkr.com/careers/career-opportunities",
+    "slug": "stage",
+    "notes": "Cracked 2026-07-06: the kkr.wd5 Workday tenant (403 S22) was a red herring — KKR's lateral board is Greenhouse slug 'stage', embedded on kkr.com/careers/career-opportunities (166 postings, board name 'Careers at KKR'). Campus board is the separate slug 'staged'."
+  },
+  {
+    "name": "Carlyle Group",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.carlyle.com/careers",
+    "category": "Private Equity & Private Markets",
+    "ats": "workday",
+    "workday": {
+      "tenant": "carlyle",
+      "version": "wd1",
+      "board": "Carlyle"
+    },
+    "verified": true,
+    "career_url": "https://carlyle.wd1.myworkdayjobs.com/Carlyle",
+    "notes": "Migrated off self-hosted Avature (old externalcareers/SearchJobs/ 404s; bare carlyle.avature.net now bounces to an internal /Login/ portal) to Workday, confirmed 2026-07-09. ~87 listings. Finance-native — no scoping needed."
+  },
+  {
+    "name": "Apollo Global Management",
+    "category": "Private Equity & Private Markets",
+    "ats": "workday",
+    "workday": {
+      "tenant": "athene",
+      "version": "wd5",
+      "board": "Apollo_Careers"
+    },
+    "verified": true,
+    "career_url": "https://athene.wd5.myworkdayjobs.com/Apollo_Careers",
+    "notes": "Tenant is 'athene' (Athene Holding, Apollo's insurance subsidiary, shares the Workday env). Finance-native — no scoping needed."
+  },
+  {
+    "name": "TPG",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.tpg.com/careers",
+    "category": "Private Equity & Private Markets",
+    "ats": "greenhouse",
+    "slug": "tpgcareers",
+    "verified": true,
+    "career_url": "https://job-boards.greenhouse.io/tpgcareers"
+  },
+  {
+    "name": "Bain Capital",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.baincapital.com/careers",
+    "category": "Private Equity & Private Markets",
+    "ats": "workday",
+    "workday": {
+      "tenant": "baincapital",
+      "version": "wd1",
+      "board": "External_Public"
+    },
+    "verified": true,
+    "career_url": "https://baincapital.wd1.myworkdayjobs.com/External_Public",
+    "notes": "External_Private board is referral/internal access only; External_Public is the public board."
+  },
+  {
+    "name": "Warburg Pincus",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://warburgpincus.com/careers/",
+    "category": "Private Equity & Private Markets",
+    "ats": "greenhouse",
+    "slug": "warburgpincusllc",
+    "verified": true,
+    "career_url": "https://job-boards.greenhouse.io/warburgpincusllc"
+  },
+  {
+    "name": "General Atlantic",
+    "category": "Private Equity & Private Markets",
+    "ats": "greenhouse",
+    "slug": "generalatlantic",
+    "verified": true,
+    "career_url": "https://job-boards.greenhouse.io/generalatlantic",
+    "notes": "Campus board slug: gacampus. Main board covers experienced hires."
+  },
+  {
+    "name": "Advent International",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.adventinternational.com/advent-at-work/",
+    "category": "Private Equity & Private Markets",
+    "ats": "workday",
+    "workday": {
+      "tenant": "adventinternational",
+      "version": "wd12",
+      "board": "AdventCareers"
+    },
+    "verified": true,
+    "career_url": "https://adventinternational.wd12.myworkdayjobs.com/AdventCareers",
+    "notes": "Unusual wd12 version. jobs.adventinternational.com is a portfolio company aggregator — not the corporate ATS."
+  },
+  {
+    "name": "Apax Partners",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.apax.com/people/careers/",
+    "category": "Private Equity & Private Markets",
+    "ats": "lever",
+    "slug": "apax",
+    "verified": true,
+    "career_url": "https://jobs.lever.co/apax"
+  },
+  {
+    "name": "EQT",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://eqtgroup.com/about/careers/associate",
+    "category": "Private Equity & Private Markets",
+    "ats": "greenhouse",
+    "slug": "eqtpartners",
+    "eu": true,
+    "verified": true,
+    "career_url": "https://job-boards.eu.greenhouse.io/eqtpartners",
+    "notes": "EU-hosted career-page UI, but the API is served from the standard boards-api.greenhouse.io host (boards-api.eu.greenhouse.io doesn't resolve — fixed in scrapers/greenhouse.py 2026-07-01)."
+  },
+  {
+    "name": "Nordic Capital",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://career.nordiccapital.com/pages/internship-program",
+    "category": "Private Equity & Private Markets",
+    "ats": "teamtailor",
+    "base_url": "https://career.nordiccapital.com",
+    "verified": true,
+    "career_url": "https://career.nordiccapital.com"
+  },
+  {
+    "name": "Cinven",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://cinven.pinpointhq.com/",
+    "category": "Private Equity & Private Markets",
+    "ats": "pinpoint",
+    "feed_url": "https://cinven.pinpointhq.com/jobs.rss",
+    "verified": true,
+    "career_url": "https://cinven.pinpointhq.com"
+  },
+  {
+    "name": "Permira",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://job-boards.eu.greenhouse.io/permiraexternalprivate",
+    "category": "Private Equity & Private Markets",
+    "ats": "greenhouse",
+    "slug": "permiraexternalprivate",
+    "eu": true,
+    "verified": true,
+    "career_url": "https://job-boards.eu.greenhouse.io/permiraexternalprivate",
+    "notes": "EU-hosted career-page UI, but the API is served from the standard boards-api.greenhouse.io host (see EQT note). Small finance-focused board, no scoping needed."
+  },
+  {
+    "name": "Bridgepoint",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.bridgepointgroup.com/about-us/joining-the-team",
+    "category": "Private Equity & Private Markets",
+    "ats": "smartrecruiters",
+    "slug": "Bridgepoint",
+    "verified": true,
+    "career_url": "https://careers.smartrecruiters.com/Bridgepoint",
+    "notes": "IAP (International Associate Programme) for entry-level associates runs through this board."
+  },
+  {
+    "name": "ICG (Intermediate Capital Group)",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.icgam.com/people-and-careers/careers/early-careers/",
+    "category": "Private Equity & Private Markets",
+    "ats": "workday",
+    "workday": {
+      "tenant": "icg",
+      "version": "wd3",
+      "board": "external_careers"
+    },
+    "verified": true,
+    "career_url": "https://icg.wd3.myworkdayjobs.com/external_careers",
+    "notes": "Pure alternative asset manager — board is finance-focused. Early careers links to same Workday board."
+  },
+  {
+    "name": "HarbourVest Partners",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.harbourvest.com/careers/",
+    "category": "Private Equity & Private Markets",
+    "ats": "workday",
+    "workday": {
+      "tenant": "harbourvest",
+      "version": "wd5",
+      "board": "HVP"
+    },
+    "verified": true,
+    "career_url": "https://harbourvest.wd5.myworkdayjobs.com/HVP"
+  },
+  {
+    "name": "Antin Infrastructure Partners",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.antin-ip.com/careers",
+    "category": "Private Equity & Private Markets",
+    "ats": "teamtailor",
+    "base_url": "https://antininfrastructurepartners-1655458195.teamtailor.com",
+    "verified": true,
+    "career_url": "https://antininfrastructurepartners-1655458195.teamtailor.com"
+  },
+  {
+    "name": "Brookfield Asset Management",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.brookfield.com/careers/student-programs",
+    "category": "Private Equity & Private Markets",
+    "ats": "workday",
+    "workday": {
+      "tenant": "brookfield",
+      "version": "wd5",
+      "board": "brookfield"
+    },
+    "verified": true,
+    "career_url": "https://brookfield.wd5.myworkdayjobs.com/brookfield",
+    "notes": "Multi-division board (PE/infra/real estate/credit/renewables). Positive scoping via search_text or facets may be needed; negative filter + Haiku tags will sort divisions."
+  },
+  {
+    "name": "Ares Management",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.ares.com/uk/careers/early-careers",
+    "category": "Private Equity & Private Markets",
+    "ats": "workday",
+    "workday": {
+      "tenant": "aresmgmt",
+      "version": "wd1",
+      "board": "External"
+    },
+    "verified": true,
+    "career_url": "https://aresmgmt.wd1.myworkdayjobs.com/External",
+    "notes": "Alternative credit/PE/real assets. ~138 roles globally (LA, London, NY)."
+  },
+  {
+    "name": "PAI Partners",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://paipartners.recruitee.com",
+    "category": "Private Equity & Private Markets",
+    "ats": "recruitee",
+    "slug": "paipartners",
+    "verified": true,
+    "career_url": "https://paipartners.recruitee.com",
+    "notes": "Small board — investment team internships primarily (London, Munich)."
+  },
+  {
+    "name": "BC Partners",
+    "category": "Private Equity & Private Markets",
+    "ats": "manual",
+    "manual_reason": "Site board removed: /current-opportunities soft-serves the homepage; 'Life at BC' page links only to LinkedIn (confirmed 2026-07-16).",
+    "verified": false,
+    "career_url": "https://www.bcpartners.com/about/life-at-bc/current-opportunities"
+  },
+  {
+    "name": "Eurazeo",
+    "category": "Private Equity & Private Markets",
+    "ats": "csod",
+    "csod": {
+      "tenant": "eurazeo",
+      "site_id": 1
+    },
+    "verified": true,
+    "career_url": "https://eurazeo.csod.com/ux/ats/careersite/1/home?c=eurazeo",
+    "notes": "CSOD (Cornerstone OnDemand). Site ID needs verification — default 1. welcometothejungle page covers portfolio co roles, not Eurazeo internal."
+  },
+  {
+    "name": "Tikehau Capital",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.tikehaucapital.com/en/careers/graduate-program",
+    "category": "Private Equity & Private Markets",
+    "ats": "talentview",
+    "career_url": "https://tikehau-capital-career.talentview.io/en/all-jobs",
+    "talentview": {
+      "slug": "tikehau-capital-career",
+      "company_website_id": 2718
+    },
+    "verified": true,
+    "notes": "TalentView public funnel JSON API (~10 finance roles). Prior 'no public API' was wrong. company_website_id auto-discovers from /websites if it ever changes. Wired 2026-06-29."
+  },
+  {
+    "name": "Lazard",
+    "category": "Global Investment Banks",
+    "ats": "oracle_hcm",
+    "oracle_hcm": {
+      "base_url": "https://icbpjb.fa.ocs.oraclecloud.com",
+      "site": "LazardProfessionalCareers"
+    },
+    "verified": true,
+    "career_url": "https://icbpjb.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/LazardProfessionalCareers",
+    "notes": "Two sites: LazardProfessionalCareers (lateral) and LazardStudents (campus). Site field may need CX_* ID — verify."
+  },
+  {
+    "name": "Rothschild & Co",
+    "category": "Global Investment Banks",
+    "ats": "workday",
+    "workday": {
+      "tenant": "rothschildandco",
+      "version": "wd3",
+      "board": "Rothschildandco_Lateral"
+    },
+    "verified": true,
+    "career_url": "https://rothschildandco.wd3.myworkdayjobs.com/Rothschildandco_Lateral",
+    "notes": "Lateral/experienced board only on Workday. Grad/student applications use Oleeo at rothschildandco.tal.net — not scrapable via standard methods."
+  },
+  {
+    "name": "Moelis & Company",
+    "category": "Global Investment Banks",
+    "ats": "workday",
+    "workday": {
+      "tenant": "moelis",
+      "version": "wd1",
+      "board": "Experienced-Hires"
+    },
+    "verified": true,
+    "career_url": "https://moelis.wd1.myworkdayjobs.com/Experienced-Hires",
+    "notes": "University-Hires board also on same tenant (moelis.wd1/University-Hires)."
+  },
+  {
+    "name": "Houlihan Lokey",
+    "category": "Global Investment Banks",
+    "ats": "workday",
+    "workday": {
+      "tenant": "hl",
+      "version": "wd1",
+      "board": "Lateral"
+    },
+    "verified": true,
+    "career_url": "https://hl.wd1.myworkdayjobs.com/Lateral",
+    "notes": "Boards: External (public — went to total=0 ~2026-07, lateral hiring moved off it), Lateral (experienced-hire IB roles, ~107 as of 2026-07-16 — the live one), Campus (early careers, separate 'Houlihan Lokey (Campus)' target), Corporate. Switched from External to Lateral after External emptied out."
+  },
+  {
+    "name": "PJT Partners",
+    "category": "Global Investment Banks",
+    "ats": "workday",
+    "workday": {
+      "tenant": "pjtpartners",
+      "version": "wd1",
+      "board": "Careers"
+    },
+    "verified": true,
+    "career_url": "https://pjtpartners.wd1.myworkdayjobs.com/Careers",
+    "notes": "Students board at pjtpartners.wd1/Students for campus. Application requires Suited Assessment."
+  },
+  {
+    "name": "Evercore",
+    "category": "Global Investment Banks",
+    "ats": "talnet",
+    "career_url": "https://www.evercore.com/careers/professionals/",
+    "board_url": "https://evercore.tal.net/vx/lang-en-GB/mobile-0/channel-1/appcentre-ext/brand-5/candidate/jobboard/vacancy/3/adv/",
+    "talnet_fetch_detail": false,
+    "verified": true,
+    "notes": "tal.net/Oleeo experienced-hires board (~28 roles). LISTING-ONLY (talnet_fetch_detail=false): Oleeo Protect trips on per-job detail GETs and then ALTCHA-gates the IP for ALL tal.net tenants; location isn't on Evercore's detail page anyway. Tagger infers location from title. Wired 2026-06-29, verified clean 2026-07-01 (Oleeo-Protect cooldown passed)."
+  },
+  {
+    "name": "Perella Weinberg Partners",
+    "category": "Global Investment Banks",
+    "ats": "workday",
+    "career_url": "https://www.pwpartners.com/careers",
+    "verified": true,
+    "workday": {
+      "tenant": "pwp",
+      "version": "wd1",
+      "board": "PWP_Experienced_Opportunities",
+      "host": "wd1.myworkdaysite.com"
+    },
+    "notes": "Experienced hires on Workday external site (wd1.myworkdaysite.com). Grad is separate on Oleeo (ALTCHA-gated), not scraped."
+  },
+  {
+    "name": "Neuberger Berman",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.nb.com/en/global/careers/early-careers",
+    "category": "Traditional Asset Managers",
+    "ats": "workday",
+    "workday": {
+      "tenant": "nb",
+      "version": "wd1",
+      "board": "NBCareers"
+    },
+    "verified": true,
+    "career_url": "https://nb.wd1.myworkdayjobs.com/NBCareers"
+  },
+  {
+    "name": "Franklin Templeton",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.franklintempletoncareers.com/early-careers",
+    "category": "Traditional Asset Managers",
+    "ats": "workday",
+    "workday": {
+      "tenant": "franklintempleton",
+      "version": "wd5",
+      "board": "Primary-External-1"
+    },
+    "verified": true,
+    "career_url": "https://franklintempleton.wd5.myworkdayjobs.com/Primary-External-1"
+  },
+  {
+    "name": "Janus Henderson Investors",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.janushenderson.com/corporate/careers/early-careers/",
+    "category": "Traditional Asset Managers",
+    "ats": "successfactors",
+    "base_url": "https://jobs.janushenderson.com",
+    "verified": true,
+    "career_url": "https://jobs.janushenderson.com"
+  },
+  {
+    "name": "Columbia Threadneedle Investments",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.columbiathreadneedle.com/en/gb/private/careers/early-careers/",
+    "category": "Traditional Asset Managers",
+    "ats": "workday",
+    "workday": {
+      "tenant": "ameriprise",
+      "version": "wd5",
+      "board": "Ameriprise",
+      "search_text": "Columbia Threadneedle"
+    },
+    "verified": true,
+    "career_url": "https://ameriprise.wd5.myworkdayjobs.com/Ameriprise",
+    "notes": "Shares Ameriprise Financial Workday board. search_text='Columbia Threadneedle' scopes to CT roles only."
+  },
+  {
+    "name": "Pictet Asset Management",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.pictet.com/global/en/careers/students-graduates",
+    "category": "Traditional Asset Managers",
+    "ats": "successfactors_dwr",
+    "successfactors_dwr": {
+      "base_url": "https://career012.successfactors.eu",
+      "company": "banquepict"
+    },
+    "verified": true,
+    "career_url": "https://career012.successfactors.eu/career?company=banquepict",
+    "notes": "Modern SF RCM tenant: job list loads via DWR RPC, not server-rendered (successfactors_classic got 0). successfactors_dwr handler replicates the search.dwr call with a large pageSize — full board in one request (42 at wiring)."
+  },
+  {
+    "name": "Lombard Odier",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.lombardodier.com/home/careers/emerging-talent.html",
+    "category": "Traditional Asset Managers",
+    "ats": "workday",
+    "workday": {
+      "tenant": "lombardodier",
+      "version": "wd3",
+      "board": "Lombard_Odier_Careers"
+    },
+    "verified": true,
+    "career_url": "https://lombardodier.wd3.myworkdayjobs.com/Lombard_Odier_Careers"
+  },
+  {
+    "name": "Sumitomo Corporation EMEA",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.sumitomocorp.com/en/europe/sceu/career/Graduate-Recruitment",
+    "category": "Physical Commodity Merchants",
+    "ats": "successfactors_dwr",
+    "successfactors_dwr": {
+      "base_url": "https://career5.successfactors.eu",
+      "company": "S004690996D"
+    },
+    "verified": true,
+    "career_url": "https://career5.successfactors.eu/career?company=S004690996D",
+    "notes": "European arm (SCEU, London) only. Company ID S004690996D is the SF internal ID. Americas arm (SCOA) is a separate entity. Modern SF RCM tenant (job list via DWR RPC, not server-rendered) — successfactors_dwr handler; small board (~4), all on the first page so fully covered."
+  },
+  {
+    "name": "Sumitomo Corporation (Americas)",
+    "category": "Physical Commodity Merchants",
+    "ats": "successfactors",
+    "base_url": "https://careers.sumitomocorp.com",
+    "verified": true,
+    "career_url": "https://careers.sumitomocorp.com",
+    "notes": "Americas arm (SCOA), separate entity from the EMEA target. Modern SF RMK site (careers.sumitomocorp.com) that DOES server-render, unlike the EMEA classic tenant. Small board (~3 at wiring), US-based; negative filter + Haiku tags sort. Added 2026-07-05."
+  },
+  {
+    "name": "Itochu Corporation",
+    "category": "Physical Commodity Merchants",
+    "ats": "adp_careercenter",
+    "career_url": "https://www.itochu.co.jp/en/about/recruit/career/",
+    "adp_careercenter": {
+      "cid": "37374376-2489-49a0-b760-7d7b35c6f37f"
+    },
+    "verified": true,
+    "notes": "ITOCHU International (US subsidiary) on ADP Workforce Now — public careercenter JSON API (~4 NY finance/accounting roles). Prior 'ADP no public API' was wrong: the careercenter events API is open once the cid is resolved. cid derived from short-code client=t5mes. Wired 2026-06-29."
+  },
+  {
+    "name": "Marubeni Corporation",
+    "category": "Physical Commodity Merchants",
+    "ats": "manual",
+    "career_url": "https://www.marubeni.com/en/contact_form/careeropportunities/",
+    "manual_reason": "Dayforce tenant 'mac' (Marubeni America) on jobs.dayforcehcm.com; the anonymous search POST /api/geo/mac/jobposting/search is clean JSON but Cloudflare-403'd without cf_clearance (GETs pass, only POST is gated; curl_cffi+__cf_bm insufficient). Fully specced Koch-style path exists (capture cf_clearance+UA once in a browser, replay from this IP, ~weekly recapture) — declined 2026-07-05, re-specced 2026-07-06. Wire instantly if the token lane is ever approved. ↗ points at the careers contact form.",
+    "verified": false
+  },
+  {
+    "name": "E.ON",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.eon-uk-careers.com/en/early-careers/Graduate-Scheme.html",
+    "category": "Energy Utilities w/ Trading",
+    "ats": "successfactors",
+    "base_url": "https://careers.eon.com",
+    "search_params": {
+      "q": "finance"
+    },
+    "verified": true,
+    "career_url": "https://careers.eon.com",
+    "scope_note": "Finance-island: careers.eon.com is a SuccessFactors board for the whole E.ON group (~442, mostly grid/retail ops across DE/CZ/HU/RO). E.ON's trading desk was spun to Uniper (Trading business-unit facet = ~1 now), so scoped q=finance (~24) to isolate Essen corporate-finance/valuation/deal roles; tagger sorts residual ops. Was ats=smartrecruiters slug EON1 until 2026-07-05 — that board was dead (totalFound=0), silently returning zero rows."
+  },
+  {
+    "name": "Fortum",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.fortum.com/careers/students",
+    "category": "Energy Utilities w/ Trading",
+    "ats": "successfactors",
+    "base_url": "https://jobs.fortum.com",
+    "verified": true,
+    "career_url": "https://jobs.fortum.com"
+  },
+  {
+    "name": "Iberdrola",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.iberdrola.com/careers/jobs/international-graduate-program",
+    "category": "Energy Utilities w/ Trading",
+    "ats": "workday",
+    "workday": {
+      "tenant": "iberdrola",
+      "version": "wd3",
+      "board": "Iberdrola"
+    },
+    "verified": true,
+    "career_url": "https://iberdrola.wd3.myworkdayjobs.com/Iberdrola",
+    "notes": "Large multi-national utility with subsidiaries (ScottishPower, Avangrid, Neoenergia). International Rotational Graduate Programme runs annually. Negative filter + Haiku will separate trading/finance roles."
+  },
+  {
+    "name": "Bank of England",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.bankofengland.co.uk/careers/early-careers",
+    "category": "MDBs, Central Banks & IFIs",
+    "ats": "oracle_hcm",
+    "verified": true,
+    "career_url": "https://www.bankofengland.co.uk/careers",
+    "oracle_hcm": {
+      "base_url": "https://eoff.fa.em1.ukg.oraclecloud.com",
+      "site": "CX_1001"
+    },
+    "notes": "Oracle HCM moved to the UKG-hosted host (eoff.fa.em1.ukg.oraclecloud.com); old eoff.fa.em1.oraclecloud.com 503d."
+  },
+  {
+    "name": "Bridgewater Associates",
+    "category": "Discretionary Macro HFs",
+    "ats": "greenhouse",
+    "slug": "bridgewater89",
+    "verified": true,
+    "career_url": "https://job-boards.greenhouse.io/bridgewater89",
+    "notes": "Campus board slug: bridgewatercampusrecruiting. Main board ~23 open roles."
+  },
+  {
+    "name": "Munich Re",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://careers.munichre.com/en/international-graduate-trainee-programme-munich",
+    "category": "Traditional Asset Managers",
+    "ats": "radancy",
+    "search_url": "https://careers.munichre.com/en/search_jobs?acm=ALL&alrpm=ALL&ascf=%5B%7B%22key%22%3A%22custom_fields.BrandTheme%22%2C%22value%22%3A%22Munich+Re%22%7D%5D",
+    "verified": true,
+    "career_url": "https://careers.munichre.com/en/munichre",
+    "notes": "Radancy — same board as MEAG (careers.munichre.com); BrandTheme='Munich Re' scopes to ~213 Munich Re roles. MEAG covered separately under BrandTheme='MEAG'."
+  },
+  {
+    "name": "BayernLB",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.bayernlb.de/karriere/",
+    "category": "European & Regional Banks",
+    "ats": "successfactors",
+    "verified": true,
+    "career_url": "https://jobs.bayernlb.de/career?company=BayernLB",
+    "notes": "SF RMK HTML front (/search/ server-renders a.jobTitle-link rows).",
+    "base_url": "https://jobs.bayernlb.de"
+  },
+  {
+    "name": "StoneX Group",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.stonex.com/en/careers/students-graduates/",
+    "category": "Market Infrastructure & Fintech",
+    "ats": "icims",
+    "icims": {
+      "base_url": "https://careers-stonex.icims.com"
+    },
+    "verified": true,
+    "career_url": "https://careers-stonex.icims.com/jobs/search"
+  },
+  {
+    "name": "Clarksons",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.clarksons.com/home/careers/early-careers/global-trainee-broker-programme/",
+    "category": "Market Infrastructure & Fintech",
+    "ats": "successfactors",
+    "base_url": "https://careers.clarksons.com",
+    "verified": true,
+    "career_url": "https://careers.clarksons.com/Clarksons/search/"
+  },
+  {
+    "name": "Heraeus Precious Metals",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://jobs.heraeus.com/en/early-professional",
+    "category": "Physical Commodity Merchants",
+    "ats": "successfactors_classic",
+    "successfactors_classic": {
+      "base_url": "https://career5.successfactors.eu",
+      "company": "C0000159900P"
+    },
+    "verified": true,
+    "career_url": "https://jobs.heraeus.com"
+  },
+  {
+    "name": "MKS PAMP",
+    "category": "Physical Commodity Merchants",
+    "ats": "workday",
+    "workday": {
+      "tenant": "mksinst",
+      "version": "wd1",
+      "board": "MKSCareersEMEA"
+    },
+    "verified": true,
+    "career_url": "https://mksinst.wd1.myworkdayjobs.com/MKSCareersEMEA"
+  },
+  {
+    "name": "Alpiq",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.alpiq.com/career/graduates-entry-level",
+    "category": "Energy Utilities w/ Trading",
+    "ats": "successfactors",
+    "base_url": "https://jobs.alpiq.com",
+    "verified": true,
+    "career_url": "https://jobs.alpiq.com"
+  },
+  {
+    "name": "MFT Energy",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://mft-energy.com/graduate/",
+    "category": "Energy Utilities w/ Trading",
+    "ats": "teamtailor",
+    "base_url": "https://career.mft-energy.com",
+    "verified": true,
+    "career_url": "https://career.mft-energy.com"
+  },
+  {
+    "name": "MET Group",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://met.com/en/people-and-career/development-opportunities/",
+    "category": "Energy Utilities w/ Trading",
+    "ats": "smartrecruiters",
+    "slug": "metgroup",
+    "verified": true,
+    "career_url": "https://careers.smartrecruiters.com/metgroup"
+  },
+  {
+    "name": "Taula Capital",
+    "category": "Discretionary Macro HFs",
+    "ats": "greenhouse",
+    "slug": "taulacapital",
+    "verified": true,
+    "career_url": "https://job-boards.greenhouse.io/taulacapital"
+  },
+  {
+    "name": "BB Energy",
+    "category": "Physical Commodity Merchants",
+    "ats": "workable",
+    "account": "b-dot-b-energy",
+    "verified": true,
+    "career_url": "https://apply.workable.com/b-dot-b-energy/"
+  },
+  {
+    "name": "SEFE",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.sefe.eu/en/career/",
+    "category": "Energy Utilities w/ Trading",
+    "ats": "successfactors_api",
+    "verified": true,
+    "career_url": "https://careers.sefe.eu/search/",
+    "successfactors_api": {
+      "base_url": "https://careers.sefe.eu",
+      "locale": "en_GB"
+    },
+    "notes": "SF RMK API; locale en_GB (default en_US returned 0). Berlin gas/LNG/power."
+  },
+  {
+    "name": "InCommodities",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://incommodities.com/graduate",
+    "category": "Energy Utilities w/ Trading",
+    "ats": "generic",
+    "verified": true,
+    "career_url": "https://incommoditiesas.hr-on.com/",
+    "url": "https://incommoditiesas.hr-on.com/",
+    "selectors": {
+      "container": "a[href*=\"show-job\"]:not(.readmore)",
+      "title": ":self",
+      "link": ":self"
+    },
+    "notes": "HR-ON server-rendered list (show-job anchors, .readmore excluded). Aarhus power/gas. Bodies via detail-page enricher."
+  },
+  {
+    "name": "CEZ Trading",
+    "category": "Energy Utilities w/ Trading",
+    "ats": "teamio",
+    "verified": true,
+    "career_url": "https://ceztrading.jobs.cz/",
+    "teamio": {
+      "widget_id": "c47d3d4b-164d-4b0a-96a2-2937084e9604",
+      "host": "ceztrading.jobs.cz",
+      "api_key": "13e87339ce453515b566d989e733b6392da8a2f6414ca2b49370efbeba98d30d",
+      "prefix": "cez"
+    },
+    "notes": "jobs.cz/Teamio GraphQL widget (api.capybara.lmc.cz); widgetId+X-API-KEY captured from the live request. Prague power/gas."
+  },
+  {
+    "name": "Freight Investor Services",
+    "category": "Market Infrastructure & Fintech",
+    "ats": "zoho_recruit",
+    "verified": true,
+    "career_url": "https://freightinvestorservices.zohorecruit.eu/jobs/Careers",
+    "zoho_recruit": {
+      "portal": "freightinvestorservices",
+      "tld": "eu"
+    },
+    "notes": "Zoho Recruit career site; jobs parsed from inline hydration JSON. 18 broker/analyst roles. Titles carry the signal (no body)."
+  },
+  {
+    "name": "Transtrend",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.transtrend.com/en/join-us/",
+    "category": "Systematic HFs & Quant AMs",
+    "ats": "sitemap_jobs",
+    "verified": true,
+    "career_url": "https://www.transtrend.com/en/werken-bij/",
+    "sitemap_jobs": {
+      "sitemap_url": "https://www.transtrend.com/sitemap.xml",
+      "path_contains": "/en/jobs/",
+      "prefix": "transtrend"
+    },
+    "notes": "Self-hosted board; job URLs from sitemap, title from slug. Rotterdam systematic CTA."
+  },
+  {
+    "name": "ArrowResources (ex-AOT Energy)",
+    "category": "Physical Commodity Merchants",
+    "ats": "workable",
+    "verified": true,
+    "career_url": "https://www.arrowresources.com/careers",
+    "account": "aot-energy",
+    "widget_account": "521391",
+    "notes": "Mystery solved 2026-07-06: aot-energy.com is UNREGISTERED (the old TLS-reset forensics pointed at a dead IP) — AOT was acquired and is now the energy division of ArrowResources AG (Zug). Careers = Workable: legacy slug 'aot-energy' (v3) + live widget account 521391 'ArrowResources AG' embedded on arrowresources.com/careers; handler polls both. Both currently 0 postings — valid-but-empty, Tibra class."
+  },
+  {
+    "name": "Copenhagen Energy Trading",
+    "category": "Energy Utilities w/ Trading",
+    "ats": "manual",
+    "verified": false,
+    "career_url": "https://copenhagen-energytrading.com/vacancies/",
+    "manual_reason": "Self-hosted WordPress /vacancies + email/LinkedIn; roles routed via parent copenhagen-energy.com. No ATS board."
+  },
+  {
+    "name": "Amalgamated Metal Trading",
+    "category": "Physical Commodity Merchants",
+    "ats": "manual",
+    "verified": false,
+    "career_url": "https://www.amt.co.uk/careers",
+    "manual_reason": "No public board — static page, 'send us your CV' email applications. London LME ring-dealing member."
+  },
+  {
+    "name": "Toyota Tsusho Metals",
+    "category": "Physical Commodity Merchants",
+    "ats": "manual",
+    "verified": false,
+    "career_url": "https://www.ttmetals.com/",
+    "manual_reason": "No careers board on ttmetals.com; enquiries via info@ttmetals.com. London LME broker (parent Toyota Tsusho Europe has a separate portal)."
+  },
+  {
+    "name": "SSY",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.ssyglobal.com/trainee-scheme",
+    "category": "Market Infrastructure & Fintech",
+    "ats": "manual",
+    "verified": false,
+    "career_url": "https://www.ssyglobal.com/careers",
+    "manual_reason": "Bespoke careers page (ssyglobal.com, not ssyonline.com); applications via careers@ssyglobal.com. London shipbroker + FFA desk."
+  },
+  {
+    "name": "Braemar",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://braemar.com/careers/trainee-broker-programme/",
+    "category": "Market Infrastructure & Fintech",
+    "ats": "manual",
+    "verified": false,
+    "career_url": "https://braemar.com/careers/",
+    "manual_reason": "No public ATS board; prose careers page, vacancies routed to LinkedIn, apply via braemar-recruitment@braemar.com. London shipbroker w/ freight-derivatives desk."
+  },
+  {
+    "name": "Andurand Capital",
+    "category": "Discretionary Macro HFs",
+    "ats": "manual",
+    "verified": false,
+    "career_url": "https://www.andurandcapital.com/recruiting.html",
+    "manual_reason": "Email-apply only (recruiting@andurandcapital.com); no ATS. London discretionary oil hedge fund."
+  },
+  {
+    "name": "Westbeck Capital",
+    "category": "Discretionary Macro HFs",
+    "ats": "manual",
+    "verified": false,
+    "career_url": "http://www.westbeckcapital.com",
+    "manual_reason": "Contact-only site; apply via info@westbeckcapital.com. London energy/oil hedge fund."
+  },
+  {
+    "name": "Svelland Capital",
+    "category": "Discretionary Macro HFs",
+    "ats": "manual",
+    "verified": false,
+    "career_url": "https://www.svelland.com",
+    "manual_reason": "No careers page/board; LinkedIn/email only. London/Nordic commodities & shipping fund."
+  },
+  {
+    "name": "KLI Asset Management",
+    "category": "Discretionary Macro HFs",
+    "ats": "manual",
+    "verified": false,
+    "career_url": "https://www.klicommodities.com",
+    "manual_reason": "No careers page/board; LinkedIn/email only. London multi-commodity directional fund."
+  },
+  {
+    "name": "Compagnie Financiere Tradition",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.tradition.com/careers/launching-your-career.aspx",
+    "category": "Market Infrastructure & Fintech",
+    "ats": "manual",
+    "verified": false,
+    "career_url": "https://www.tradition.com/careers/",
+    "manual_reason": "No public board; speculative applications by email to location HR (e.g. HR.Lausanne@tradition.ch). Lausanne IDB, energy & commodities desks."
+  },
+  {
+    "name": "AllianceBernstein",
+    "category": "Traditional Asset Managers",
+    "ats": "workday",
+    "workday": {
+      "tenant": "abglobal",
+      "version": "wd1",
+      "board": "alliancebernsteincareers"
+    },
+    "verified": true,
+    "career_url": "https://abglobal.wd1.myworkdayjobs.com/alliancebernsteincareers",
+    "notes": "Global board incl. London. Rotational associate programme. 94 roles at wiring (2026-07-03)."
+  },
+  {
+    "name": "PGIM",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://jobs.pgim.com/us-en/early-talent",
+    "category": "Traditional Asset Managers",
+    "ats": "workday",
+    "workday": {
+      "tenant": "pru",
+      "version": "wd5",
+      "board": "PGIM_Careers"
+    },
+    "verified": true,
+    "career_url": "https://pru.wd5.myworkdayjobs.com/PGIM_Careers",
+    "notes": "PGIM-dedicated board on parent Prudential tenant; jobs.pgim.com is only a Phenom front-end. London/Munich offices. 49 roles at wiring."
+  },
+  {
+    "name": "Barings",
+    "category": "Traditional Asset Managers",
+    "ats": "workday",
+    "workday": {
+      "tenant": "barings",
+      "version": "wd1",
+      "board": "Barings"
+    },
+    "verified": true,
+    "career_url": "https://barings.wd1.myworkdayjobs.com/Barings",
+    "notes": "London/Frankfurt offices, analyst programme. 37 roles at wiring."
+  },
+  {
+    "name": "Nuveen / TIAA",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://careers.tiaa.org/earlytalent",
+    "category": "Traditional Asset Managers",
+    "ats": "workday",
+    "workday": {
+      "tenant": "tiaa",
+      "version": "wd1",
+      "board": "Search"
+    },
+    "verified": true,
+    "career_url": "https://tiaa.wd1.myworkdayjobs.com/Search",
+    "scope_note": "Shared TIAA parent board (~147 total, US-retirement-heavy); Workday searchText too fuzzy to scope Nuveen — full board per RBC/Erste doctrine, tagger sorts relevance.",
+    "notes": "147 roles at wiring."
+  },
+  {
+    "name": "Newton Investment Management",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.bny.com/corporate/global/en/about-us/careers/students.html",
+    "category": "Traditional Asset Managers",
+    "ats": "oracle_hcm",
+    "oracle_hcm": {
+      "base_url": "https://eofe.fa.us2.oraclecloud.com",
+      "site": "BNY-Careers",
+      "keyword": "Newton"
+    },
+    "verified": true,
+    "career_url": "https://eofe.fa.us2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/BNY-Careers",
+    "scope_note": "Shared BNY board (1673 total) scoped by full-text keyword 'Newton' (~3 hits). Keyword matches descriptions too, so occasional non-Newton BNY roles slip in; filter/tagger handles.",
+    "notes": "newtonim.com careers redirects here."
+  },
+  {
+    "name": "Walter Scott",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.walterscott.com/careers/",
+    "category": "Traditional Asset Managers",
+    "ats": "oracle_hcm",
+    "oracle_hcm": {
+      "base_url": "https://eofe.fa.us2.oraclecloud.com",
+      "site": "BNY-Careers",
+      "keyword": "Walter Scott"
+    },
+    "verified": true,
+    "career_url": "https://www.walterscott.com/careers/",
+    "scope_note": "Own site is email-only; roles surface on shared BNY Oracle board, scoped by keyword 'Walter Scott' (1 hit at wiring)."
+  },
+  {
+    "name": "First Sentier Investors",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.firstsentiergroup.com/careers",
+    "category": "Traditional Asset Managers",
+    "ats": "oracle_hcm",
+    "oracle_hcm": {
+      "base_url": "https://eoiv.fa.ap1.oraclecloud.com",
+      "site": "CX_2001"
+    },
+    "verified": true,
+    "career_url": "https://www.firstsentiergroup.com/careers",
+    "notes": "careers.firstsentierinvestors.com is dead; board found via firstsentiergroup.com. 2 roles at wiring."
+  },
+  {
+    "name": "MFS Investment Management",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.mfs.com/en-us/individual-investor/about-mfs/careers.html",
+    "category": "Traditional Asset Managers",
+    "ats": "workday",
+    "workday": {
+      "tenant": "mfs",
+      "version": "wd1",
+      "board": "MFS-Careers"
+    },
+    "verified": true,
+    "career_url": "https://mfs.wd1.myworkdayjobs.com/MFS-Careers",
+    "notes": "36 roles at wiring; London office."
+  },
+  {
+    "name": "Dimensional Fund Advisors",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://careers.dimensional.com/internships",
+    "category": "Traditional Asset Managers",
+    "ats": "workday",
+    "workday": {
+      "tenant": "dimensional",
+      "version": "wd5",
+      "board": "DFA_Careers"
+    },
+    "verified": true,
+    "career_url": "https://dimensional.wd5.myworkdayjobs.com/DFA_Careers",
+    "notes": "Front-end at careers.dimensional.com. 61 roles at wiring; London office."
+  },
+  {
+    "name": "Brown Advisory",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.brownadvisory.com/careers/international-students",
+    "category": "Traditional Asset Managers",
+    "ats": "workday",
+    "workday": {
+      "tenant": "brownadvisory",
+      "version": "wd1",
+      "board": "Brown"
+    },
+    "verified": true,
+    "career_url": "https://brownadvisory.wd1.myworkdayjobs.com/Brown",
+    "notes": "37 roles at wiring; London office."
+  },
+  {
+    "name": "GMO",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.gmo.com/europe/careers/",
+    "category": "Traditional Asset Managers",
+    "ats": "lever",
+    "slug": "gmo",
+    "verified": true,
+    "career_url": "https://jobs.lever.co/gmo",
+    "notes": "All offices on one board (Boston/London/Amsterdam). 10 roles at wiring."
+  },
+  {
+    "name": "Muzinich & Co",
+    "category": "Traditional Asset Managers",
+    "ats": "workday",
+    "workday": {
+      "tenant": "muzinich",
+      "version": "wd5",
+      "board": "muzinichcareers"
+    },
+    "verified": true,
+    "career_url": "https://muzinich.wd5.myworkdayjobs.com/muzinichcareers",
+    "notes": "Credit specialist, London/Frankfurt. 3 roles at wiring (incl. Trader London)."
+  },
+  {
+    "name": "Aegon Asset Management",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.aegonam.com/about-us/careers/early-careers/",
+    "category": "Traditional Asset Managers",
+    "ats": "workday",
+    "workday": {
+      "tenant": "transamerica",
+      "version": "wd5",
+      "board": "AegonAM"
+    },
+    "verified": true,
+    "career_url": "https://transamerica.wd5.myworkdayjobs.com/AegonAM",
+    "notes": "Dedicated Aegon AM board on Transamerica parent tenant. 13 roles at wiring (NL + US)."
+  },
+  {
+    "name": "Vontobel",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.vontobel.com/en-ch/about-vontobel/careers/internship/",
+    "category": "Traditional Asset Managers",
+    "ats": "workday",
+    "workday": {
+      "tenant": "vontobel",
+      "version": "wd3",
+      "board": "Vontobel_External_Career"
+    },
+    "verified": true,
+    "career_url": "https://vontobel.wd3.myworkdayjobs.com/Vontobel_External_Career",
+    "notes": "Also covers TwentyFour AM (same tenant). Zurich + Frankfurt office. 40 roles at wiring."
+  },
+  {
+    "name": "Bestinver",
+    "category": "Traditional Asset Managers",
+    "ats": "workday",
+    "workday": {
+      "tenant": "acciona",
+      "version": "wd3",
+      "board": "ACCIONA_Employment_Channel",
+      "search_text": "Bestinver"
+    },
+    "verified": true,
+    "career_url": "https://acciona.wd3.myworkdayjobs.com/ACCIONA_Employment_Channel",
+    "scope_note": "Owned by Acciona; shares its Workday board (692 total) — scoped via search_text 'Bestinver' (5 hits at wiring). Madrid/Barcelona relevant.",
+    "notes": ""
+  },
+  {
+    "name": "Raiffeisen Capital Management (KAG)",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.raiffeisenfonds.at/de/global/karriere",
+    "category": "Traditional Asset Managers",
+    "ats": "successfactors",
+    "base_url": "https://jobs.rbinternational.com/raiffeisencapitalmgmt",
+    "verified": true,
+    "career_url": "https://www.rcm.at/at-de/global/karriere",
+    "notes": "Dedicated SF sub-board on the RBI portal; KAG roles post here, not the main RBI board. 1 role at wiring (Vienna student job)."
+  },
+  {
+    "name": "Anthos Fund & Asset Management",
+    "category": "Traditional Asset Managers",
+    "ats": "greenhouse",
+    "slug": "afam",
+    "verified": true,
+    "career_url": "https://job-boards.greenhouse.io/afam",
+    "notes": "Brenninkmeijer family AM, Amsterdam. 1 role at wiring."
+  },
+  {
+    "name": "Edmond de Rothschild",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://evht.fa.ocs.oraclecloud.eu/hcmUI/CandidateExperience/en/sites/CX_7001/jobs",
+    "category": "Traditional Asset Managers",
+    "ats": "oracle_hcm",
+    "oracle_hcm": {
+      "base_url": "https://evht.fa.ocs.oraclecloud.eu",
+      "site": "CX_7001"
+    },
+    "verified": true,
+    "career_url": "https://evht.fa.ocs.oraclecloud.eu/hcmUI/CandidateExperience/en/sites/CX_7001/jobs",
+    "notes": "Geneva/Paris. Corporate careers page 403s but Oracle portal is open. 34 roles at wiring."
+  },
+  {
+    "name": "Colchester Global Investors",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://careers.colchesterglobal.com/vacancy/rotational-graduate-scheme/",
+    "category": "Traditional Asset Managers",
+    "ats": "wp_job",
+    "wp_job": {
+      "base_url": "https://careers.colchesterglobal.com",
+      "post_type": "vacancy",
+      "tenant": "colchester"
+    },
+    "verified": true,
+    "career_url": "https://careers.colchesterglobal.com/vacancy/current-open-vacancies/",
+    "notes": "Global sovereign-bond value manager, London. WP 'vacancy' CPT via wp-json (same pattern as Mercuria). One evergreen index row ('Current Open Vacancies') rides along — harmless. 3 rows at wiring incl. Rotational Graduate Scheme + Summer Intern."
+  },
+  {
+    "name": "Capital Fund Management (CFM)",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.cfm.com/join-us-cfm-careers/",
+    "category": "Systematic HFs & Quant AMs",
+    "ats": "successfactors",
+    "base_url": "https://jobs.cfm.com",
+    "verified": true,
+    "career_url": "https://jobs.cfm.com/search/",
+    "notes": "Paris quant fund. SF modern HTML. NOTE: greenhouse slug 'cfm' is an unrelated HVAC firm — do not use. 31 roles at wiring."
+  },
+  {
+    "name": "Acadian Asset Management",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.acadian-asset.com/careers/open-positions",
+    "category": "Systematic HFs & Quant AMs",
+    "ats": "greenhouse",
+    "slug": "acadianassetmanagementllc",
+    "verified": true,
+    "career_url": "https://www.acadian-asset.com/careers/open-positions",
+    "notes": "Systematic quant AM, Boston/London. 19 roles at wiring."
+  },
+  {
+    "name": "Lynx Asset Management",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.lynxhedge.se/en/student-opportunities/",
+    "category": "Systematic HFs & Quant AMs",
+    "ats": "teamtailor",
+    "base_url": "https://careers.lynxhedge.se",
+    "verified": true,
+    "career_url": "https://careers.lynxhedge.se/jobs",
+    "notes": "Stockholm CTA/quant. 0 postings at wiring — config valid (jobs.rss verified), board just empty today."
+  },
+  {
+    "name": "Hayfin Capital Management",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.hayfin.com/people/internship-programme/",
+    "category": "Private Equity & Private Markets",
+    "ats": "workable",
+    "account": "hayfin-capital-management",
+    "verified": true,
+    "career_url": "https://apply.workable.com/hayfin-capital-management/",
+    "notes": "Private credit, London + Frankfurt office. 3 roles at wiring (incl. Finance Graduate at probe time)."
+  },
+  {
+    "name": "Pemberton Asset Management",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://pembertonam.com/careers/",
+    "category": "Private Equity & Private Markets",
+    "ats": "ashby",
+    "slug": "Pemberton",
+    "verified": true,
+    "career_url": "https://jobs.ashbyhq.com/Pemberton",
+    "notes": "Private credit, London. 3 roles at wiring."
+  },
+  {
+    "name": "Golub Capital",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://golubcapital.com/careers/",
+    "category": "Private Equity & Private Markets",
+    "ats": "workday",
+    "workday": {
+      "tenant": "golubcapital",
+      "version": "wd501",
+      "board": "Golub_Capital_Careers"
+    },
+    "verified": true,
+    "career_url": "https://wd501.myworkdaysite.com/recruiting/golubcapital/Golub_Capital_Careers",
+    "notes": "Private credit. Public URL is myworkdaysite.com variant but the standard cxs API works. 26 roles firm-wide at wiring, filter for London."
+  },
+  {
+    "name": "LGT Capital Partners",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.lgtcp.com/career-life-cycle",
+    "category": "Private Equity & Private Markets",
+    "ats": "workday",
+    "workday": {
+      "tenant": "lgtcp",
+      "version": "wd502",
+      "board": "lgtcpcurrentvacancies"
+    },
+    "verified": true,
+    "career_url": "https://lgtcp.wd502.myworkdayjobs.com/lgtcpcurrentvacancies",
+    "notes": "Own tenant separate from LGT Bank; Pfäffikon HQ. 26 roles at wiring."
+  },
+  {
+    "name": "Quoniam Asset Management",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.quoniam.com/en/careers/",
+    "category": "Systematic HFs & Quant AMs",
+    "ats": "umantis",
+    "umantis": {
+      "base_url": "https://recruitingapp-5064.de.umantis.com",
+      "tenant": "quoniam"
+    },
+    "verified": true,
+    "career_url": "https://www.quoniam.com/karriere/stellenangebote/",
+    "notes": "Frankfurt quant AM (Union Investment majority) — top DACH pick. New umantis handler. 3 at wiring: Aktien Portfoliomanager, Werkstudent PM Equities, Intern Research Forecasts."
+  },
+  {
+    "name": "Metzler Asset Management",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.metzler.com/de/metzler/karriere/studenten-absolventen/investment-trainee-programm",
+    "category": "Traditional Asset Managers",
+    "ats": "generic",
+    "url": "https://www.metzler.com/de/metzler/karriere/stellenangebote",
+    "selectors": {
+      "container": "a.link--clickbox",
+      "title": ":self",
+      "link": ":self"
+    },
+    "verified": true,
+    "career_url": "https://www.metzler.com/de/metzler/karriere/stellenangebote",
+    "notes": "Bespoke TYPO3, server-rendered clickbox anchors. Frankfurt; traineeship. 16 at wiring."
+  },
+  {
+    "name": "Berenberg",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://careers.berenberg.com/early-careers/graduate-programmes/wealth-asset-management-corporate-banking-graduate-programme",
+    "category": "Traditional Asset Managers",
+    "ats": "avature",
+    "search_url": "https://berenberg.avature.net/de_DE/careers/SearchJobs",
+    "verified": true,
+    "career_url": "https://careers.berenberg.com/de",
+    "notes": "Avature SearchJobs (careers.berenberg.com fronts it; /de/SearchJobs on that host 404s — use avature.net). Hamburg + Frankfurt. 38 at wiring."
+  },
+  {
+    "name": "Lupus alpha",
+    "category": "Traditional Asset Managers",
+    "ats": "generic",
+    "url": "https://karriere.lupusalpha.de/en",
+    "selectors": {
+      "container": "a.job-offer-content",
+      "title": "h2",
+      "link": ":self"
+    },
+    "noise_terms": [
+      "initiativbewerbung"
+    ],
+    "verified": true,
+    "career_url": "https://karriere.lupusalpha.de/en",
+    "notes": "Frankfurt small/mid-cap + CLO specialist. Custom hosted job server, server-rendered. Evergreen Initiativbewerbung row dropped via noise_terms. 4 rows at wiring."
+  },
+  {
+    "name": "Flossbach von Storch",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.flossbachvonstorch.de/de/ueber-uns/karriere/nachwuchskraefte",
+    "category": "Traditional Asset Managers",
+    "ats": "personio",
+    "personio": {
+      "base_url": "https://flossbach-von-storch-ag.jobs.personio.de",
+      "tenant": "fvs"
+    },
+    "verified": true,
+    "career_url": "https://flossbach-von-storch-ag.jobs.personio.de/",
+    "notes": "Largest indep. German AM, Cologne (+Frankfurt roles). New personio handler (clean XML feed incl. full descriptions). 12 at wiring."
+  },
+  {
+    "name": "DJE Kapital",
+    "category": "Traditional Asset Managers",
+    "ats": "personio",
+    "personio": {
+      "base_url": "https://dje-kapital-ag.jobs.personio.de",
+      "tenant": "dje"
+    },
+    "verified": true,
+    "career_url": "https://dje-kapital-ag.jobs.personio.de/",
+    "notes": "Pullach/Munich AM. Personio XML feed. 6 at wiring."
+  },
+  {
+    "name": "BayernInvest",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.bayerninvest.de/karriere/einsteigen-bei-der-bayerninvest/werkstudenten-und-praktikanten-mwd/index.html",
+    "category": "Traditional Asset Managers",
+    "ats": "generic",
+    "url": "https://recruiting.bayerninvest.de/stellenangebote.html",
+    "selectors": {
+      "container": "a[href*=\"-de-j\"]",
+      "title": ":self",
+      "link": ":self"
+    },
+    "noise_terms": [
+      "initiativ"
+    ],
+    "verified": true,
+    "career_url": "https://recruiting.bayerninvest.de/stellenangebote.html",
+    "notes": "Munich (BayernLB AM arm). rexx systems portal, server-rendered. 3 rows at wiring."
+  },
+  {
+    "name": "J. Safra Sarasin",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.jsafrasarasin.com/content/jsafrasarasin/language-masters/en/company/careers.html",
+    "category": "Traditional Asset Managers",
+    "ats": "umantis",
+    "umantis": {
+      "base_url": "https://jsafrasarasin.umantis.com",
+      "tenant": "jsafrasarasin"
+    },
+    "verified": true,
+    "career_url": "https://jsafrasarasin.umantis.com/Jobs/All",
+    "notes": "Basel private bank/AM. New umantis handler. 16 at wiring."
+  },
+  {
+    "name": "Storebrand Asset Management",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.storebrand.no/om-storebrand/jobb-i-storebrand/storebrand-traineeprogram",
+    "category": "Traditional Asset Managers",
+    "ats": "workday",
+    "workday": {
+      "tenant": "storebrand",
+      "version": "wd3",
+      "board": "Storebrand_Careers"
+    },
+    "verified": true,
+    "career_url": "https://storebrand.wd3.myworkdayjobs.com/Storebrand_Careers",
+    "notes": "Group-wide board incl. AM roles (Oslo/Lysaker; SKAGEN under same group). 11 at wiring."
+  },
+  {
+    "name": "Candriam",
+    "category": "Traditional Asset Managers",
+    "ats": "talentsoft",
+    "talentsoft": {
+      "board_url": "https://jobs.candriam.com/job/list-of-jobs.aspx",
+      "locale": 2057
+    },
+    "verified": true,
+    "career_url": "https://jobs.candriam.com/homepage.aspx?LCID=2057",
+    "notes": "NY Life-owned, Brussels + Frankfurt office, grad intake. Same Talentsoft pattern as Amundi/CACIB. 21 roles at wiring."
+  },
+  {
+    "name": "Railpen",
+    "category": "Pensions, Insurance & Sovereign Investors",
+    "ats": "workday",
+    "workday": {
+      "tenant": "railpen",
+      "version": "wd3",
+      "board": "Railpen"
+    },
+    "verified": true,
+    "career_url": "https://railpen.wd3.myworkdayjobs.com/Railpen",
+    "notes": "UK rail pension in-house investor. 9 roles at wiring."
+  },
+  {
+    "name": "Just Group",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.workatjust.co.uk/early_careers/",
+    "category": "Pensions, Insurance & Sovereign Investors",
+    "ats": "workday",
+    "workday": {
+      "tenant": "just",
+      "version": "wd3",
+      "board": "JUST_External"
+    },
+    "verified": true,
+    "career_url": "https://just.wd3.myworkdayjobs.com/JUST_External",
+    "notes": "UK annuity insurer (in-house investment team). workatjust.co.uk proxies this board. 14 roles at wiring."
+  },
+  {
+    "name": "Pension Insurance Corporation (PIC)",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.pensioncorporation.com/careers",
+    "category": "Pensions, Insurance & Sovereign Investors",
+    "ats": "workable",
+    "account": "pension-services-corporation-limited",
+    "verified": true,
+    "career_url": "https://apply.workable.com/pension-services-corporation-limited/",
+    "notes": "UK pension-risk-transfer insurer; main site Incapsula-gated but Workable board open. 10 roles at wiring."
+  },
+  {
+    "name": "Rothesay",
+    "category": "Pensions, Insurance & Sovereign Investors",
+    "ats": "greenhouse",
+    "slug": "rothesaylife",
+    "verified": true,
+    "career_url": "https://www.rothesay.com/about-us/working-here/careers/open-positions/",
+    "notes": "UK annuity insurer, strong in-house investment team + grad scheme. 4 roles at wiring."
+  },
+  {
+    "name": "Zurich Insurance (Investment Management)",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.zurich.com/careers/students-and-early-careers",
+    "category": "Pensions, Insurance & Sovereign Investors",
+    "ats": "successfactors",
+    "base_url": "https://www.careers.zurich.com",
+    "search_params": {
+      "q": "investment"
+    },
+    "verified": true,
+    "career_url": "https://www.careers.zurich.com/search/",
+    "scope_note": "Group board is 814 roles; scoped with q=investment (61 at wiring). Full-text q, so some underwriting noise — tagger sorts.",
+    "notes": ""
+  },
+  {
+    "name": "Swiss Re Asset Management",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://careers.swissre.com/go/Graduates/2744301/",
+    "category": "Pensions, Insurance & Sovereign Investors",
+    "ats": "successfactors",
+    "base_url": "https://careers.swissre.com",
+    "search_params": {
+      "q": "investment"
+    },
+    "verified": true,
+    "career_url": "https://careers.swissre.com/search/",
+    "scope_note": "Group board is 313 roles; q='asset management' does NOT scope (multi-word ignored), q=investment does (13 at wiring).",
+    "notes": ""
+  },
+  {
+    "name": "Baloise (Helvetia Baloise)",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.baloise.com/en/CH/jobs/starting-your-career/trainee-programme.html",
+    "category": "Pensions, Insurance & Sovereign Investors",
+    "ats": "avature",
+    "search_url": "https://careers.baloise.com/en_US/careers/SearchJobs",
+    "verified": true,
+    "career_url": "https://careers.baloise.com/en_US/careers/SearchJobs",
+    "notes": "Avature board covers merged Helvetia Baloise group (49 at wiring); AM roles among them. baloise.com root 406s to curl but Avature host is open."
+  },
+  {
+    "name": "GIC",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://gic.careers/programmes/gic-professionals-programme/",
+    "category": "Pensions, Insurance & Sovereign Investors",
+    "ats": "successfactors",
+    "base_url": "https://careers.gic.com.sg",
+    "verified": true,
+    "career_url": "https://careers.gic.com.sg/search/",
+    "notes": "Singapore SWF with London office. Full board (142 at wiring), Singapore-heavy — tagger/city filter sorts."
+  },
+  {
+    "name": "Temasek",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://jobs.temasek.com.sg/",
+    "category": "Pensions, Insurance & Sovereign Investors",
+    "ats": "successfactors",
+    "base_url": "https://jobs.temasek.com.sg",
+    "verified": true,
+    "career_url": "https://jobs.temasek.com.sg/search/",
+    "notes": "Singapore SWF with London office. SF-modern branded host (career2.successfactors.eu company=temasekcapP2 302s here). 55 at wiring."
+  },
+  {
+    "name": "European Stability Mechanism (ESM)",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.esm.europa.eu/careers",
+    "category": "Pensions, Insurance & Sovereign Investors",
+    "ats": "oracle_hcm",
+    "oracle_hcm": {
+      "base_url": "https://ebuz.fa.em2.oraclecloud.com",
+      "site": "CX"
+    },
+    "verified": true,
+    "career_url": "https://vacancies.esm.europa.eu/",
+    "notes": "Luxembourg. vacancies.esm.europa.eu fronts this Oracle HCM site. 4 at wiring incl. traineeship."
+  },
+  {
+    "name": "CPP Investments",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.cppinvestments.com/careers/early-career-candidates/graduate-programs/",
+    "category": "Pensions, Insurance & Sovereign Investors",
+    "ats": "workday",
+    "workday": {
+      "tenant": "cppib",
+      "version": "wd10",
+      "board": "cppinvestments"
+    },
+    "verified": true,
+    "career_url": "https://cppib.wd10.myworkdayjobs.com/cppinvestments",
+    "notes": "Canadian pension giant, London office; posts analyst roles ~a year ahead. 45 at wiring."
+  },
+  {
+    "name": "Ontario Teachers' Pension Plan (OTPP)",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.otpp.com/en-ca/careers/early-talent/",
+    "category": "Pensions, Insurance & Sovereign Investors",
+    "ats": "workday",
+    "workday": {
+      "tenant": "otppb",
+      "version": "wd3",
+      "board": "OntarioTeachers_Careers"
+    },
+    "verified": true,
+    "career_url": "https://otppb.wd3.myworkdayjobs.com/OntarioTeachers_Careers",
+    "notes": "London office. 40 at wiring."
+  },
+  {
+    "name": "Federated Hermes",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.federatedhermes.com/us/corporate/internships.do",
+    "category": "Traditional Asset Managers",
+    "ats": "manual",
+    "career_url": "https://careers.federatedhermes.com/",
+    "manual_reason": "Oracle PeopleSoft HRMS candidate gateway (HRS_HRAM_FL search page, SiteId=11) — legacy platform, no supported handler. Probed 2026-07-02."
+  },
+  {
+    "name": "Payden & Rygel",
+    "category": "Traditional Asset Managers",
+    "ats": "manual",
+    "career_url": "https://www.payden.com/careers",
+    "manual_reason": "No public board — careers page is prose + mailto:careers@payden.com; postings only on LinkedIn. Probed 2026-07-02."
+  },
+  {
+    "name": "Carmignac",
+    "category": "Traditional Asset Managers",
+    "ats": "manual",
+    "career_url": "https://www.carmignac.com/en/about-us/careers",
+    "manual_reason": "No public board: careers page is prose-only with mailto:irecruitment@carmignac.com; WTTJ org page exists but has zero postings. Internships→analyst path exists — apply direct. Probed 2026-07-02."
+  },
+  {
+    "name": "Comgest",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.comgest.com/en/about-us/our-people/careers/internship-offers",
+    "category": "Traditional Asset Managers",
+    "ats": "generic",
+    "career_url": "https://www.comgest.com/en/about-us/our-people/careers",
+    "url": "https://www.comgest.com/en/about-us/our-people/careers/internship-offers",
+    "selectors": {
+      "container": "dt.accordion__header",
+      "title": ".accordion__header__button__text",
+      "url_fallback": "page"
+    },
+    "verified": true,
+    "notes": "Sitecore accordion listing (no per-job anchors -> url_fallback page). Internship-offers page wired (full-time job-offers page is application-form only). Titles carry location, e.g. 'ESG ANALYST - INTERNSHIP (Paris)'."
+  },
+  {
+    "name": "Fulcrum Asset Management",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://fulcrumasset.com/about-us/careers/",
+    "category": "Systematic HFs & Quant AMs",
+    "ats": "generic",
+    "career_url": "https://fulcrumasset.com/about-us/careers/",
+    "verified": true,
+    "url": "https://fulcrumasset.com/about-us/careers/",
+    "selectors": {
+      "container": "div.uk-grid-small.uk-margin-bottom",
+      "title": "h3",
+      "link": "a[href*=\"/careers/\"]"
+    },
+    "notes": "Bespoke WP careers; title h3 + apply link in same UIkit row. Bodies via detail-page enricher."
+  },
+  {
+    "name": "Record Financial Group",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://recordfg.com/careers/",
+    "category": "Traditional Asset Managers",
+    "ats": "manual",
+    "career_url": "https://recordfg.com/careers/",
+    "manual_reason": "Access PeopleHR board (recordcm.peoplehr.net), unsupported; only 2 evergreen entries (Graduate Mailing List, Experienced Hires) — join the graduate mailing list directly. Probed 2026-07-02."
+  },
+  {
+    "name": "Ossiam",
+    "category": "Systematic HFs & Quant AMs",
+    "ats": "ossiam",
+    "career_url": "https://www.ossiam.com/EN/careers",
+    "verified": true,
+    "notes": "Bespoke public JSON api.ossiam.net/careers/posts. Natixis-affiliated quant AM."
+  },
+  {
+    "name": "Swisscanto / ZKB Asset Management",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.zkb.ch/de/ueber-uns/jobs-karriere/young-talents/programm-focus.html",
+    "category": "Traditional Asset Managers",
+    "ats": "refline",
+    "career_url": "https://apply.refline.ch/792841/search.html",
+    "verified": true,
+    "refline": {
+      "tenant": "792841"
+    },
+    "notes": "Refline server-rendered board (ZKB group tenant 792841, incl. Swisscanto/AM); bodies via server-rendered detail pages."
+  },
+  {
+    "name": "La Française Group",
+    "category": "Traditional Asset Managers",
+    "ats": "generic",
+    "career_url": "https://recrutement.creditmutuel.fr/fr/nos_offres.html?socs=39%7C4962%7C1499%7C1497%7C4963%7C4965%7C5007%7C5008%7C1496",
+    "verified": true,
+    "url": "https://recrutement.creditmutuel.fr/fr/nos_offres.html?socs=39%7C4962%7C1499%7C1497%7C4963%7C4965%7C5007%7C5008%7C1496",
+    "selectors": {
+      "container": "a[href*=\"offre.html?annonce=\"]",
+      "title": ":self",
+      "link": ":self"
+    },
+    "notes": "Credit Mutuel RHEC portal, server-rendered, socs= filter isolates La Française entities (~15). Bodies via detail-page enricher."
+  },
+  {
+    "name": "Cobas Asset Management",
+    "category": "Traditional Asset Managers",
+    "ats": "manual",
+    "career_url": "https://www.cobasam.com/",
+    "manual_reason": "No public board: no careers page in sitemap (cobasempleo.com is a pension product site, not careers); hiring via LinkedIn/direct (info@cobasam.com). Probed 2026-07-02."
+  },
+  {
+    "name": "azValor Asset Management",
+    "category": "Traditional Asset Managers",
+    "ats": "manual",
+    "career_url": "https://www.azvalor.com/trabaje-con-nosotros/",
+    "manual_reason": "Prose careers page with a spontaneous-application form only; no listings, no ATS. Probed 2026-07-02."
+  },
+  {
+    "name": "Manulife | CQS Investment Management",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.cqs.com/careers",
+    "category": "Traditional Asset Managers",
+    "ats": "manual",
+    "career_url": "https://www.cqs.com/careers",
+    "manual_reason": "No public board: careers prose says contact recruitment@cqsm.com; site WAF-403s all non-browser clients; zero CQS roles on Manulife's Workday. Probed 2026-07-02."
+  },
+  {
+    "name": "Capital Four",
+    "category": "Traditional Asset Managers",
+    "ats": "emply",
+    "career_url": "https://capital-four.career.emply.com/vacancies",
+    "emply": {
+      "base_url": "https://capital-four.career.emply.com",
+      "tenant": "capitalfour"
+    },
+    "verified": true,
+    "notes": "Emply (new handler 2026-07-16): get-page JSON API needs the page's sectionId GUID — that was the old '500s without frontend payload' mystery. Seasonal Copenhagen analyst programme is the prize; senior Private Debt roles at wiring."
+  },
+  {
+    "name": "Arcmont Asset Management",
+    "category": "Private Equity & Private Markets",
+    "ats": "manual",
+    "career_url": "https://arcmont.com/life-at-arcmont/",
+    "manual_reason": "No public board: no careers page or ATS link anywhere on site; roles via LinkedIn only (Nuveen affiliate). Probed 2026-07-02."
+  },
+  {
+    "name": "Park Square Capital",
+    "category": "Private Equity & Private Markets",
+    "ats": "manual",
+    "career_url": "https://www.parksquarecapital.com/our-team/talent/",
+    "manual_reason": "No public board: /careers redirects to /contact, sitemap has no jobs page; LinkedIn/contact only. Probed 2026-07-02."
+  },
+  {
+    "name": "Ashmore Group",
+    "category": "Traditional Asset Managers",
+    "ats": "manual",
+    "career_url": "https://www.ashmoregroup.com/en-gb/careers",
+    "manual_reason": "No public board: careers page is prose only, apply by CV + cover letter to careers@ashmoregroup.com. EM debt specialist. Probed 2026-07-02."
+  },
+  {
+    "name": "Fisch Asset Management",
+    "category": "Traditional Asset Managers",
+    "ats": "manual",
+    "career_url": "https://www.fam.ch/about-us/jobs/open-positions",
+    "manual_reason": "Real domain is fam.ch (fisch.ch has broken TLS); bespoke TYPO3 site with open-positions behind an investor-disclaimer gate; jobs@fam.ch. Probed 2026-07-02."
+  },
+  {
+    "name": "BlueOrchard",
+    "category": "Traditional Asset Managers",
+    "ats": "bamboohr",
+    "career_url": "https://www.blueorchard.com/careers/",
+    "slug": "blueorchard",
+    "verified": true,
+    "notes": "BambooHR public JSON (/careers/list + /careers/{id}/detail). Schroders-owned impact AM."
+  },
+  {
+    "name": "APG Asset Management",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://werkenbij.apg.nl/en/traineeships-at-apg/",
+    "category": "Pensions, Insurance & Sovereign Investors",
+    "ats": "sitemap_jobs",
+    "career_url": "https://werkenbij.apg.nl/vacatures/",
+    "verified": true,
+    "sitemap_jobs": {
+      "sitemap_url": "https://werkenbij.apg.nl/sitemap.xml",
+      "path_contains": "/vacatures/",
+      "trailing_id": true,
+      "require_id": true,
+      "prefix": "apg"
+    },
+    "notes": "werkenbij.apg.nl sitemap lists /vacatures/{slug}-{id}; title from slug. IT/stage-heavy (filter sorts)."
+  },
+  {
+    "name": "PGGM",
+    "category": "Pensions, Insurance & Sovereign Investors",
+    "ats": "generic",
+    "career_url": "https://werkenbijpggm.nl/vacatures",
+    "verified": true,
+    "url": "https://werkenbijpggm.nl/vacatures",
+    "selectors": {
+      "container": "a[href*=\"/vacatures/vacature/\"]",
+      "title": "h3",
+      "link": ":self"
+    },
+    "notes": "Connexys/Salesforce werkenbij site, server-rendered cards (generic selectors). Bodies via detail-page enricher."
+  },
+  {
+    "name": "Achmea Investment Management",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.werkenbijachmea.nl/traineeships",
+    "category": "Pensions, Insurance & Sovereign Investors",
+    "ats": "achmea",
+    "career_url": "https://www.werkenbijachmea.nl/vacatures",
+    "verified": true,
+    "achmea": {
+      "base": "https://www.werkenbijachmea.nl/vacatures",
+      "prefix": "achmea"
+    },
+    "notes": "werkenbijachmea server-rendered cards, offset ?o=N pagination. Group board; AM roles a small slice (filter sorts)."
+  },
+  {
+    "name": "ATP",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.atp.dk/karriere/graduate-i-atp",
+    "category": "Pensions, Insurance & Sovereign Investors",
+    "ats": "hr_manager",
+    "career_url": "https://www.atp.dk/karriere/ledige-stillinger",
+    "verified": true,
+    "hr_manager": {
+      "alias": "atp"
+    },
+    "notes": "HR-manager.net Talent Recruiter public JSON (positionlist). ShortDescription summaries inline."
+  },
+  {
+    "name": "PFA",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.pfa.dk/om-pfa/job-i-pfa/graduate/",
+    "category": "Pensions, Insurance & Sovereign Investors",
+    "ats": "pfa",
+    "career_url": "https://www.pfa.dk/om-pfa/job-i-pfa/ledige-job/",
+    "verified": true,
+    "notes": "pfa.dk list page server-renders career_job_req_id links; title from each job_listing <title>. Danish."
+  },
+  {
+    "name": "USS Investment Management",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.usscareers.co.uk/london/",
+    "category": "Pensions, Insurance & Sovereign Investors",
+    "ats": "appellia",
+    "career_url": "https://www.usscareers.co.uk/",
+    "verified": true,
+    "appellia": {
+      "board_url": "https://uss.appellia.com/?ous=",
+      "prefix": "uss"
+    },
+    "notes": "Appellia/OMNI RMS WebForms; server-rendered grid, viewstate page-walk. Bodies via detail-page enricher."
+  },
+  {
+    "name": "Border to Coast",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.bordertocoast.org.uk/careers/graduate-programme/",
+    "category": "Pensions, Insurance & Sovereign Investors",
+    "ats": "manual",
+    "career_url": "https://www.bordertocoast.org.uk/current-vacancies/",
+    "manual_reason": "No ATS board; vacancies page links straight to LinkedIn job posts (3 at probe). Probed 2026-07-02."
+  },
+  {
+    "name": "Norges Bank Investment Management (NBIM)",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.nbim.no/en/about-us/career/graduate-programme/",
+    "category": "Pensions, Insurance & Sovereign Investors",
+    "ats": "generic",
+    "career_url": "https://www.nbim.no/en/about-us/career/vacancies/",
+    "verified": true,
+    "url": "https://www.nbim.no/en/about-us/career/vacancies/",
+    "selectors": {
+      "container": "a[href*=\"webcruiter.no\"]",
+      "title": "span:not(.italic)",
+      "link": ":self"
+    },
+    "notes": "Webcruiter links server-rendered on nbim.no; title in first span. Oljefondet."
+  },
+  {
+    "name": "Ruffer",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.studentladder.co.uk/job/ruffer-graduate-scheme/",
+    "category": "Traditional Asset Managers",
+    "ats": "manual",
+    "career_url": "https://www.ruffer.co.uk/en/about",
+    "manual_reason": "No public board — all careers paths incl. summer-associate-programme now 404; recruitment via careers@ruffer.co.uk / LinkedIn. Research grad programme exists — apply direct. Probed 2026-07-02."
+  },
+  {
+    "name": "Sarasin & Partners",
+    "category": "Traditional Asset Managers",
+    "ats": "manual",
+    "career_url": "https://sarasinandpartners.com/about-us/join-us/",
+    "manual_reason": "Email-only recruitment (recruitmentsp@sarasin.co.uk); no ATS embed or vacancy list. Investment grad scheme exists — apply direct. Probed 2026-07-02."
+  },
+  {
+    "name": "Polar Capital",
+    "category": "Traditional Asset Managers",
+    "ats": "manual",
+    "career_url": "https://www.polarcapital.co.uk/gb/professional/Careers/",
+    "manual_reason": "Careers page is prose-only, applications by email (applications@polarcapital.co.uk). Probed 2026-07-02."
+  },
+  {
+    "name": "Veritas Asset Management",
+    "category": "Traditional Asset Managers",
+    "ats": "manual",
+    "career_url": "https://www.vamllp.com/",
+    "manual_reason": "No careers page exists (all paths + sitemap 404); brochure site, contact-only. Probed 2026-07-02."
+  },
+  {
+    "name": "Troy Asset Management",
+    "category": "Traditional Asset Managers",
+    "ats": "manual",
+    "career_url": "https://www.taml.co.uk/",
+    "manual_reason": "No careers page (/careers 404); career enquiries by email (cy@taml.co.uk) / LinkedIn. Probed 2026-07-02."
+  },
+  {
+    "name": "VanEck Europe",
+    "category": "Traditional Asset Managers",
+    "ats": "ukg",
+    "career_url": "https://vaneck.rec.pro.ukg.net/VAN1502VEAC/JobBoard/9158c56d-61c9-447f-98b1-4ba0b04ca31d/",
+    "verified": true,
+    "ukg": {
+      "host": "vaneck.rec.pro.ukg.net",
+      "tenant": "VAN1502VEAC",
+      "board_guid": "9158c56d-61c9-447f-98b1-4ba0b04ca31d"
+    },
+    "notes": "UKG Pro Recruiting; antiforgery-token JSON POST to JobBoardView/LoadSearchResults. Global board (US-heavy; Frankfurt when open)."
+  },
+  {
+    "name": "HQ Trust",
+    "category": "Traditional Asset Managers",
+    "ats": "generic",
+    "career_url": "https://hqtrust.de/karriere/",
+    "verified": true,
+    "url": "https://hqtrust.de/karriere/",
+    "selectors": {
+      "container": "h2.t-entry-title",
+      "title": "a",
+      "link": "a"
+    },
+    "notes": "Bespoke WP career pages; titles in h2.t-entry-title (was h3 pre-2026-07; layout re-tagged the heading level). The 'p.t-entry-title' Nothing-found placeholder must NOT be matched — the h2 qualifier keeps it out. Quandt family office. Bodies via detail-page enricher."
+  },
+  {
+    "name": "ODDO BHF Asset Management",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.oddo-bhf.com/en/pd/1191/graduate_programmes",
+    "category": "Traditional Asset Managers",
+    "ats": "generic",
+    "career_url": "https://recrutement.altays-progiciels.com/oddo/en/recherche.html",
+    "verified": true,
+    "url": "https://recrutement.altays-progiciels.com/oddo/en/offres.html",
+    "selectors": {
+      "container": "a[href*=\"/offres/\"]",
+      "title": ":self",
+      "link": ":self"
+    },
+    "notes": "Altays server-rendered offer list (title = anchor text). Frankfurt/Paris PWM/AM."
+  },
+  {
+    "name": "KfW",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.kfw.de/%C3%9Cber-die-KfW/Karriere/Absolventen/",
+    "category": "Traditional Asset Managers",
+    "ats": "beesite_sitemap",
+    "career_url": "https://jobs.kfw.de/index.php?ac=jobad_overview",
+    "verified": true,
+    "beesite_sitemap": {
+      "sitemap_url": "https://jobs.kfw.de/sitemap.xml",
+      "prefix": "kfw"
+    },
+    "notes": "Self-hosted BeeSite; sitemap enumerates ac=jobad&id URLs, each ad server-rendered (title+body). Frankfurt promotional bank."
+  },
+  {
+    "name": "Ampega Asset Management (Talanx)",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.ampega.de/karriere/",
+    "category": "Traditional Asset Managers",
+    "ats": "successfactors_api",
+    "career_url": "https://www.ampega.de/karriere/unsere-jobs/",
+    "verified": true,
+    "successfactors_api": {
+      "base_url": "https://job.hdi.group",
+      "locale": "de_DE",
+      "facet_filters": {
+        "cust_Segment": [
+          "Ampega"
+        ]
+      }
+    },
+    "notes": "SF RMK API on HDI group board, facet cust_Segment=Ampega isolates the AM arm."
+  },
+  {
+    "name": "ACATIS",
+    "category": "Traditional Asset Managers",
+    "ats": "manual",
+    "career_url": "https://www.acatis.de/ueber-uns/stellenausschreibungen-1",
+    "manual_reason": "Prose page on own site, currently 'Aktuell keine offenen Stellen'; no ATS, no job links. Frankfurt. Probed 2026-07-02."
+  },
+  {
+    "name": "Hauck Aufhäuser Lampe",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.hal-privatbank.com/karriere/job-finden",
+    "category": "Traditional Asset Managers",
+    "ats": "getnoticed",
+    "career_url": "https://karriere.abnamro.de/stellenangebote",
+    "verified": true,
+    "getnoticed": {
+      "base": "https://karriere.abnamro.de",
+      "prefix": "hal"
+    },
+    "notes": "Getnoticed /api/vacancy JSON (ABN AMRO DE merger). First page 10 of ~17 (stateful pagination not HTTP-reachable)."
+  },
+  {
+    "name": "LBBW Asset Management",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.lbbw-am.de/karriere",
+    "category": "Traditional Asset Managers",
+    "ats": "rss",
+    "career_url": "https://www.lbbw-am.de/karriere",
+    "verified": true,
+    "rss": {
+      "feed_url": "https://www.lbbw-am.de/karriere/rss.feed",
+      "prefix": "lbbw"
+    },
+    "notes": "TYPO3 EXT:news careers RSS feed; full bodies via server-rendered detail pages."
+  },
+  {
+    "name": "DPAM / Degroof Petercam",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.dpaminvestments.com/retail/at/en/careers-at-dpam",
+    "category": "Traditional Asset Managers",
+    "ats": "sitemap_jobs",
+    "career_url": "https://www.degroofpetercam.com/en-be/jobs-finance",
+    "verified": true,
+    "sitemap_jobs": {
+      "sitemap_url": "https://www.degroofpetercam.com/sitemap_en-be/sitemap-0.xml",
+      "path_contains": "/en-be/careers/",
+      "prefix": "dpam"
+    },
+    "notes": "Gatsby careers; job URLs from sitemap, title from slug (page-data.json is 1.3MB/job, avoided). Listing-only."
+  },
+  {
+    "name": "Anima Sgr",
+    "category": "Traditional Asset Managers",
+    "ats": "generic",
+    "career_url": "https://zinrec.intervieweb.it/animasgr/it/career",
+    "url": "https://zinrec.intervieweb.it/animasgr/it/career",
+    "selectors": {
+      "container": "div.vacancy__render",
+      "title": ".vacancy__title h3",
+      "link": ".vacancy__title a"
+    },
+    "verified": true,
+    "notes": "Intervieweb/inRecruiting hosted board (zinrec) — plain HTML vacancy cards; the annunci.php feed key was never needed. Italian-language postings (lang_req detection handles)."
+  },
+  {
+    "name": "Azimut",
+    "category": "Traditional Asset Managers",
+    "ats": "azimut",
+    "career_url": "https://www.azimut-group.com/careers",
+    "verified": true,
+    "notes": "Liferay Headless API; OAuth client-credentials (creds discovered from careers-*.js chunk each run, survives redeploy)."
+  },
+  {
+    "name": "Generali Investments / Generali AM",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.generali.com/work-with-us/join-us/Openings_Graduates_and_Students",
+    "category": "Traditional Asset Managers",
+    "ats": "generali",
+    "career_url": "https://gogenerali.com/home/jobs",
+    "verified": true,
+    "generali": {
+      "company_match": [
+        "Generali Investments",
+        "Generali Asset Management"
+      ]
+    },
+    "notes": "Group JSON feed filtered to Investments Holding + Asset Management (~35)."
+  },
+  {
+    "name": "Van Lanschot Kempen Investment Management",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://careers.vanlanschotkempen.com/en-nl/young-talent",
+    "category": "Traditional Asset Managers",
+    "ats": "vanlanschot",
+    "career_url": "https://careers.vanlanschotkempen.com/en-nl/vacancies",
+    "verified": true,
+    "notes": "Sitecore/Next.js vacancies JSON (/api/vlk/vacancies/get); bodies via server-rendered detail pages."
+  },
+  {
+    "name": "Houlihan Lokey (Campus)",
+    "category": "Global Investment Banks",
+    "ats": "workday",
+    "workday": {
+      "tenant": "hl",
+      "version": "wd1",
+      "board": "Campus"
+    },
+    "verified": true,
+    "notes": "Early-careers/internship board, separate from External (which the main HL entry scrapes). 12 live intern reqs confirmed via handler 2026-07-04."
+  },
+  {
+    "name": "Lazard (Students)",
+    "category": "Global Investment Banks",
+    "ats": "oracle_hcm",
+    "oracle_hcm": {
+      "base_url": "https://icbpjb.fa.ocs.oraclecloud.com",
+      "site": "LazardStudentCareers"
+    },
+    "verified": true,
+    "notes": "Student/campus sibling of LazardProfessionalCareers on the same Oracle tenant. 94 live reqs confirmed via handler 2026-07-04."
+  },
+  {
+    "name": "PJT Partners (Students)",
+    "category": "Global Investment Banks",
+    "ats": "workday",
+    "workday": {
+      "tenant": "pjtpartners",
+      "version": "wd1",
+      "board": "Students"
+    },
+    "verified": true,
+    "notes": "Campus sibling of the Careers board. Endpoint live but seasonally empty (0 reqs 2026-07); populates in recruiting season."
+  },
+  {
+    "name": "Moelis & Company (University)",
+    "category": "Global Investment Banks",
+    "ats": "workday",
+    "workday": {
+      "tenant": "moelis",
+      "version": "wd1",
+      "board": "University-Hires"
+    },
+    "verified": true,
+    "notes": "Campus sibling of Experienced-Hires. Endpoint live but seasonally empty (talent-pool only 2026-07)."
+  },
+  {
+    "name": "Glencore Early Careers (UK)",
+    "category": "Physical Commodity Merchants",
+    "ats": "greenhouse",
+    "slug": "glencoreuk",
+    "eu": true,
+    "verified": true,
+    "notes": "Separate UK early-careers Greenhouse board, distinct from the bespoke glencore Magnolia handler (keyword=trading scope misses it). Verified via handler 2026-07-04."
+  },
+  {
+    "name": "Millennium Management (Campus)",
+    "category": "Discretionary Macro HFs",
+    "ats": "eightfold",
+    "eightfold": {
+      "base_url": "https://campusjobs.mlp.com",
+      "domain": "mlp.com"
+    },
+    "verified": true,
+    "notes": "Separate Eightfold campus microsite, distinct from main career.mlp.com. Verified via handler 2026-07-04."
+  },
+  {
+    "name": "Bridgewater Associates (Campus)",
+    "category": "Discretionary Macro HFs",
+    "ats": "greenhouse",
+    "slug": "bridgewatercampusrecruiting",
+    "verified": true,
+    "notes": "Separate Greenhouse campus board from main bridgewater89. Verified via handler 2026-07-04."
+  },
+  {
+    "name": "LSEG (Graduate Careers)",
+    "category": "Market Infrastructure & Fintech",
+    "ats": "workday",
+    "workday": {
+      "tenant": "lseg",
+      "version": "wd3",
+      "board": "Graduate_Careers"
+    },
+    "verified": true,
+    "notes": "Separate early-careers Workday board on same lseg.wd3 tenant, distinct from main Careers. Verified via handler 2026-07-04."
+  },
+  {
+    "name": "Blackstone (Campus)",
+    "category": "Private Equity & Private Markets",
+    "ats": "workday",
+    "workday": {
+      "tenant": "blackstone",
+      "version": "wd1",
+      "board": "Blackstone_Campus_Careers"
+    },
+    "verified": true,
+    "notes": "Separate campus Workday sibling of lateral Blackstone_Careers. Verified via handler 2026-07-04."
+  },
+  {
+    "name": "General Atlantic (Campus)",
+    "category": "Private Equity & Private Markets",
+    "ats": "greenhouse",
+    "slug": "gacampus",
+    "verified": true,
+    "notes": "Separate Greenhouse campus board, distinct slug from lateral generalatlantic. Verified via handler 2026-07-04."
+  },
+  {
+    "name": "PwC (Campus)",
+    "category": "Consulting & Advisory",
+    "ats": "workday",
+    "workday": {
+      "tenant": "pwc",
+      "version": "wd3",
+      "board": "Global_Campus_Careers",
+      "search_text": "Deals"
+    },
+    "verified": true,
+    "scope_note": "Finance-island: search_text=Deals isolates transaction/M&A slice (unscoped board ~1344 all service lines).",
+    "notes": "Separate PwC campus Workday board, sibling of Global_Experienced_Careers. Verified via handler 2026-07-04."
+  },
+  {
+    "name": "BDO (Campus)",
+    "category": "Consulting & Advisory",
+    "ats": "oracle_hcm",
+    "oracle_hcm": {
+      "base_url": "https://ebqb.fa.us2.oraclecloud.com",
+      "site": "CX_1001"
+    },
+    "verified": true,
+    "notes": "Separate BDO USA campus Oracle HCM site, distinct from experienced BDOExperiencedCareers. Verified via handler 2026-07-04."
+  },
+  {
+    "name": "Rothesay (Graduates)",
+    "category": "Pensions, Insurance & Sovereign Investors",
+    "ats": "greenhouse",
+    "slug": "rothesaygraduates",
+    "verified": true,
+    "notes": "Separate Greenhouse grad/intern board, distinct from lateral rothesaylife. Seasonally empty in July; auto-fills next intake. Verified reachable via handler 2026-07-04."
+  },
+  {
+    "name": "Wellington Management (Campus)",
+    "category": "Traditional Asset Managers",
+    "ats": "workday",
+    "workday": {
+      "tenant": "wellington",
+      "version": "wd5",
+      "board": "Campus"
+    },
+    "verified": true,
+    "notes": "Separate campus Workday sibling of lateral External. Verified via handler 2026-07-04."
+  },
+  {
+    "name": "BMO Capital Markets (Campus)",
+    "category": "European & Regional Banks",
+    "ats": "workday",
+    "workday": {
+      "tenant": "bmo",
+      "version": "wd3",
+      "board": "Campus"
+    },
+    "verified": true,
+    "notes": "Co-op/intern/new-grad Workday board, distinct from lateral External. Verified via handler 2026-07-04."
+  },
+  {
+    "name": "CIBC Capital Markets (Campus)",
+    "category": "European & Regional Banks",
+    "ats": "workday",
+    "workday": {
+      "tenant": "cibc",
+      "version": "wd3",
+      "board": "Campus"
+    },
+    "verified": true,
+    "notes": "Fall co-op Workday board, distinct from lateral. Verified via handler 2026-07-04."
+  },
+  {
+    "name": "RBC Capital Markets (Campus)",
+    "category": "European & Regional Banks",
+    "ats": "workday",
+    "workday": {
+      "tenant": "rbc",
+      "version": "wd3",
+      "board": "RBCEARLYTALENT1"
+    },
+    "verified": true,
+    "notes": "Dedicated early-talent Workday board, distinct from lateral RBCGLOBAL1. Verified via handler 2026-07-04."
+  },
+  {
+    "name": "Lloyds Banking Group (Campus)",
+    "category": "European & Regional Banks",
+    "ats": "workday",
+    "workday": {
+      "tenant": "lbg",
+      "version": "wd3",
+      "board": "Graduate_careers"
+    },
+    "verified": true,
+    "notes": "Grad/intern Workday sibling board; reachable but seasonally empty (0 in July), opens autumn. Verified reachable via handler 2026-07-04."
+  },
+  {
+    "name": "EY (Early Careers)",
+    "category": "Consulting & Advisory",
+    "ats": "recsolu",
+    "recsolu": {
+      "base_url": "https://eyglobal.yello.co",
+      "board_id": "c1riT--B2O-KySgYWsZO1Q",
+      "query": "transaction"
+    },
+    "verified": true,
+    "scope_note": "Finance-island: EY's global early-careers board is ~1000+ all-service-line (audit/tax/consulting). query='transaction' positively scopes to the Strategy & Transactions / deals slice (~147). Duplicate with query='corporate finance'/'valuation' to widen.",
+    "notes": "Separate EY early-careers board on Yello/recsolu, distinct ATS from the experienced SuccessFactors RMK. Verified via handler 2026-07-04."
+  },
+  {
+    "name": "Bank of America (Campus)",
+    "category": "Global Investment Banks",
+    "ats": "talnet",
+    "board_url": "https://bankcampuscareers.tal.net/vx/lang-en-GB/mobile-0/appcentre-ext/brand-1/candidate/jobboard/vacancy/1/adv/",
+    "talnet_fetch_detail": false,
+    "verified": true,
+    "notes": "Oleeo/tal.net campus board (server-rendered tiles). 67 reqs verified via handler 2026-07-04. BofA's lateral board is a separate Workday tenant (uncovered)."
+  },
+  {
+    "name": "Nomura (Campus)",
+    "category": "Global Investment Banks",
+    "ats": "talnet",
+    "board_url": "https://nomuracampus.tal.net/vx/lang-en-GB/mobile-0/appcentre-ext/brand-4/candidate/jobboard/vacancy/1/adv/",
+    "talnet_fetch_detail": false,
+    "verified": true,
+    "notes": "Nomura Global Campus Oleeo/tal.net board (server-rendered). 6 reqs verified 2026-07-04. Separate from the lateral SuccessFactors board."
+  },
+  {
+    "name": "Evercore (Campus)",
+    "category": "Global Investment Banks",
+    "ats": "talnet",
+    "board_url": "https://evercore.tal.net/vx/lang-en-GB/mobile-0/channel-1/appcentre-ext/brand-5/candidate/jobboard/vacancy/2/adv/",
+    "talnet_fetch_detail": false,
+    "verified": true,
+    "notes": "Evercore students/campus Oleeo board (vacancy/2), sibling of the lateral vacancy/3 already scraped. 4 reqs verified 2026-07-04."
+  },
+  {
+    "name": "Perella Weinberg Partners (Students)",
+    "category": "Global Investment Banks",
+    "ats": "workday",
+    "board_url": "https://pwpcareers.tal.net/vx/lang-en-GB/mobile-0/appcentre-1/brand-4/candidate/jobboard/vacancy/2/adv/",
+    "talnet_fetch_detail": false,
+    "verified": true,
+    "notes": "Experienced hires on Workday external site (wd1.myworkdaysite.com). Grad is separate on Oleeo (ALTCHA-gated), not scraped.",
+    "workday": {
+      "tenant": "pwp",
+      "version": "wd1",
+      "board": "PWP_Experienced_Opportunities",
+      "host": "wd1.myworkdaysite.com"
+    }
+  },
+  {
+    "name": "Barings (Early Talent)",
+    "category": "Traditional Asset Managers",
+    "ats": "workday",
+    "workday": {
+      "tenant": "barings",
+      "version": "wd1",
+      "board": "Early_Talent"
+    },
+    "verified": true,
+    "notes": "Real early-careers Workday sibling board (separate from lateral Barings). Empty in July 2026; auto-populates in the autumn campus cycle. Verified reachable via handler 2026-07-05."
+  },
+  {
+    "name": "Morgan Stanley (Campus)",
+    "category": "Global Investment Banks",
+    "ats": "talnet",
+    "board_url": "https://morganstanley.tal.net/vx/lang-en-GB/mobile-0/brand-2/candidate/jobboard/vacancy/1/adv/",
+    "talnet_fetch_detail": false,
+    "verified": true,
+    "notes": "MS Global Programs Oleeo/tal.net campus board (brand-2). 49 reqs (Summer Analyst, IBD off-cycle, GCM internships) verified via handler 2026-07-05. Distinct from lateral Workday ms/wd5 External."
+  },
+  {
+    "name": "Rothschild & Co (Students)",
+    "category": "Global Investment Banks",
+    "ats": "talnet",
+    "board_url": "https://rothschildandco.tal.net/vx/lang-en-GB/mobile-0/appcentre-ext/brand-4/candidate/jobboard/vacancy/2/adv/",
+    "talnet_fetch_detail": false,
+    "verified": true,
+    "notes": "Rothschild 'Student Opportunities' Oleeo/tal.net board (brand-4, vacancy/2). 25 grad/internship reqs (M&A/FIG off-cycle, PE & private-debt internships, IB graduate) verified via handler 2026-07-05. Distinct from lateral Workday; supersedes that target's stale 'not scrapable' note."
+  },
+  {
+    "name": "AllianceBernstein (Campus)",
+    "category": "Traditional Asset Managers",
+    "ats": "workday",
+    "workday": {
+      "tenant": "abglobal",
+      "version": "wd1",
+      "board": "abcampuscareers"
+    },
+    "verified": true,
+    "notes": "Distinct campus Workday board (abglobal/wd1/abcampuscareers), separate from lateral alliancebernsteincareers. 1 req in July (seasonal; fills Sep-Apr). Verified via handler 2026-07-05."
+  },
+  {
+    "name": "Invesco (Campus)",
+    "category": "Traditional Asset Managers",
+    "ats": "workday",
+    "workday": {
+      "tenant": "invesco",
+      "version": "wd1",
+      "board": "IVZearlycareers"
+    },
+    "verified": true,
+    "notes": "Distinct early-careers Workday board (invesco/wd1/IVZearlycareers), separate from lateral IVZ. 2 reqs in July (seasonal). Verified via handler 2026-07-05."
+  },
+  {
+    "name": "Baillie Gifford (Campus)",
+    "category": "Traditional Asset Managers",
+    "ats": "workday",
+    "workday": {
+      "tenant": "bailliegifford",
+      "version": "wd3",
+      "board": "BaillieGiffordEarlyCareers"
+    },
+    "verified": true,
+    "notes": "Distinct early-careers Workday board (bailliegifford/wd3/BaillieGiffordEarlyCareers), separate from lateral BaillieGiffordCareers. Endpoint valid, 0 reqs now (2026 intake closed Nov 2025, reopens autumn). Verified via handler 2026-07-05."
+  },
+  {
+    "name": "KKR (Campus)",
+    "category": "Private Equity & Private Markets",
+    "ats": "greenhouse",
+    "slug": "staged",
+    "verified": true,
+    "notes": "KKR student-careers Greenhouse board (slug 'staged', confirmed KKR via job URLs -> kkr.com/careers/student-careers). 5 finance-native reqs (2027 PE Internship Frankfurt/London, Off-Cycle Intern, Global Client Solutions, Campus Talent Community) verified via handler 2026-07-05. Lateral board is the separate Greenhouse slug 'stage' (wired 2026-07-06)."
+  },
+  {
+    "name": "UBS (Graduate Careers)",
+    "category": "Global Investment Banks",
+    "ats": "brassring_hosted",
+    "brassring_hosted": {
+      "search_url": "https://jobs.ubs.com/TGnewUI/Search/Home/HomeWithPreLoad?partnerid=25008&siteid=5131&PageType=searchResults&SearchType=linkquery&LinkID=10846",
+      "partner_id": 25008,
+      "site_id": 5131,
+      "link_id": 10846,
+      "location_field": "formtext23"
+    },
+    "verified": true,
+    "notes": "UBS 'Job Board for Graduates' BrassRing site (siteid 5131, LinkID 10846), distinct from the lateral siteid 5012. 5 grad/summer reqs (Graduate Talent Program, Summer Jobs) verified via handler 2026-07-05; APAC-heavy now, EMEA grad apps open Sept."
+  },
+  {
+    "name": "Apollo Global Management (Campus)",
+    "category": "Private Equity & Private Markets",
+    "ats": "workday",
+    "workday": {
+      "tenant": "athene",
+      "version": "wd5",
+      "board": "apollononpubliccareersite",
+      "search_text": "Summer Analyst"
+    },
+    "verified": true,
+    "notes": "Apollo campus reqs live only on the non-public Workday board (athene/apollononpubliccareersite), absent from the public Apollo_Careers board. Scoped with search_text='Summer Analyst' to isolate the 6 Summer/Sophomore Analyst campus reqs and exclude ~110 hidden lateral roles. Verified via handler 2026-07-05."
+  },
+  {
+    "name": "Lincoln International",
+    "category": "Global Investment Banks",
+    "ats": "greenhouse",
+    "slug": "lincolninternational",
+    "career_url": "https://www.lincolninternational.com/careers/",
+    "notes": "Mid-market M&A powerhouse; Frankfurt Capital Advisory internships + London on the board. Greenhouse boards-api (~40).",
+    "verified": true
+  },
+  {
+    "name": "William Blair",
+    "category": "Global Investment Banks",
+    "ats": "greenhouse",
+    "slug": "williamblair",
+    "career_url": "https://www.williamblair.com/careers",
+    "notes": "Greenhouse (~38); Frankfurt IB internship + London roles present at wiring.",
+    "verified": true
+  },
+  {
+    "name": "LionTree",
+    "category": "Global Investment Banks",
+    "ats": "greenhouse",
+    "slug": "liontree",
+    "career_url": "https://liontree.com/",
+    "notes": "Elite TMT boutique; tiny board (1 at wiring, NY). Kept for the occasional London/EU opening.",
+    "verified": true
+  },
+  {
+    "name": "DC Advisory",
+    "category": "Global Investment Banks",
+    "ats": "workable",
+    "account": "dcadvisory",
+    "career_url": "https://www.dcadvisory.com/careers/",
+    "notes": "Daiwa's mid-market M&A arm (Frankfurt/London/Madrid). Workable account valid; 0 live at wiring — expect intermittent postings.",
+    "verified": true
+  },
+  {
+    "name": "Stifel",
+    "category": "Global Investment Banks",
+    "ats": "icims",
+    "icims": {
+      "base_url": "https://careers-stifel.icims.com"
+    },
+    "career_url": "https://www.stifel.com/careers",
+    "notes": "Single global iCIMS tenant (Europe incl. ex-MainFirst Frankfurt on same board). Large + US-retail-heavy; rely on filter buckets + tags.",
+    "verified": true
+  },
+  {
+    "name": "Robert W. Baird",
+    "category": "Global Investment Banks",
+    "ats": "workday",
+    "workday": {
+      "tenant": "baird",
+      "version": "wd1",
+      "board": "Careers",
+      "host": "wd1.myworkdaysite.com"
+    },
+    "career_url": "https://bairdcareers.com/",
+    "notes": "Workday on myworkdaysite.com host (like PWP). ~86 jobs, US wealth-heavy; Frankfurt/Europe IB when open.",
+    "verified": true
+  },
+  {
+    "name": "Piper Sandler",
+    "category": "Global Investment Banks",
+    "ats": "workday",
+    "workday": {
+      "tenant": "pipersandler",
+      "version": "wd501",
+      "board": "Piper_Sandler_Careers"
+    },
+    "career_url": "https://www.pipersandler.com/careers",
+    "notes": "~39 jobs, mostly IBD/finance incl. London infrastructure IB. Site id has NO trailing underscores (UI URL shows __ which 404s the API).",
+    "verified": true
+  },
+  {
+    "name": "Raymond James",
+    "category": "Global Investment Banks",
+    "ats": "workday",
+    "workday": {
+      "tenant": "raymondjames",
+      "version": "wd1",
+      "board": "RaymondJamesCareers"
+    },
+    "career_url": "https://www.raymondjames.com/careers",
+    "notes": "~337 jobs, overwhelmingly US wealth-management branch roles — leans hard on RETAIL_DROPS + tags. European roles appear on the same board.",
+    "verified": true
+  },
+  {
+    "name": "Investec",
+    "category": "European & Regional Banks",
+    "ats": "rss",
+    "rss": {
+      "feed_url": "https://careers.investec.co.uk/jobs/rss/",
+      "prefix": "investec"
+    },
+    "career_url": "https://careers.investec.co.uk/",
+    "notes": "eArcu ATS; clean RSS feed (~52 items, London/Dublin credit/risk/project-finance). Do NOT add the .co.za feed (SA retail/ops).",
+    "verified": true
+  },
+  {
+    "name": "Clearwater International",
+    "category": "Global Investment Banks",
+    "ats": "personio",
+    "personio": {
+      "base_url": "https://clearwater.jobs.personio.de",
+      "tenant": "clearwater"
+    },
+    "career_url": "https://www.clearwatercf.com/careers/",
+    "notes": "Pan-European mid-market M&A (Frankfurt/Munich + 10 countries). Personio XML incl. full descriptions.",
+    "verified": true
+  },
+  {
+    "name": "DNB Carnegie",
+    "category": "European & Regional Banks",
+    "ats": "successfactors",
+    "base_url": "https://jobs.carnegie.se",
+    "career_url": "https://jobs.carnegie.se/search/",
+    "notes": "Nordic IB leader. SuccessFactors RMK site; board EMPTY at wiring (0 live) — endpoint valid, re-check selector on first non-empty scan.",
+    "verified": true
+  },
+  {
+    "name": "ABG Sundal Collier",
+    "category": "European & Regional Banks",
+    "ats": "teamtailor",
+    "base_url": "https://abgsc.teamtailor.com",
+    "career_url": "https://abgsc.teamtailor.com/jobs",
+    "notes": "Nordic IB/ER boutique on Teamtailor (2 at wiring incl. IB & Research internships 2027 Oslo).",
+    "verified": true
+  },
+  {
+    "name": "Alantra",
+    "category": "Global Investment Banks",
+    "ats": "workday",
+    "workday": {
+      "tenant": "alantra",
+      "version": "wd3",
+      "board": "Alantra"
+    },
+    "career_url": "https://www.alantra.com/careers/",
+    "notes": "Madrid-HQ mid-market IB+AM (~50 jobs; London/Madrid/NY/Athens M&A, FIG). Some PA/IT noise — filter buckets handle.",
+    "verified": true
+  },
+  {
+    "name": "GP Bullhound",
+    "category": "Global Investment Banks",
+    "ats": "recruitee",
+    "slug": "gpbullhound",
+    "career_url": "https://www.gpbullhound.com/careers",
+    "notes": "Tech IB; Recruitee api/offers (~7: IB Analyst/Associate/Internship, Stockholm/London/Berlin/SF), full descriptions inline.",
+    "verified": true
+  },
+  {
+    "name": "Guggenheim Securities",
+    "category": "Global Investment Banks",
+    "ats": "workday",
+    "workday": {
+      "tenant": "guggenheiminvestment",
+      "version": "wd5",
+      "board": "External"
+    },
+    "career_url": "https://www.guggenheimpartners.com/firm/careers",
+    "notes": "Front-office tenant (guggenheiminvestment.wd5, ~23). Separate thin corp tenant guggenheim.wd1/Guggenheim_Partners not wired.",
+    "verified": true
+  },
+  {
+    "name": "MCF Corporate Finance",
+    "category": "Global Investment Banks",
+    "ats": "personio",
+    "personio": {
+      "base_url": "https://mcfcorpfin.jobs.personio.de",
+      "tenant": "mcf"
+    },
+    "career_url": "https://mcfcorpfin.com/careers/",
+    "notes": "Hamburg/Frankfurt mid-market M&A + debt advisory (7 at wiring incl. Associate Debt Advisory Frankfurt).",
+    "verified": true
+  },
+  {
+    "name": "Carlsquare",
+    "category": "Global Investment Banks",
+    "ats": "personio",
+    "personio": {
+      "base_url": "https://carlsquare-gmbh.jobs.personio.de",
+      "tenant": "carlsquare"
+    },
+    "career_url": "https://www.carlsquare.com/career/open-positions/",
+    "notes": "DACH/Nordic tech M&A boutique (11 at wiring: M&A Analyst, IB Associate Warsaw).",
+    "verified": true
+  },
+  {
+    "name": "Concentro Management",
+    "category": "Consulting & Advisory",
+    "ats": "personio",
+    "personio": {
+      "base_url": "https://concentro-management-ag-1.jobs.personio.de",
+      "tenant": "concentro"
+    },
+    "career_url": "https://www.concentro.de/karriere",
+    "notes": "German mid-market M&A/restructuring advisory (8 at wiring).",
+    "verified": true
+  },
+  {
+    "name": "Stephens",
+    "category": "Global Investment Banks",
+    "ats": "ukg",
+    "ukg": {
+      "host": "recruiting2.ultipro.com",
+      "tenant": "STE1004",
+      "board_guid": "fbeef081-b55b-0ae3-a2ac-7b4fb3db6826"
+    },
+    "career_url": "https://www.stephens.com/careers",
+    "notes": "US mid-market IB with London/Frankfurt (Stephens Europe). UKG on legacy recruiting2.ultipro.com host — handler is host-agnostic (23 at wiring incl. M&A Analyst London). noise_terms shed the firm's insurance-brokerage arm + corporate services (pilots, security, facilities) the global buckets don't cover.",
+    "noise_terms": ["captain", "security officer", "customer services rep", "insurance operations", "loss control", "benefits assistant", "l&h benefits", "p&c commercial", "pcg insurance", "marketing executive"],
+    "verified": true
+  },
+  {
+    "name": "Centerview Partners",
+    "category": "Global Investment Banks",
+    "ats": "manual",
+    "career_url": "https://www.centerviewpartners.com/careers.aspx",
+    "manual_reason": "No public ATS — bespoke ASP.NET careers.aspx (main careers path WAF-403s curl); applications via Handshake/direct resume."
+  },
+  {
+    "name": "Canaccord Genuity (UK/EU)",
+    "category": "Global Investment Banks",
+    "ats": "generic",
+    "career_url": "https://www.canaccordgenuity.com/global-careers/uk--europe-opportunities/",
+    "url": "https://www.canaccordgenuity.com/global-careers/uk--europe-opportunities/",
+    "selectors": {
+      "container": "div.cg-accordion__section",
+      "title": "span.cg-accordion__title",
+      "link": "a[href*='peoplehr.net']"
+    },
+    "verified": true,
+    "noise_terms": [
+      "speculative applications"
+    ],
+    "notes": "UK/EU roles server-rendered as accordions on the marketing page; apply links -> PeopleHR (canaccordgenuityltd.peoplehr.net; its own board pages are JS/empty). jobs.canaccordgenuity.com is a dead host."
+  },
+  {
+    "name": "Arcano Partners",
+    "category": "Global Investment Banks",
+    "ats": "teamtailor",
+    "career_url": "https://talento.arcanopartners.com/en-GB/jobs",
+    "base_url": "https://talento.arcanopartners.com",
+    "verified": true,
+    "grad_scheme": true,
+    "grad_scheme_url": "https://talento.arcanopartners.com/en-GB/jobs",
+    "notes": "Teamtailor (new JS layout — HTML zero-parse recovers via jobs.rss fallback). 3 at wiring incl. summer internship 2027. Madrid."
+  },
+  {
+    "name": "Equita",
+    "category": "European & Regional Banks",
+    "ats": "manual",
+    "career_url": "https://www.equita.eu/en/careers.html",
+    "manual_reason": "Static careers page; roles are linked PDF postings + mailto recruitment@equita.eu — no machine-readable feed. Self-signed cert in chain."
+  },
+  {
+    "name": "AZ Capital",
+    "category": "Global Investment Banks",
+    "ats": "manual",
+    "career_url": "https://www.azcapital.com/talento",
+    "manual_reason": "Static 'talento' marketing page, no ATS feed or listed vacancies; internships via spontaneous application. Madrid.",
+    "grad_scheme": true,
+    "grad_scheme_url": "https://www.azcapital.com/es/talento/practicas"
+  },
+  {
+    "name": "Arma Partners",
+    "category": "Global Investment Banks",
+    "ats": "generic",
+    "career_url": "https://www.armapartners.com/careers/open-vacancies/",
+    "url": "https://www.armapartners.com/careers/open-vacancies/",
+    "selectors": {
+      "container": "div.job--list__item",
+      "title": ".job--list__item_title",
+      "link": ".job--list__item_link a, a.job--list__item_link",
+      "empty_marker": "we do not have any open vacancies"
+    },
+    "verified": true,
+    "notes": "Server-rendered WP page (earlier JS-rendered diagnosis was wrong). Vacancy markup job--list__item/_title/_link taken from the 2026-02 Wayback snapshot (M&A Analyst/Associate Munich + London then). empty_marker = the site's explicit no-vacancies prose."
+  }
+]

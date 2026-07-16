@@ -1,0 +1,5 @@
+<nav class="area-tabs" id="tabs"{% if oob %} hx-swap-oob="true"{% endif %} aria-label="Area">
+  {% for t in tabs %}
+    <a class="area-tab {% if t.active %}on{% endif %}" href="{{ t.url }}" data-area="{{ t.area }}">{{ t.label }} <span class="n">{{ t.count }}</span></a>
+  {% endfor %}
+</nav>

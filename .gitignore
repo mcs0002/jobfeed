@@ -1,0 +1,31 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+*.db
+*.db-shm
+*.db-wal
+*.log
+.DS_Store
+verify_state.json
+secrets/*
+!secrets/.gitkeep
+!secrets/*.example.json
+.deliver.lock/
+
+# Claude Code local worktrees/session state
+.claude/
+link_state.json
+.apply_worker.lock
+
+# Personal notes with financial/social details — local-only, not for the public repo
+notes/OPEN_SOURCE_DECISION.md
+
+# One-off scratch/repair scripts left in the working tree (mostly on the M1).
+# Ignoring them matters beyond tidiness: an UNTRACKED file colliding with a
+# future tracked filename makes `git pull --ff-only` abort and kills every
+# nightly run; git overwrites IGNORED files without complaint.
+/_*.py
+/retag_*
+/repair_*
+/validate_full.py

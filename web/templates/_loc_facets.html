@@ -1,0 +1,10 @@
+<div class="fp-grid cols-3" id="loc-facets"{% if oob %} hx-swap-oob="true"{% endif %}>
+  {% for name, label in [('loc_region','Region'),('loc_country','Country'),('loc_city','City')] %}
+  <select name="{{ name }}" aria-label="{{ label }}">
+    <option value="">{{ label }}: any</option>
+    {% for v in facets[name] %}
+    <option value="{{ v }}" {% if params.get(name)==v %}selected{% endif %}>{{ v }}</option>
+    {% endfor %}
+  </select>
+  {% endfor %}
+</div>

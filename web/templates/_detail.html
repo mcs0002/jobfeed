@@ -1,0 +1,60 @@
+<div class="detail-inner" data-id="{{ job.id }}">
+  <div class="dp-head">
+    <div style="flex:1">
+      <h2>{{ job.title }}</h2>
+      <div class="dp-sub">{{ job.company }}{% if job.category %} · {{ job.category }}{% endif %}</div>
+    </div>
+    <button type="button" class="dp-star{% if job.favorite %} on{% endif %}" data-star-id="{{ job.id }}"
+      onclick="window.__toggleStarPane('{{ job.id }}')" title="Favorite" aria-label="Toggle favorite">{% if job.favorite %}★{% else %}☆{% endif %}</button>
+  </div>
+
+  {% if job.delisted_at %}
+  <div class="dp-delisted">This posting was delisted {{ days_ago(job.delisted_at) }} ({{ job.delisted_at[:10] }}) — it's no longer on the company's board, so the live link is likely dead. Use the captured description below.</div>
+  {% endif %}
+
+  <div class="dp-actions">
+    {% if job.url|safe_url %}
+    <a class="btn-open{% if job.delisted_at %} dead{% endif %}" href="{{ job.url|safe_url }}" target="_blank" rel="noopener"{% if job.delisted_at %} title="This posting was delisted — the link may 404"{% endif %}>Open posting{% if job.delisted_at %} (may be dead){% endif %} ↗</a>
+    {% endif %}
+    <span class="status-select">
+      <span class="dot" data-status-id="{{ job.id }}" style="background: var(--st-{{ job.status }})"></span>
+      <select data-status-id="{{ job.id }}" aria-label="Application stage"
+        onchange="window.__setStatus('{{ job.id }}', this.value)">
+        {% for s in ["new","queued","applied","oa","interview","offer","rejected","ignored"] %}
+          <option value="{{ s }}" {% if job.status == s %}selected{% endif %}>{{ s }}</option>
+        {% endfor %}
+      </select>
+    </span>
+    <button type="button" class="btn-ignore" onclick="window.__setStatus('{{ job.id }}', 'ignored')">⊘ Ignore</button>
+  </div>
+
+  <div class="dp-meta">
+    <div class="cell"><div class="k">Area</div><div class="v">{% if job.area %}{{ area_label(job.area) }}{% set sub = area_subtag(job.area) %}{% if job.desk %} · {{ job.desk }}{% elif sub %} · {{ sub }}{% endif %}{% else %}—{% endif %}{% if job.min_yoe and job.min_yoe >= 3 %} · {{ job.min_yoe }}y+{% endif %}</div></div>
+    <div class="cell"><div class="k">Location</div><div class="v">{{ job.loc_city or job.location or '—' }}{% if job.work_mode %} · {{ job.work_mode }}{% endif %}</div></div>
+    <div class="cell"><div class="k">Type</div><div class="v">{{ job.job_type or 'job' }}</div></div>
+    <div class="cell"><div class="k">First seen</div><div class="v">{{ days_ago(job.first_seen) }}</div></div>
+    {# Description-derived facets: always render, '—' when unknown (NULL/'' =
+       pre-description or none stated), so the grid is a stable 8 cells. #}
+    <div class="cell"><div class="k">Start</div><div class="v">{% if job.start_date == 'asap' %}ASAP{% else %}{{ job.start_date or '—' }}{% endif %}</div></div>
+    <div class="cell"><div class="k">Education</div><div class="v">{% if job.education %}{{ job.education }}{% if job.education != 'phd' %}+{% endif %}{% else %}—{% endif %}</div></div>
+    {% set lang_names = {'de':'German','fr':'French','it':'Italian','es':'Spanish','nl':'Dutch','da':'Danish','sv':'Swedish','no':'Norwegian','fi':'Finnish','pt':'Portuguese','pl':'Polish','zh':'Chinese','ja':'Japanese','ko':'Korean','ar':'Arabic','ru':'Russian','tr':'Turkish','el':'Greek','cs':'Czech','hu':'Hungarian','ro':'Romanian'} %}
+    <div class="cell"><div class="k">Languages</div><div class="v">English{% if job.lang_req %} + {% for c in job.lang_req.split(',') %}{% if c %}{{ lang_names.get(c, c) }}{% if not loop.last %}, {% endif %}{% endif %}{% endfor %}{% endif %}</div></div>
+    <div class="cell"><div class="k">Experience</div><div class="v">{% if job.min_yoe %}{{ job.min_yoe }}+ years{% else %}entry level{% endif %}</div></div>
+  </div>
+
+  <div class="dp-notes">
+    <div class="dp-section-label">Notes</div>
+    <form hx-post="/job/{{ job.id }}/notes" hx-target="#dp-notes-status-{{ job.id }}" hx-swap="innerHTML">
+      <textarea name="notes" rows="2" placeholder="Application notes — contacts, deadlines, follow-ups…">{{ job.notes or '' }}</textarea>
+      <div class="dp-notes-actions"><button type="submit">Save notes</button> <span id="dp-notes-status-{{ job.id }}" class="dp-notes-status"></span></div>
+    </form>
+  </div>
+
+  <div class="dp-desc">
+    <div class="dp-section-label">Description</div>
+    {% if job.description_html %}{{ job.description_html }}{% else %}<p>No description captured.</p>{% endif %}
+  </div>
+
+  <div class="dp-other">See all roles at <a href="/?company={{ job.company|urlencode }}&amp;area=">{{ job.company }} →</a></div>
+  <p class="dp-hint">j/k navigate · f favorite · e ignore · a applied</p>
+</div>

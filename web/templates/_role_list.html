@@ -1,0 +1,22 @@
+{% for j in jobs %}
+{% set isnew = (j.first_seen or '')[:19] > (last_seen|default(''))[:19] %}
+<button type="button" class="role-card{% if isnew %} is-new{% endif %}{% if sel_job and sel_job.id == j.id %} sel{% endif %}"
+  data-id="{{ j.id }}" data-status="{{ j.status }}" data-detail="/job/{{ j.id }}?pane=1"
+  hx-get="/job/{{ j.id }}?pane=1" hx-target="#detail-pane" hx-swap="innerHTML">
+  <div class="rc-top">
+    <div class="rc-title">{{ j.title }}{% if isnew %}<span class="newdot"></span>{% endif %}</div>
+    <span class="star{% if j.favorite %} on{% endif %}" data-star-id="{{ j.id }}" role="button" tabindex="-1" aria-label="Toggle favorite">{% if j.favorite %}★{% else %}☆{% endif %}</span>
+  </div>
+  <div class="rc-meta">{{ j.company }}{% if j.loc_city or j.location %} · {{ j.loc_city or j.location }}{% endif %} · {{ days_ago(j.first_seen) }}</div>
+  <div class="rc-tags">
+    {% if j.area %}<span class="area area-{{ area_group(j.area) }}">{{ area_label(j.area) }}</span>{% set sub = area_subtag(j.area) %}{% if sub %}<span class="tag subarea">{{ sub }}</span>{% endif %}{% endif %}
+    {% if j.desk %}<span class="tag">{{ j.desk }}</span>{% endif %}
+    {% if j.job_type == 'internship' %}<span class="tag intern">intern</span>{% elif j.job_type == 'graduate-programme' %}<span class="tag grad">grad</span>{% endif %}
+    {% if j.min_yoe and j.min_yoe >= 3 %}<span class="tag senior">{{ j.min_yoe }}y+</span>{% endif %}
+    {% if j.delisted_at %}<span class="tag delisted">delisted</span>{% endif %}
+    <span class="rc-status st-{{ j.status }}">{{ j.status }}</span>
+  </div>
+</button>
+{% else %}
+<div class="list-empty">No roles match these filters.</div>
+{% endfor %}
