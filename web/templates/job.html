@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}{{ job.title }} — {{ job.company }}{% endblock %}
+{% block main_class %}page{% endblock %}
+{% block content %}
+<a class="back" href="javascript:history.back()">← Back</a>
+<article class="detail">
+  {% include "_star.html" %}
+  <h1>{{ job.title }}</h1>
+  <p class="sub"><strong>{{ job.company }}</strong></p>
+  {% if job.delisted_at %}
+  <div class="delisted-banner">This posting was delisted {{ days_ago(job.delisted_at) }} ({{ job.delisted_at[:10] }}) — it's no longer on the company's board, so the live link is likely dead. Use the captured description below.</div>
+  {% endif %}
+  <dl class="meta">
+    <dt>Firm type</dt><dd>{{ job.category or '—' }}</dd>
+    <dt>Area</dt><dd>{% if job.area %}{{ area_label(job.area) }}{% set sub = area_subtag(job.area) %}{% if sub %} · {{ sub }}{% endif %}{% if job.desk %} · {{ job.desk }}{% endif %}{% else %}—{% endif %}</dd>
+    <dt>Seniority</dt><dd>{{ job.seniority or '—' }}{% if job.min_yoe and job.min_yoe >= 3 %} · <strong>{{ job.min_yoe }}+ yrs required</strong>{% endif %}</dd>
+    <dt>Type</dt><dd>{{ job.job_type }}</dd>
+    <dt>Location</dt><dd>{{ job.loc_city or job.location or '—' }}{% if job.loc_country %}, {{ job.loc_country }}{% endif %}{% if job.loc_region %} ({{ job.loc_region }}){% endif %}</dd>
+    <dt>Work mode</dt><dd>{{ job.work_mode or '—' }}</dd>
+    <dt>Posted</dt><dd>{{ job.posted or '—' }}</dd>
+    <dt>First seen</dt><dd>{{ days_ago(job.first_seen) }} ({{ (job.first_seen or '')[:10] }})</dd>
+    <dt>Status</dt><dd><span class="badge badge-{{ job.status }}">{{ job.status }}</span>{% if job.delisted_at %} <span class="tag delisted">delisted {{ job.delisted_at[:10] }}</span>{% endif %}</dd>
+    {% if job.applied_at %}<dt>Applied</dt><dd>{{ job.applied_at[:10] }}</dd>{% endif %}
+  </dl>
+
+  <div class="actions-bar">
+    {% include "_status_cell.html" %}
+    {% if job.url|safe_url %}
+    <a class="act act-primary{% if job.delisted_at %} act-dead{% endif %}" href="{{ job.url|safe_url }}" target="_blank" rel="noopener"{% if job.delisted_at %} title="This posting was delisted — the link may 404"{% endif %}>Open posting{% if job.delisted_at %} (may be dead){% endif %} ↗</a>
+    {% endif %}
+  </div>
+
+  {% if request.session.get('role') != 'guest' %}
+  <h2>Notes</h2>
+  <form class="notes-form" hx-post="/job/{{ job.id }}/notes" hx-target="#notes-status" hx-swap="innerHTML">
+    <textarea name="notes" rows="2" placeholder="Application notes — contacts, deadlines, follow-ups…">{{ job.notes or '' }}</textarea>
+    <div class="notes-actions"><button type="submit">Save notes</button> <span id="notes-status" class="notes-status"></span></div>
+  </form>
+  {% endif %}
+
+  <h2>Description</h2>
+  <div class="description">{% if job.description_html %}{{ job.description_html }}{% else %}<p>No description captured.</p>{% endif %}</div>
+</article>
+{% endblock %}

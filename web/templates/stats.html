@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+{% block title %}Stats — Jobfeed{% endblock %}
+{% block main_class %}page{% endblock %}
+{% block content %}
+
+{# Two audiences on one page were mixing his own application progress with
+   the scraper's health. They are split into panels: "Mine" is the only one
+   he acts on, so it opens first. #}
+<div class="stats-tabs" role="tablist">
+  <button type="button" class="stats-tab on" data-panel="mine" role="tab">Mine</button>
+  <button type="button" class="stats-tab" data-panel="scanner" role="tab">Scanner</button>
+</div>
+
+<section class="stats-panel" id="panel-mine">
+<div class="summary-cards wide">
+  <div class="scard"><div class="k">In pipeline</div><div class="v">{{ in_pipeline }}</div>
+    <div class="sub">queued · applied · OA · interview</div>
+  </div>
+  <div class="scard"><div class="k">Closing ≤7d</div>
+    <div class="v{% if closing_7 %} closing{% endif %}">{{ closing_7 }}</div>
+    <div class="sub">{% if closing_7 %}<a href="/?closing=7">review them</a>{% else %}nothing urgent{% endif %}</div>
+  </div>
+  <div class="scard"><div class="k">Favourites</div><div class="v">{{ fav_count }}</div>
+    <div class="sub"><a href="/?fav=1">open them</a></div>
+  </div>
+</div>
+
+{# S13 — pipeline board. Desktop only: mobile Stats keeps the row lists. #}
+<div class="pipeline">
+  <div class="pl-head">
+    <span class="pl-title">Pipeline</span>
+    <span class="pl-hint">click a role to open it in Browse</span>
+  </div>
+  <div class="pl-cols">
+    {% for st in pipeline_stages %}
+    <div class="pl-col">
+      <div class="pl-colhead st-{{ st }}">
+        <span class="pl-name">{{ st }}</span>
+        <span class="pl-count">{{ pipeline[st]|length }}</span>
+      </div>
+      {% if pipeline[st] %}
+        {% for j in pipeline[st] %}
+        {# Status filters are cleared deliberately so the role is definitely
+           visible on arrival, whatever Browse was last filtered to. #}
+        <a class="pl-card" href="/?company={{ j.company|urlencode }}&amp;area=&amp;sel={{ j.id|urlencode }}">
+          <span class="pl-role">{{ j.title }}</span>
+          <span class="pl-co">{{ j.company }}</span>
+          {% set dl = deadline_days(j.deadline) %}
+          {% if dl is not none and dl <= 30 %}<span class="pl-dl">{{ deadline_text(j.deadline) }}</span>{% endif %}
+        </a>
+        {% endfor %}
+      {% else %}
+        <div class="pl-empty">none</div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="by-status">
+  <div class="pl-head">
+    <span class="pl-title">By status</span>
+    <span class="pl-hint">{{ "{:,}".format(untriaged) }} still untriaged</span>
+  </div>
+  {% if by_status %}
+  {% for r in by_status %}
+  <div class="bs-row">
+    <span class="bs-name st-{{ r.name }}">{{ r.name }}</span>
+    <span class="bs-track"><span class="bs-fill st-{{ r.name }}" style="width:{{ r.pct }}%"></span></span>
+    <span class="bs-n">{{ r.n }}</span>
+  </div>
+  {% endfor %}
+  {% else %}<p class="dp-empty">Nothing tagged yet.</p>{% endif %}
+</div>
+
+<h2>Application response</h2>
+<p class="stat-sub">Response means the application moved beyond “applied” to OA, interview, offer, or rejection.</p>
+<div class="funnel-grid">
+{% for heading, rows in funnels.items() %}<div><h3>By {{ heading|lower }}</h3>
+  {% for r in rows %}<div class="funnel-row"><span>{{ r.label }}</span><b>{{ r.response_rate }}%</b><small>{{ r.responses }}/{{ r.applications }}</small></div>
+  {% else %}<p class="dp-empty">No applications yet.</p>{% endfor %}
+</div>{% endfor %}
+</div>
+</section>
+
+<section class="stats-panel" id="panel-scanner" hidden>
+<div class="summary-cards wide">
+  <div class="scard"><div class="k">Roles stored</div><div class="v">{{ "{:,}".format(total) }}</div></div>
+  <div class="scard"><div class="k">New this week</div><div class="v good">{{ weeks[0].total if weeks else 0 }}</div></div>
+  <div class="scard"><div class="k">Last run</div>
+    {% if last_run and last_run != 'never' %}
+      <div class="v">{{ last_run[11:16] }}</div><div class="sub">{{ days_ago(last_run) }}</div>
+    {% else %}<div class="v">never</div>{% endif %}
+  </div>
+  <div class="scard"><div class="k">Scan runtime</div>
+    {% if runtime %}
+      <div class="v">{{ runtime }}</div>
+      <div class="sub">{{ run.firms_checked }} firms · {{ run.errors }} error{{ '' if run.errors == 1 else 's' }}</div>
+    {% else %}<div class="v">—</div><div class="sub">from next scan</div>{% endif %}
+  </div>
+</div>
+
+<h2>Tagger health</h2>
+{% if telemetry %}
+<div class="telemetry">
+  {% for t in telemetry %}<div class="telemetry-row{% if t.flags or t.coverage < 100 %} warn{% endif %}">
+    <span><b>{{ t.provider }}</b> · {{ t.model }}<small>rubric {{ t.rubric }} · {{ days_ago(t.ts) }}</small></span>
+    <span>{{ t.tagged }}/{{ t.total }} <small>{{ t.coverage }}% coverage</small></span>
+    <span>{{ t.cache_rate }}% <small>cache</small></span>
+    <span>{% if t.priced %}${{ "%.3f"|format(t.cost) }}{% else %}unpriced{% endif %}<small>{{ t.latency_s }}s</small></span>
+    <span>{% if t.flags %}{{ t.flags|join(', ') }}{% elif t.failed_batches %}{{ t.failed_batches }} failed batches{% else %}clean{% endif %}</span>
+  </div>{% endfor %}
+</div>
+{% else %}<p class="dp-empty">No tag runs recorded yet.</p>{% endif %}
+
+<h2>Human evaluation</h2>
+<p class="stat-sub">{{ evaluation.total }} labelled · {{ evaluation.corrected }} corrections ·
+  {{ evaluation.false_manager }} false-manager · {{ evaluation.false_other }} finance→other misses.</p>
+{% if evaluation.models %}<div class="telemetry">
+  {% for m in evaluation.models %}<div class="telemetry-row">
+    <span><b>{{ m.provider }}</b> · {{ m.model }}<small>rubric {{ m.rubric }}</small></span>
+    <span>{{ m.n }} <small>labels</small></span><span>{{ m.false_manager }} <small>false-manager</small></span>
+    <span>{{ m.false_other }} <small>finance→other</small></span><span>{{ m.corrected }} corrected</span>
+  </div>{% endfor %}
+</div>{% endif %}
+
+<h2>Weekly intake</h2>
+{% macro stacked(segs, spaced) %}
+<div class="sbar{% if spaced %} spaced{% endif %}">
+  {% for s in segs %}<span class="seg seg-{{ s.slug }}" style="width:{{ s.pct }}%" title="{{ s.label }}: {{ s.n }}"></span>{% endfor %}
+</div>
+<div class="legend">
+  {% for s in segs %}<span class="li"><span class="dot seg-{{ s.slug }}"></span>{{ s.label }} <b>{{ s.n }}</b></span>{% endfor %}
+</div>
+{% endmacro %}
+{% for r in weeks %}
+<div class="wk">
+  <div class="wk-head">
+    <span class="lbl">{{ r.label }}</span>
+    <span class="meta"><b>{{ r.finance }}</b> finance{% if r.other_n %} · {{ r.other_n }} other{% endif %} · {{ r.total }} total</span>
+  </div>
+  {% if r.area_bar %}{{ stacked(r.area_bar, false) }}{% endif %}
+  {% if r.region_bar %}{{ stacked(r.region_bar, true) }}{% endif %}
+  {% if not r.area_bar and not r.region_bar %}<p class="stat-sub" style="margin:0">No roles this week.</p>{% endif %}
+</div>
+{% else %}
+<p class="dp-empty">No data yet.</p>
+{% endfor %}
+
+<h2>Firm velocity</h2>
+<p class="stat-sub">New finance roles per firm, week by week. Dimmed rows posted nothing this week.</p>
+{% if velocity %}
+<div class="velocity">
+  <div class="velrow velhead">
+    <span class="vco">Firm</span>
+    <span class="vrecent">This wk</span>
+    <div class="spark-lbl"><span>← 8w ago</span><span>weekly trend (scaled per firm)</span><span>now →</span></div>
+    <span class="vtotal">8w total</span>
+  </div>
+  {% for v in velocity %}
+  <div class="velrow{% if v.recent == 0 %} silent{% endif %}">
+    <a class="vco" href="/?company={{ v.company|urlencode }}&amp;area=">{{ v.company }}</a>
+    <span class="vrecent">{% if v.recent %}{{ v.recent }}{% else %}—{% endif %}</span>
+    <div class="spark">
+      {% for n in v.counts|reverse %}
+      <span class="bar" style="height:{{ ((n / v.max_wk * 100)|int if v.max_wk else 0) }}%" title="{{ 7 - loop.index0 }}w ago: {{ n }} new"></span>
+      {% endfor %}
+    </div>
+    <span class="vtotal">{{ v.total }}</span>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<p class="dp-empty">No firm velocity data yet — run a scan first.</p>
+{% endif %}
+</section>
+
+<script>
+  (function () {
+    var KEY = "jsui.statsPanel";
+    function show(name) {
+      document.querySelectorAll(".stats-panel").forEach(function (p) {
+        p.hidden = p.id !== "panel-" + name;
+      });
+      document.querySelectorAll(".stats-tab").forEach(function (t) {
+        t.classList.toggle("on", t.dataset.panel === name);
+      });
+      try { localStorage.setItem(KEY, name); } catch (e) {}
+    }
+    document.querySelectorAll(".stats-tab").forEach(function (t) {
+      t.addEventListener("click", function () { show(t.dataset.panel); });
+    });
+    var saved = null;
+    try { saved = localStorage.getItem(KEY); } catch (e) {}
+    if (saved === "scanner") show("scanner");
+  })();
+</script>
+{% endblock %}

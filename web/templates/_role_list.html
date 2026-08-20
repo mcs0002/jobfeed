@@ -1,0 +1,50 @@
+{# S8: sticky Today / This week / Earlier dividers. The list is always sorted
+   newest-first (app.py pins sort=recent), so the groups come out in order and
+   a single pass over `jobs` is enough — no regrouping in Python. Empty groups
+   are omitted entirely because the header is only emitted on transition. #}
+{% set _d = [] %}{% for j in jobs %}{% set _ = _d.append(days_since(j.first_seen)) %}{% endfor %}
+{% set today_n = _d | select('lt', 1) | list | length %}
+{% set week_n = (_d | select('lt', 8) | list | length) - today_n %}
+{% set earlier_n = (_d | length) - today_n - week_n %}
+{% set counts = {0: today_n, 1: week_n, 2: earlier_n} %}
+{% set labels = {0: 'Today', 1: 'This week', 2: 'Earlier'} %}
+{% set ns = namespace(group=None) %}
+{% for j in jobs %}
+{% set d = days_since(j.first_seen) %}
+{% set g = 0 if d == 0 else (1 if d <= 7 else 2) %}
+{% if g != ns.group %}
+  {% if ns.group is not none %}</div>{% endif %}
+  {% set ns.group = g %}
+  <div class="rl-divider">
+    <span class="rl-div-label">{{ labels[g] }}</span>
+    <span class="rl-div-count">{{ counts[g] }} role{{ '' if counts[g] == 1 else 's' }}</span>
+  </div>
+  <div class="rl-group">
+{% endif %}
+{% set isnew = (j.first_seen or '')[:19] > (last_seen|default(''))[:19] %}
+<div role="button" tabindex="0" class="role-card{% if isnew %} is-new{% endif %}{% if sel_job and sel_job.id == j.id %} sel{% endif %}"
+  data-id="{{ j.id }}" data-status="{{ j.status }}" data-detail="/job/{{ j.id }}?pane=1"
+  hx-get="/job/{{ j.id }}?pane=1" hx-target="#detail-pane" hx-swap="innerHTML">
+  <div class="rc-top">
+    <div class="rc-title">{{ j.title }}{% if isnew %}<span class="newdot"></span>{% endif %}</div>
+    <button type="button" class="star{% if j.favorite %} on{% endif %}" data-star-id="{{ j.id }}" aria-label="Toggle favorite for {{ j.title }}">{% if j.favorite %}★{% else %}☆{% endif %}</button>
+  </div>
+  <div class="rc-meta">{{ j.company }}{% if j.loc_city or j.location %} · {{ j.loc_city or j.location }}{% endif %} · {{ days_ago(j.first_seen) }}</div>
+  <div class="rc-tags">
+    {% if j.area %}<span class="area area-{{ area_group(j.area) }}">{{ area_label(j.area) }}</span>{% set sub = area_subtag(j.area) %}{% if sub %}<span class="tag subarea">{{ sub }}</span>{% endif %}{% endif %}
+    {% if j.desk %}<span class="tag">{{ j.desk }}</span>{% endif %}
+    {% if j.job_type == 'internship' %}<span class="tag intern">intern</span>{% elif j.job_type == 'graduate-programme' %}<span class="tag grad">grad</span>{% endif %}
+    {% if j.min_yoe and j.min_yoe >= 3 %}<span class="tag senior">{{ j.min_yoe }}y+</span>{% endif %}
+    {% if j.delisted_at %}<span class="tag delisted">delisted</span>{% endif %}
+    {% set dl = deadline_days(j.deadline) %}
+    {% if dl is not none and dl <= 30 %}<span class="tag deadline">{{ deadline_text(j.deadline) }}</span>{% endif %}
+    <span class="rc-status st-{{ j.status }}"><span class="st-dot" aria-hidden="true"></span>{{ j.status }}</span>
+  </div>
+</div>
+{% else %}
+<div class="list-empty">
+  <div class="le-msg">No roles match these filters</div>
+  <a class="le-reset" href="/">↺ Reset filters</a>
+</div>
+{% endfor %}
+{% if ns.group is not none %}</div>{% endif %}

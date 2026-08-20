@@ -1,0 +1,27 @@
+# These are RANGE pins for development convenience, not a reproducible install.
+# For reproducible deploys on the M1, generate and install from a lockfile:
+#     uv pip compile requirements.txt -o requirements.lock
+#     uv pip sync requirements.lock
+# The lock captures exact transitive versions; this file only bounds the direct
+# deps.
+#
+# playwright is pinned EXACT (==) on purpose: the pip package version and the
+# separately-installed browser binary (`playwright install`) must stay in
+# lockstep, or the driver and browser disagree and scrapes break. Bump this
+# value and re-run `playwright install` together.
+beautifulsoup4>=4.12,<5
+playwright==1.60.0
+requests>=2.32,<3
+# cover-letter PDF rendering (cover_letter.py)
+reportlab>=4.2,<6
+# web app (browse/filter UI + JSON API)
+fastapi>=0.115,<1
+uvicorn>=0.30,<1
+jinja2>=3.1,<4
+python-multipart>=0.0.9,<1
+itsdangerous>=2.1,<3
+# JA3/TLS browser impersonation + AIA cert-chain completion for WAF'd / broken-chain
+# boards (stronger fallback than the system-curl `_http.curl_get` path)
+curl_cffi>=0.7,<1
+# starlette's TestClient (tests/test_web_*) needs the httpx2 client
+httpx2>=2.7,<3
