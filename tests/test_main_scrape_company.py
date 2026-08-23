@@ -97,6 +97,40 @@ class CleanZeroDegradedTests(unittest.TestCase):
         degraded = _write_health_state({"BigBoard": 3}, error_names=set())
         self.assertIn("BigBoard", degraded)
 
+    def test_partial_retry_preserves_unattempted_health_and_error_details(self):
+        path = os.path.join(self.tmp, "verify_state.json")
+        with open(path, "w") as f:
+            json.dump({
+                "baseline": {"Recovered": 5, "StillUntested": 7},
+                "failing": ["Recovered", "StillUntested"],
+                "degraded": ["OldDegraded"],
+                "last_raw_counts": {"Recovered": 5, "StillUntested": 7},
+                "last_unique_counts": {"Recovered": 5, "StillUntested": 7},
+                "last_errors": {
+                    "Recovered": "old error", "StillUntested": "other error"
+                },
+            }, f)
+
+        _write_health_state({"Recovered": 6}, error_names=set(),
+                            unique_counts={"Recovered": 6})
+        with open(path) as f:
+            state = json.load(f)
+
+        self.assertEqual(state["failing"], ["StillUntested"])
+        self.assertEqual(state["degraded"], ["OldDegraded"])
+        self.assertEqual(state["last_raw_counts"]["Recovered"], 6)
+        self.assertEqual(state["last_raw_counts"]["StillUntested"], 7)
+        self.assertNotIn("Recovered", state["last_errors"])
+        self.assertEqual(state["last_errors"]["StillUntested"], "other error")
+
+    def test_partial_retry_persists_new_error_reason(self):
+        self._seed_baseline({"Broken": 4})
+        _write_health_state({}, {"Broken"}, error_details={"Broken": "HTTP 503"})
+        with open(os.path.join(self.tmp, "verify_state.json")) as f:
+            state = json.load(f)
+        self.assertEqual(state["failing"], ["Broken"])
+        self.assertEqual(state["last_errors"], {"Broken": "HTTP 503"})
+
 
 class ScanIdentityIntegrationTests(unittest.TestCase):
     """Pin the scan-loop interactions between URL dedup and delisting."""

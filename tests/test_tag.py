@@ -6,6 +6,7 @@ import tempfile
 import time
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -746,6 +747,59 @@ class ApiTransportTests(unittest.TestCase):
             self.assertEqual(tag._provider(), "cli")
 
 
+class CodexTransportTests(unittest.TestCase):
+    CFG = {"TAG_PROVIDER": "codex", "TAG_CODEX_MODEL": ""}
+
+    def setUp(self):
+        tag._CLI_DEAD = False
+
+    def tearDown(self):
+        tag._CLI_DEAD = False
+
+    def test_codex_is_primary_toolless_and_uses_final_message_file(self):
+        jobs = [{"title": "FX Trading Intern", "company": "Example Bank",
+                 "location": "London", "description": "Support the FX desk."}]
+        seen = {}
+
+        def fake_run(command, **kwargs):
+            seen["command"] = command
+            seen["prompt"] = kwargs["input"]
+            output_path = command[command.index("--output-last-message") + 1]
+            Path(output_path).write_text(
+                "0|markets|trading|intern|internship|London|United Kingdom|"
+                "Europe|onsite|-|0|bachelor|-\n")
+            return SimpleNamespace(returncode=0, stdout="progress", stderr="")
+
+        with patch.dict(os.environ, self.CFG, clear=False), \
+             patch.object(tag, "_codex_bin", return_value="/fake/codex"), \
+             patch.object(tag, "_claude_bin",
+                          side_effect=AssertionError("Claude must not be used")), \
+             patch.object(tag.subprocess, "run", side_effect=fake_run):
+            tag.tag_jobs(jobs)
+            provenance = tag.tag_provenance()
+
+        self.assertEqual(jobs[0]["area"], "markets")
+        self.assertEqual(jobs[0]["job_type"], "internship")
+        self.assertIn("exec", seen["command"])
+        self.assertIn("--ephemeral", seen["command"])
+        self.assertIn("read-only", seen["command"])
+        self.assertIn("shell_tool", seen["command"])
+        self.assertIn("UNTRUSTED JOB DATA", seen["prompt"])
+        self.assertEqual(provenance["provider"], "codex")
+        self.assertEqual(tag.LAST_RUN_HEALTH["jobs_tagged"], 1)
+
+    def test_codex_missing_never_falls_back_to_external_api(self):
+        jobs = [{"title": "Analyst", "company": "X", "location": "Paris"}]
+        with patch.dict(os.environ, self.CFG, clear=False), \
+             patch.object(tag, "_codex_bin", return_value=None), \
+             patch.object(tag, "_claude_bin",
+                          side_effect=AssertionError("Claude must not be used")):
+            tag.tag_jobs(jobs)
+        self.assertEqual(jobs[0]["area"], "")
+        self.assertTrue(any("codex CLI not found" in reason
+                            for reason in tag.LAST_RUN_HEALTH["failure_reasons"]))
+
+
 class ManagerRungTests(unittest.TestCase):
     """seniority='manager' is a hard gate — the browse query filters it out —
     so a wrong manager label hides the role rather than mislabelling it."""
@@ -832,7 +886,7 @@ class TagRunsTelemetryTests(unittest.TestCase):
         self.assertEqual(r["jobs_total"], 13)
         self.assertEqual(r["jobs_tagged"], 12)
         self.assertEqual(r["tokens_cached"], 4224)
-        self.assertIn(r["provider"], ("cli", "api"))
+        self.assertIn(r["provider"], ("cli", "codex", "api"))
         self.assertFalse(r["api_fallback"])
 
     def test_records_the_degradation_flags(self):
@@ -852,7 +906,11 @@ class TagRunsTelemetryTests(unittest.TestCase):
     def test_tag_jobs_writes_one_record_per_call(self):
         jobs = [{"id": 1, "title": "Analyst", "company": "X", "location": "NY",
                  "description": "d"}]
-        with patch.object(tag, "_tag_batch_any") as batch:
+        # Keep this unit test independent of whether the developer machine has
+        # the optional Claude CLI installed and authenticated.
+        with (patch.object(tag, "_claude_bin", return_value="/mock/claude"),
+              patch.object(tag, "warm_auth"),
+              patch.object(tag, "_tag_batch_any") as batch):
             batch.side_effect = lambda b, *a, **k: [
                 j.update(area="markets", job_type="job") for j in b]
             tag.tag_jobs(jobs)

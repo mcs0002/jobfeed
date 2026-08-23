@@ -59,8 +59,10 @@ silently stopped schedule can't rot unnoticed.
 ## Quickstart
 
 Requires Python 3.10+ (developed on 3.12) and [uv](https://docs.astral.sh/uv/).
-Tagging can use either any OpenAI-compatible `/v1/chat/completions` API or the
-authenticated Claude CLI. The production pattern is API-primary: configure
+Tagging can use an authenticated Codex CLI, any OpenAI-compatible
+`/v1/chat/completions` API, or the authenticated Claude CLI. For Codex, set
+`TAG_PROVIDER=codex`; it runs non-interactively and ephemerally with agent
+tools disabled, using the CLI's existing ChatGPT login. The API-primary pattern configures
 `TAG_PROVIDER=api` plus `TAG_API_BASE_URL`, `TAG_API_MODEL`, and `TAG_API_KEY`
 in `.env`; the CLI is optional and is touched only if that API fails. An
 Anthropic Messages API key can remain as a final fallback. Skip tagging
@@ -78,7 +80,8 @@ cp .env.example .env
 
 Useful flags: `--all` (report every live match, not just unseen), `--dry-run`
 (no DB writes), `--no-tag` (skip the tagging pass), `--workers N` (concurrent
-company scrapes, default 6).
+company scrapes, default 6), `--company NAME` (scan only matching company
+names; repeat the flag for multiple firms).
 
 Then start the web app and open http://localhost:8000:
 

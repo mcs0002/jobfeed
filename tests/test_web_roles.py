@@ -9,6 +9,8 @@ import os
 import sqlite3
 import sys
 import tempfile
+import unittest
+from unittest.mock import patch
 
 os.environ["WEB_PASSWORD"] = "owner-pw-test"
 os.environ["WEB_USER"] = "admin"
@@ -88,3 +90,27 @@ def test_guest_ui_hides_controls():
     body = c.get("/").text
     assert "guest" in body  # role badge + body class
     assert 'class="browse guest"' in body or "guest" in body.split("<body", 1)[1][:120]
+
+
+class ApplyLaunchWebTests(unittest.TestCase):
+    def test_owner_can_launch_assisted_apply_from_job_detail(self):
+        c = client()
+        login(c, "admin", "owner-pw-test")
+        detail = c.get("/job/j1").text
+        self.assertIn("Prepare application", detail)
+        self.assertIn("may attach your CV", detail)
+        with patch.object(webapp, "_launch_assisted_apply",
+                          return_value=(True, "Application window opened.")) as launch:
+            r = c.post("/job/j1/prepare-application")
+        self.assertEqual(r.status_code, 200)
+        self.assertIn("Application window opened", r.text)
+        launch.assert_called_once_with("j1")
+
+    def test_guest_cannot_launch_assisted_apply(self):
+        c = client()
+        login(c, "guest", "guest-pw-test")
+        self.assertNotIn("Prepare application", c.get("/job/j1").text)
+        with patch.object(webapp, "_launch_assisted_apply") as launch:
+            r = c.post("/job/j1/prepare-application")
+        self.assertEqual(r.status_code, 403)
+        launch.assert_not_called()

@@ -15,9 +15,10 @@ every other ATS still opens with a printed copy-paste card so nothing is ever a
 dead end.
 
 Usage:
-  ./apply.py --from-m1 --job-id <id>       # pull live role from M1, full flow
+  ./apply.py --job-id <id>                  # use the local jobs.db
+  ./apply.py --queue                        # process local status='queued' roles
+  ./apply.py --from-m1 --job-id <id>        # optional remote M1 flow
   ./apply.py --url URL --company C --title T
-  ./apply.py --queue                       # drain all status='queued' roles from M1
   ./apply.py --from-m1 --job-id <id> --no-letter   # skip letter gen (faster test)
   ./apply.py --url URL --headless          # autofill check without a window (testing)
 """
@@ -109,6 +110,112 @@ def _field_values(profile: dict) -> dict:
     }
 
 
+# German citizenship gives a clear work-right answer only where freedom of
+# movement applies.  Outside that area we deliberately do not invent an
+# immigration status: a visa, residence title or settled status is personal
+# information that cannot be inferred from nationality.
+_EU_EEA_COUNTRIES = {
+    "austria", "belgium", "bulgaria", "croatia", "cyprus", "czechia",
+    "czech republic", "denmark", "estonia", "finland", "france", "germany",
+    "greece", "hungary", "iceland", "ireland", "italy", "latvia",
+    "liechtenstein", "lithuania", "luxembourg", "malta", "netherlands",
+    "norway", "poland", "portugal", "romania", "slovakia", "slovenia",
+    "spain", "sweden",
+}
+_EU_EEA_CODES = {
+    "at", "be", "bg", "hr", "cy", "cz", "dk", "ee", "fi", "fr", "de",
+    "gr", "hu", "is", "ie", "it", "lv", "li", "lt", "lu", "mt", "nl",
+    "no", "pl", "pt", "ro", "sk", "si", "es", "se",
+}
+_SWISS_NAMES = {"switzerland", "schweiz", "suisse", "svizzera", "ch"}
+_UK_NAMES = {
+    "united kingdom", "uk", "gb", "england", "scotland", "wales",
+    "northern ireland",
+}
+_US_NAMES = {"united states", "united states of america", "usa", "us"}
+
+
+def _matches_job_country(job: dict, names: set[str], codes: set[str] | None = None) -> bool:
+    """Match a normalised country field first, then safe location tokens.
+
+    Two-letter country codes are compared as tokens so e.g. ``de`` never
+    accidentally matches a word such as ``Denmark``.
+    """
+    country = str(job.get("loc_country") or "").strip().casefold()
+    if country:
+        return country in names or country in (codes or set())
+    location = str(job.get("location") or "").casefold()
+    if any(name in location for name in names if len(name) > 2):
+        return True
+    tokens = set(re.findall(r"[a-z]+", location))
+    return bool(tokens & (codes or set()) or tokens & {n for n in names if len(n) <= 2})
+
+
+def work_authorization_answers(profile: dict, job: dict) -> dict[str, str]:
+    """Derive role-specific work-authorisation answers conservatively.
+
+    The current rule set is intentionally limited to German nationality.  For
+    every other nationality the explicitly stored profile answers remain the
+    fallback; this prevents a future profile change from silently receiving
+    German/EU assumptions.
+    """
+    if str(profile.get("nationality") or "").strip().casefold() != "german":
+        common = profile.get("common_answers", {})
+        return {
+            "market": "profile",
+            "authorized_to_work": common.get("authorized_to_work", ""),
+            "require_visa_sponsorship": common.get("require_visa_sponsorship", ""),
+        }
+    if _matches_job_country(job, _EU_EEA_COUNTRIES, _EU_EEA_CODES):
+        return {
+            "market": "EU/EEA",
+            "authorized_to_work": "Yes — German/EU citizen.",
+            "require_visa_sponsorship": "No.",
+        }
+    if _matches_job_country(job, _SWISS_NAMES):
+        return {
+            "market": "Switzerland",
+            "authorized_to_work": (
+                "Eligible as a German/EU citizen under EU/EFTA free movement; "
+                "Swiss notification/permit formalities apply."
+            ),
+            "require_visa_sponsorship": (
+                "No employer visa sponsorship required; Swiss registration/permit "
+                "formalities still apply."
+            ),
+        }
+    if _matches_job_country(job, _UK_NAMES):
+        return {
+            "market": "UK",
+            "authorized_to_work": (
+                "No — not from German nationality alone (unless a separate UK "
+                "immigration status applies)."
+            ),
+            "require_visa_sponsorship": (
+                "Yes, unless separate UK work authorization already exists."
+            ),
+        }
+    if _matches_job_country(job, _US_NAMES):
+        return {
+            "market": "US",
+            "authorized_to_work": (
+                "No — not from German nationality alone (unless separate US work "
+                "authorization exists)."
+            ),
+            "require_visa_sponsorship": (
+                "Yes, unless separate US work authorization already exists."
+            ),
+        }
+    return {
+        "market": "country-specific",
+        "authorized_to_work": (
+            "Not established from German nationality alone — check the destination "
+            "country's rules."
+        ),
+        "require_visa_sponsorship": "Country-specific check required.",
+    }
+
+
 def autofill(page, ats: str, profile: dict) -> list[str]:
     """Fill recognised fields from the profile. Returns labels of filled fields.
     Best-effort: a missing field is skipped, never fatal. Inputs only."""
@@ -154,6 +261,7 @@ def copy_paste_card(profile: dict, job: dict, cv_path: str, cover_pdf: str) -> s
     ATSes we don't autofill (Workday, SmartRecruiters, unknown)."""
     v = _field_values(profile)
     ca = profile.get("common_answers", {})
+    work_auth = work_authorization_answers(profile, job)
     lines = [
         "  ---- COPY-PASTE CARD --------------------------------------------",
         f"  Name:        {v['full_name']}",
@@ -162,8 +270,8 @@ def copy_paste_card(profile: dict, job: dict, cv_path: str, cover_pdf: str) -> s
         f"  Location:    {v['city']}, {v['country']}",
         f"  LinkedIn:    {v['linkedin'] or '(none on file)'}",
         f"  Nationality: {profile.get('nationality','')}",
-        f"  Work auth:   {ca.get('authorized_to_work','')}",
-        f"  Sponsorship: {ca.get('require_visa_sponsorship','')}",
+        f"  Work auth:   {work_auth['authorized_to_work']}",
+        f"  Sponsorship: {work_auth['require_visa_sponsorship']}",
         f"  Earliest start: {ca.get('earliest_start_date','')}",
         f"  CV:          {cv_path}",
         f"  Cover letter: {cover_pdf or '(not generated)'}",
@@ -181,8 +289,32 @@ def _resolve_cv_path(profile: dict) -> str:
     return os.path.join(base, cv) if base and cv else ""
 
 
+def _load_apply_inputs(make_letter: bool) -> tuple[dict, str, str]:
+    """Load the full cover-letter inputs or a minimal autofill-only profile.
+
+    cl._load_inputs() correctly requires narrative fields for generated letters,
+    but those fields should not block the --no-letter form-filling workflow.
+    """
+    if make_letter:
+        return cl._load_inputs()
+    if not os.path.exists(cl.PROFILE_JSON):
+        sys.exit(
+            f"missing {cl.PROFILE_JSON} — copy applicant_profile.example.json "
+            "and fill it"
+        )
+    with open(cl.PROFILE_JSON) as fp:
+        profile = json.load(fp)
+    required = ("full_name", "first_name", "last_name", "email", "phone")
+    missing = [field for field in required if not profile.get(field)]
+    if missing:
+        sys.exit("applicant_profile.json is missing autofill fields: "
+                 + ", ".join(missing))
+    return profile, "", ""
+
+
 def apply_one(job: dict, profile: dict, cv_text: str, samples: str,
-              make_letter: bool = True, headless: bool = False) -> None:
+              make_letter: bool = True, headless: bool = False,
+              use_m1: bool = False, web_mode: bool = False) -> None:
     from playwright.sync_api import sync_playwright
 
     url = job.get("url") or ""
@@ -252,15 +384,34 @@ def apply_one(job: dict, profile: dict, cv_text: str, samples: str,
         if headless:
             ctx.close()
             return
+        if web_mode:
+            print("  Started from Jobfeed. Close the application browser window "
+                  "when you are finished; update the status on the website.")
+            try:
+                # The web server has no interactive stdin. Keep the dedicated
+                # Playwright window alive until the user closes it instead of
+                # asking them to return to a terminal prompt.
+                while ctx.pages:
+                    ctx.pages[0].wait_for_event("close", timeout=0)
+            except Exception:
+                pass
+            ctx.close()
+            return
         try:
             input("  Press Enter here when you are done (browser stays open until then)... ")
         except EOFError:
             pass
 
         if job.get("id") and not str(job.get("id")).endswith("_adhoc"):
-            ans = input(f"  Mark {job.get('id')} as 'applied' on the M1? [y/N] ").strip().lower()
+            where = "the M1" if use_m1 else "the local database"
+            ans = input(
+                f"  Mark {job.get('id')} as 'applied' in {where}? [y/N] "
+            ).strip().lower()
             if ans == "y":
-                mark_applied_m1(job["id"])
+                if use_m1:
+                    mark_applied_m1(job["id"])
+                else:
+                    mark_applied_local(job["id"])
         ctx.close()
 
 
@@ -323,6 +474,15 @@ def mark_applied_m1(job_id: str) -> None:
               file=sys.stderr)
 
 
+def mark_applied_local(job_id: str) -> None:
+    from db import JobDB
+    db_path = os.environ.get("JOBS_DB", os.path.join(ROOT, "jobs.db"))
+    if JobDB(db_path).set_status(job_id, "applied"):
+        print(f"  marked {job_id} applied in {db_path}")
+    else:
+        print(f"  ! job {job_id} not found in {db_path}", file=sys.stderr)
+
+
 def fetch_queue_m1() -> list[dict]:
     """Pull all status='queued' roles from the live DB on the M1."""
     remote = (
@@ -336,12 +496,20 @@ def fetch_queue_m1() -> list[dict]:
     return json.loads((out.stdout or "[]").strip() or "[]")
 
 
+def fetch_queue_local() -> list[dict]:
+    """Read queued roles from this installation's jobs.db."""
+    from db import JobDB
+    db_path = os.environ.get("JOBS_DB", os.path.join(ROOT, "jobs.db"))
+    return JobDB(db_path).fetch_jobs(status="queued")
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="Assisted apply (never auto-submits).")
     ap.add_argument("--job-id")
     ap.add_argument("--from-m1", action="store_true")
     ap.add_argument("--queue", action="store_true",
-                    help="process every status='queued' role from the M1")
+                    help=("process every status='queued' role from local jobs.db "
+                          "(or M1 with --from-m1)"))
     ap.add_argument("--url")
     ap.add_argument("--title")
     ap.add_argument("--company")
@@ -351,10 +519,14 @@ def main() -> int:
                     help="skip cover-letter generation")
     ap.add_argument("--headless", action="store_true",
                     help="run without a window (autofill check only; no pause)")
+    ap.add_argument("--web", action="store_true",
+                    help="website-launched mode: wait until the browser is closed")
     ap.add_argument("--login", metavar="URL",
                     help="open URL in the persistent profile and wait while you "
                          "sign in, seeding the session for later runs")
     args = ap.parse_args()
+    if args.web and args.headless:
+        ap.error("--web and --headless cannot be combined")
 
     if args.login:
         seed_login(args.login)
@@ -362,23 +534,27 @@ def main() -> int:
     if args.job_id:
         cl.validate_job_id(args.job_id)
 
-    profile, cv_text, samples = cl._load_inputs()
+    make_letter = not args.no_letter
+    profile, cv_text, samples = _load_apply_inputs(make_letter)
 
     if args.queue:
-        jobs = fetch_queue_m1()
+        jobs = fetch_queue_m1() if args.from_m1 else fetch_queue_local()
         if not jobs:
-            print("queue empty (no roles with status='queued' on the M1)")
+            where = "the M1" if args.from_m1 else "the local database"
+            print(f"queue empty (no roles with status='queued' in {where})")
             return 0
         print(f"draining {len(jobs)} queued role(s)\n")
         for i, job in enumerate(jobs, 1):
             print(f"[{i}/{len(jobs)}] {job.get('company')} — {job.get('title')}")
             apply_one(job, profile, cv_text, samples,
-                      make_letter=not args.no_letter, headless=args.headless)
+                      make_letter=make_letter, headless=args.headless,
+                      use_m1=args.from_m1, web_mode=args.web)
         return 0
 
     job = cl._load_job(args)
     apply_one(job, profile, cv_text, samples,
-              make_letter=not args.no_letter, headless=args.headless)
+              make_letter=make_letter, headless=args.headless,
+              use_m1=args.from_m1, web_mode=args.web)
     return 0
 
 

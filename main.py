@@ -65,6 +65,20 @@ def load_targets():
         return json.load(f)
 
 
+def select_companies(targets: list[dict], queries: list[str]) -> list[dict]:
+    """Return targets whose names contain any requested query.
+
+    Matching is case-insensitive so a local trial scan can select one or a few
+    firms without editing the shared targets.json inventory.
+    """
+    needles = [query.strip().casefold() for query in queries if query.strip()]
+    if not needles:
+        return targets
+    return [target for target in targets
+            if any(needle in target.get("name", "").casefold()
+                   for needle in needles)]
+
+
 def scrape_company(company: dict) -> tuple[list[dict], str | None]:
     """Returns (jobs, error_message). error_message is None on success."""
     ats = company.get("ats", "unknown")
@@ -248,7 +262,8 @@ def _enrich_timeout(job: dict) -> int:
     return ENRICH_TIMEOUT_SECONDS
 
 
-def _enrich_new_jobs(new_jobs: list[dict], db: JobDB, dry_run: bool) -> None:
+def _enrich_new_jobs(new_jobs: list[dict], db: JobDB, dry_run: bool,
+                     max_jobs: int | None = None) -> None:
     """Fetch descriptions concurrently for new_jobs that don't already have
     one, in place. Persists each fetched description so the scheduled
     enrichment pass doesn't re-fetch later. Errors per-job are swallowed —
@@ -265,6 +280,10 @@ def _enrich_new_jobs(new_jobs: list[dict], db: JobDB, dry_run: bool) -> None:
     through WorkdayEnricher (cxs JSON API + tenant/board config + a primed
     session), one session per tenant, parallelised across tenants."""
     targets = [j for j in new_jobs if not j.get("description") and j.get("url")]
+    if max_jobs is not None and len(targets) > max_jobs:
+        print(f"enrichment: capped at {max_jobs} of {len(targets)} jobs; "
+              "the remaining listings are already stored")
+        targets = targets[:max_jobs]
     if not targets:
         return
 
@@ -415,7 +434,8 @@ HEALTH_COLLAPSE_RATIO = 0.2  # at/below this fraction of baseline = degraded
 
 
 def _write_health_state(raw_counts: dict[str, int], error_names: set[str],
-                        unique_counts: dict[str, int] | None = None) -> None:
+                        unique_counts: dict[str, int] | None = None,
+                        error_details: dict[str, str] | None = None) -> None:
     """Refresh verify_state.json from this scan's results so the /sources
     'stalled' indicator reflects the latest run, not just the weekly selfcheck.
 
@@ -436,6 +456,11 @@ def _write_health_state(raw_counts: dict[str, int], error_names: set[str],
     except (OSError, ValueError):
         prev = {}
     unique_counts = unique_counts or raw_counts
+    error_details = error_details or {}
+    # The current invocation may intentionally cover only a subset (for
+    # example --company or --retry-failing). Update health for that scope while
+    # preserving the latest state of every company that was not attempted.
+    scope = set(raw_counts) | set(error_names)
     baseline = dict(prev.get("baseline", {}))
     # Compute degraded BEFORE raising the baseline, so today's low count can't
     # lift its own floor.
@@ -465,12 +490,30 @@ def _write_health_state(raw_counts: dict[str, int], error_names: set[str],
         # Preserve keys owned by other writers (selfcheck's selfcheck_*
         # transition snapshot) and write atomically — a torn read parses as
         # {} and silently resets every rolling baseline.
+        previous_failing = set(prev.get("failing", []))
+        previous_degraded = set(prev.get("degraded", []))
+        merged_failing = (previous_failing - scope) | set(error_names)
+        merged_degraded = (previous_degraded - scope) | set(degraded)
+
+        last_raw_counts = dict(prev.get("last_raw_counts", {}))
+        last_unique_counts = dict(prev.get("last_unique_counts", {}))
+        last_errors = dict(prev.get("last_errors", {}))
+        for name in scope:
+            last_raw_counts.pop(name, None)
+            last_unique_counts.pop(name, None)
+            last_errors.pop(name, None)
+        last_raw_counts.update(raw_counts)
+        last_unique_counts.update(unique_counts)
+        last_errors.update({name: error_details.get(name, "Unknown scrape error")
+                            for name in error_names})
+
         prev.update({
-            "failing": sorted(error_names),
-            "degraded": sorted(degraded),
+            "failing": sorted(merged_failing),
+            "degraded": sorted(merged_degraded),
             "baseline": dict(sorted(baseline.items())),
-            "last_raw_counts": dict(sorted(raw_counts.items())),
-            "last_unique_counts": dict(sorted(unique_counts.items())),
+            "last_raw_counts": dict(sorted(last_raw_counts.items())),
+            "last_unique_counts": dict(sorted(last_unique_counts.items())),
+            "last_errors": dict(sorted(last_errors.items())),
             "last_scan_at": datetime.now(timezone.utc).isoformat(),
             "last_clean_scan": {
                 **prev.get("last_clean_scan", {}),
@@ -496,10 +539,48 @@ def main():
     parser.add_argument("--include-unverified", action="store_true", help="Also run configured sources that have not been verified")
     parser.add_argument("--workers", type=int, default=6, help="Concurrent company scrapes (default: 6)")
     parser.add_argument("--no-tag", action="store_true", help="Skip the Haiku tagging pass (tag.py)")
+    parser.add_argument(
+        "--max-enrich", type=int, default=None, metavar="N",
+        help="Enrich at most N new job descriptions (0 skips; default: unlimited)",
+    )
+    parser.add_argument(
+        "--company", action="append", default=[], metavar="NAME",
+        help="Only scan companies whose names contain NAME (repeatable)",
+    )
+    parser.add_argument(
+        "--retry-failing", action="store_true",
+        help="Retry exactly the sources currently listed as failing",
+    )
     args = parser.parse_args()
+    if args.max_enrich is not None and args.max_enrich < 0:
+        parser.error("--max-enrich must be zero or greater")
     scan_t0 = time.monotonic()
 
-    targets = load_targets()
+    if args.retry_failing and args.company:
+        parser.error("--retry-failing cannot be combined with --company")
+
+    all_targets = load_targets()
+    configured_company_names = {target["name"] for target in all_targets}
+    targets = all_targets
+    if args.retry_failing:
+        state_path = Path(ROOT) / "verify_state.json"
+        try:
+            failing_names = set(json.loads(state_path.read_text()).get("failing", []))
+        except (OSError, ValueError):
+            failing_names = set()
+        if not failing_names:
+            print("retry: no failing sources recorded", flush=True)
+            return
+        targets = [target for target in all_targets
+                   if target.get("name") in failing_names]
+        missing = failing_names - {target.get("name") for target in targets}
+        if missing:
+            print("retry: ignoring sources no longer in targets.json: "
+                  + ", ".join(sorted(missing)), flush=True)
+    if args.company:
+        targets = select_companies(all_targets, args.company)
+        if not targets:
+            parser.error("--company did not match any configured company")
 
     if args.verify:
         if args.verified_only:
@@ -643,18 +724,40 @@ def main():
     # app's job-detail view, the YoE-wall detector, and the tagger all need it.
     # Bounded by len(new_jobs). With the relaxed "store the rest" filter this can
     # be larger than before, but it's still best-effort and never breaks the scan.
-    _enrich_new_jobs(new_jobs, db, dry_run=args.dry_run)
+    _enrich_new_jobs(new_jobs, db, dry_run=args.dry_run,
+                     max_jobs=args.max_enrich)
 
     # Tagging pass — runs on EVERY stored role (title+company+location only,
     # cheap). Populates the function/seniority/type/location facets the web UI
     # filters on. Independent of relevance scoring below.
+    if args.no_tag:
+        # A local installation may intentionally have no paid/configured LLM.
+        # Still populate the core browse facets so Area, Type and Location do
+        # not render as empty controls. Model-backed tags remain more nuanced.
+        from fallback_tag import PROVENANCE, fallback_tag_jobs
+        fallback_tag_jobs(new_jobs)
+        if not args.dry_run:
+            with db.transaction():
+                for job in new_jobs:
+                    db.set_tags(
+                        job["id"], area=job.get("area", ""),
+                        desk=job.get("desk", ""),
+                        seniority=job.get("seniority", ""),
+                        job_type=job.get("job_type", "job"),
+                        loc_city=job.get("loc_city", ""),
+                        loc_country=job.get("loc_country", ""),
+                        loc_region=job.get("loc_region", ""),
+                        work_mode=job.get("work_mode", ""),
+                        lang_req=job.get("lang_req"),
+                        education=job.get("education"),
+                        start_date=job.get("start_date"),
+                        min_yoe=job.get("min_yoe"),
+                        **PROVENANCE,
+                    )
     if not args.no_tag:
         tag_jobs(new_jobs)
-        # The circuit breaker (tag.py) detects a dead `claude` CLI — expired
-        # OAuth is the recurring case — but until now only logged it, so every
-        # auth decay silently stored a night's roles with blank tags. Email
-        # immediately: the rows self-repair via the nightly re-tag hook once
-        # the CLI is re-authed, but re-authing needs a human.
+        # The circuit breaker detects a dead configured CLI. Email immediately:
+        # the rows self-repair via the nightly re-tag hook after re-authentication.
         if tag.LAST_RUN_HEALTH.get("api_transport_down") and not args.dry_run:
             if tag.LAST_RUN_HEALTH.get("api_fallback"):
                 used = "the Anthropic Messages API"
@@ -672,15 +775,19 @@ def main():
                 f"{len(new_jobs)} new roles were tagged.",
             )
         elif tag.LAST_RUN_HEALTH.get("cli_down") and not args.dry_run:
+            tag_provider = tag.tag_provenance()["provider"]
+            cli_name = "Codex CLI" if tag_provider == "codex" else "Claude CLI"
+            login_command = ("codex login" if tag_provider == "codex"
+                             else "claude (then /login)")
             notify.send_alert(
                 "job-scan: tagger CLI down (auth expired?)",
-                f"tag.py circuit breaker tripped: the claude CLI returned "
+                f"tag.py circuit breaker tripped: the {cli_name} returned "
                 f"fully blank batches"
                 + (" and the ANTHROPIC_TAG_API_KEY fallback also failed"
                    if tag.LAST_RUN_HEALTH.get("api_fallback") else "")
                 + f". {len(new_jobs)} new roles were stored "
                 f"with blank tags (invisible to area filters until re-tagged).\n\n"
-                f"Fix: ssh m1, run `claude` and /login to re-auth, then\n"
+                f"Fix: re-authenticate with `{login_command}`, then\n"
                 f"  .venv/bin/python backfill_tags.py --workers 4\n"
                 f"or wait for the nightly re-tag hook to drain the backlog.",
             )
@@ -746,7 +853,8 @@ def main():
     if not args.dry_run and checked > 0:
         degraded_now = _write_health_state(
             raw_counts, {name for name, _ in errors},
-            {name: len(ids) for name, ids in raw_ids_by_company.items()}) or set()
+            {name: len(ids) for name, ids in raw_ids_by_company.items()},
+            dict(errors)) or set()
 
     # Delisting: a stored role missing from a company's fresh board is
     # presumably taken down. Only evaluated for companies that scraped
@@ -789,7 +897,10 @@ def main():
         # out here by name instead. Every configured name counts, not just
         # runnable ones — an unverified/manual/unknown source is still
         # "current", just not actively scraped.
-        orphaned = db.purge_orphaned_companies({t["name"] for t in targets})
+        # Always compare against the complete inventory. `targets` may be a
+        # deliberate subset selected by --company/--retry-failing; treating
+        # unselected firms as removed would purge unrelated database rows.
+        orphaned = db.purge_orphaned_companies(configured_company_names)
         if orphaned:
             print(f"purged {orphaned} roles from sources no longer in "
                   f"targets.json", flush=True)
@@ -797,6 +908,10 @@ def main():
     # The web app is the only surface — store broad, filter/apply on the site.
     print(f"scan: {len(new_jobs)} new roles stored, {checked} firms checked, "
           f"{len(errors)} errors", flush=True)
+    if errors:
+        print("failed sources:", flush=True)
+        for name, error in errors:
+            print(f"  FAIL  {name} — {error}", flush=True)
 
     if _LIGHT_BATCH_TIMED_OUT:
         # See _LIGHT_BATCH_TIMED_OUT: a wedged scraper thread would block the

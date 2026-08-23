@@ -18,6 +18,7 @@ import json
 import os
 import re
 import secrets
+import subprocess
 import urllib.parse
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -42,6 +43,8 @@ from web.descfmt import format_description  # noqa: E402
 
 _TARGETS_PATH = os.path.join(ROOT, "targets.json")
 _TARGETS_CACHE: dict = {"mtime": None, "data": None}
+_APPLY_PROCESSES: dict[str, subprocess.Popen] = {}
+_APPLY_LOG = os.path.join(ROOT, "secrets", "apply_launcher.log")
 
 
 
@@ -380,6 +383,58 @@ def get_db():
         yield db
     finally:
         db.conn.close()
+
+
+def _apply_preflight() -> tuple[bool, str]:
+    """Validate the local private profile and CV before spawning a browser."""
+    profile_path = os.path.join(ROOT, "secrets", "applicant_profile.json")
+    try:
+        with open(profile_path) as fp:
+            profile = json.load(fp)
+    except (OSError, ValueError):
+        return False, "Applicant profile is missing or invalid."
+    docs = profile.get("documents", {})
+    base = os.path.expanduser(docs.get("base_dir", ""))
+    if base and not os.path.isabs(base):
+        base = os.path.join(ROOT, base)
+    cv_path = os.path.join(base, docs.get("cv", "")) if base else ""
+    if not cv_path or not os.path.isfile(cv_path):
+        return False, "Configured CV file was not found."
+    return True, ""
+
+
+def _launch_assisted_apply(job_id: str) -> tuple[bool, str]:
+    """Launch CV-only assisted apply without requiring a terminal.
+
+    The child process opens a dedicated local browser and waits until that
+    window is closed. It never submits and never changes the role to applied.
+    """
+    if not re.fullmatch(r"[A-Za-z0-9_-]+", job_id or ""):
+        return False, "Invalid job ID."
+    running = _APPLY_PROCESSES.get(job_id)
+    if running is not None and running.poll() is None:
+        return True, "The application window is already open."
+    ready, message = _apply_preflight()
+    if not ready:
+        return False, message
+    env = os.environ.copy()
+    env["JOBS_DB"] = DB_FILE
+    env.setdefault("PLAYWRIGHT_BROWSERS_PATH",
+                   os.path.join(ROOT, ".playwright-browsers"))
+    os.makedirs(os.path.dirname(_APPLY_LOG), exist_ok=True)
+    try:
+        with open(_APPLY_LOG, "ab", buffering=0) as log:
+            proc = subprocess.Popen(
+                [sys.executable, os.path.join(ROOT, "apply.py"),
+                 "--job-id", job_id, "--no-letter", "--web"],
+                cwd=ROOT, env=env, stdin=subprocess.DEVNULL,
+                stdout=log, stderr=subprocess.STDOUT,
+                start_new_session=True,
+            )
+    except OSError as exc:
+        return False, f"Could not open the application window: {exc}"
+    _APPLY_PROCESSES[job_id] = proc
+    return True, "Application window opened. Review everything and submit yourself."
 
 
 # --- Auth ---
@@ -964,6 +1019,27 @@ def set_status(job_id: str, request: Request, status: str = Form(...),
     if job is None:
         return HTMLResponse("Not found", status_code=404)
     return TEMPLATES.TemplateResponse(request, "_status_cell.html", {"request": request, "job": job})
+
+
+@app.post("/job/{job_id}/prepare-application", response_class=HTMLResponse)
+def prepare_application(job_id: str, request: Request,
+                        db: JobDB = Depends(get_db), _=Depends(require_owner)):
+    """Start assisted apply from the web UI; never submit the application."""
+    job = db.get_job(job_id)
+    if job is None:
+        return HTMLResponse("Not found", status_code=404)
+    if not job.get("url") or job.get("delisted_at"):
+        return TEMPLATES.TemplateResponse(request, "_apply_launch.html", {
+            "request": request, "job_id": job_id, "state": "error",
+            "message": "This posting has no active application link.",
+        }, status_code=409)
+    launched, message = _launch_assisted_apply(job_id)
+    if launched and job.get("status") == "new":
+        db.set_status(job_id, "queued")
+    return TEMPLATES.TemplateResponse(request, "_apply_launch.html", {
+        "request": request, "job_id": job_id,
+        "state": "launched" if launched else "error", "message": message,
+    }, status_code=200 if launched else 503)
 
 
 @app.post("/job/{job_id}/favorite")

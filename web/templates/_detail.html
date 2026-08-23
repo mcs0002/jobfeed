@@ -16,6 +16,12 @@
     {% if job.url|safe_url %}
     <a class="btn-open{% if job.delisted_at %} dead{% endif %}" href="{{ job.url|safe_url }}" target="_blank" rel="noopener"{% if job.delisted_at %} title="This posting was delisted — the link may 404"{% endif %}>Open posting{% if job.delisted_at %} (may be dead){% endif %} ↗</a>
     {% endif %}
+    {% if request.session.get('role') != 'guest' and not job.delisted_at and job.url|safe_url %}
+      {% set job_id = job.id %}
+      {% set state = 'ready' %}
+      {% set message = '' %}
+      {% include "_apply_launch.html" %}
+    {% endif %}
     <span class="status-select st-{{ job.status }}" data-status-wrap="{{ job.id }}">
       <span class="dot" data-status-id="{{ job.id }}" style="background: var(--st-{{ job.status }})"></span>
       <select data-status-id="{{ job.id }}" aria-label="Application stage"
@@ -59,5 +65,5 @@
   </div>
 
   <div class="dp-other">See all roles at <a href="/?company={{ job.company|urlencode }}&amp;area=">{{ job.company }} →</a></div>
-  <p class="dp-hint">j/k navigate · f favorite · e ignore · a applied</p>
+  <p class="dp-hint">Prepare application opens a separate local browser · final submit stays manual</p>
 </div>

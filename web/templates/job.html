@@ -28,6 +28,12 @@
     {% if job.url|safe_url %}
     <a class="act act-primary{% if job.delisted_at %} act-dead{% endif %}" href="{{ job.url|safe_url }}" target="_blank" rel="noopener"{% if job.delisted_at %} title="This posting was delisted — the link may 404"{% endif %}>Open posting{% if job.delisted_at %} (may be dead){% endif %} ↗</a>
     {% endif %}
+    {% if request.session.get('role') != 'guest' and not job.delisted_at and job.url|safe_url %}
+      {% set job_id = job.id %}
+      {% set state = 'ready' %}
+      {% set message = '' %}
+      {% include "_apply_launch.html" %}
+    {% endif %}
   </div>
 
   {% if request.session.get('role') != 'guest' %}

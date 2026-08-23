@@ -1,0 +1,14 @@
+<div id="apply-launch-{{ job_id }}" class="apply-launch state-{{ state }}">
+  {% if state == 'ready' or state == 'error' %}
+    {% if message %}<span class="apply-message">{{ message }}</span>{% endif %}
+    <button type="button" class="btn-apply"
+      hx-post="/job/{{ job_id }}/prepare-application"
+      hx-target="#apply-launch-{{ job_id }}"
+      hx-swap="outerHTML"
+      hx-confirm="This opens a separate local application browser and may attach your CV to the employer's form. It never submits. Continue?">
+      Prepare application
+    </button>
+  {% else %}
+    <span class="apply-message success">{{ message }} Set the stage to applied here only after submitting.</span>
+  {% endif %}
+</div>
