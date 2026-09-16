@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Jobfeed{% endblock %}</title>
+  <link rel="stylesheet" href="/static/style.css?v={{ asset_v }}">
+  <script src="/static/htmx.min.js"></script>
+  <script>
+    // Apply the saved theme before first paint so there's no light-mode flash
+    // on a dark-mode load. Mirrors the prototype's localStorage key.
+    (function () {
+      try {
+        var t = localStorage.getItem("jsui.theme");
+        if (t === "dark") document.documentElement.setAttribute("data-theme", "dark");
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body class="{% block body_class %}{% endblock %}{% if request.session.get('role') == 'guest' %} guest{% endif %}">
+  <header class="topbar">
+    <div class="topbar-left">
+      <a class="brand" href="/">Jobfeed</a>
+      <nav class="topnav">
+        <a href="/" data-browse-link class="{% if active_nav == 'browse' %}on{% endif %}">Browse</a>
+        {% if request.session.get('role') != 'guest' %}<a href="/applications" class="{% if active_nav == 'applications' %}on{% endif %}">Applications</a>{% endif %}
+        <a href="/stats/applications" class="{% if active_nav == 'application-stats' %}on{% endif %}">Application stats</a>
+        <a href="/stats/technical" class="{% if active_nav == 'technical-stats' %}on{% endif %}">Technical stats</a>
+        <a href="/sources" class="{% if active_nav == 'sources' %}on{% endif %}">Sources</a>
+        <a href="/review" class="{% if active_nav == 'review' %}on{% endif %}" title="Audit the roles tagging hid from you">Review</a>
+        <a href="/limits" class="{% if active_nav == 'limits' %}on{% endif %}" title="How many applications each firm allows per cycle">Limits</a>
+        <a href="/campus" class="{% if active_nav == 'campus' %}on{% endif %}" title="Graduate schemes that never reach an ATS board">Grad</a>
+      </nav>
+    </div>
+    <div class="topbar-right">
+      {% block topbar_extra %}{% endblock %}
+      <button type="button" class="theme-toggle" onclick="window.__toggleTheme()" title="Toggle dark mode" aria-label="Toggle dark mode"></button>
+      {% if request.session.get('role') == 'guest' %}<span class="role-badge" title="Guest access — browsing only, no changes">guest</span>{% endif %}
+      <form method="post" action="/logout" class="logout-form"><button type="submit" title="Log out" aria-label="Log out">⏻</button></form>
+    </div>
+  </header>
+  <main class="{% block main_class %}{% endblock %}">
+    {% block content %}{% endblock %}
+  </main>
+  {# S15 undo toast. Lives here so any page can raise one; only Browse does
+     today. aria-live so the recovery path is announced, not just drawn. #}
+  <div class="undo-toast" id="undo-toast" role="status" aria-live="polite" hidden>
+    <span class="ut-msg" id="undo-toast-msg"></span>
+    <button type="button" class="ut-btn" id="undo-toast-btn">Undo</button>
+  </div>
+  <nav class="bottomnav" aria-label="Sections">
+    <a href="/" data-browse-link class="{% if active_nav == 'browse' %}on{% endif %}"><span class="bn-ico">▤</span>Browse</a>
+    {% if request.session.get('role') != 'guest' %}<a href="/applications" class="{% if active_nav == 'applications' %}on{% endif %}"><span class="bn-ico">A</span>Apply</a>{% endif %}
+    <a href="/stats/applications" class="{% if active_nav == 'application-stats' %}on{% endif %}"><span class="bn-ico">◈</span>App stats</a>
+    <a href="/stats/technical" class="{% if active_nav == 'technical-stats' %}on{% endif %}"><span class="bn-ico">∿</span>Tech stats</a>
+    <a href="/sources" class="{% if active_nav == 'sources' %}on{% endif %}"><span class="bn-ico">⛁</span>Sources</a>
+    <a href="/review" class="{% if active_nav == 'review' %}on{% endif %}"><span class="bn-ico">◌</span>Review</a>
+    <a href="/limits" class="{% if active_nav == 'limits' %}on{% endif %}"><span class="bn-ico">⚖</span>Limits</a>
+    <a href="/campus" class="{% if active_nav == 'campus' %}on{% endif %}"><span class="bn-ico">🎓</span>Grad</a>
+  </nav>
+  <script>
+    // Browse is a working view, not a fresh start. Keep both navigation links
+    // pointed at the last filter/search URL recorded by the Browse page.
+    (function () {
+      try {
+        var href = localStorage.getItem("jsui.lastBrowse") || "/";
+        if (href.charAt(0) !== "/") href = "/";
+        var browseUrl = new URL(href, window.location.origin);
+        browseUrl.searchParams.delete("q");
+        href = browseUrl.pathname + browseUrl.search;
+        localStorage.setItem("jsui.lastBrowse", href);
+        document.querySelectorAll("[data-browse-link]").forEach(function (a) {
+          a.setAttribute("href", href);
+        });
+      } catch (e) {}
+    })();
+    // Theme toggle: swap [data-theme] on <html>, persist, and refresh the
+    // button glyph. Server ships light; dark is the same token set the
+    // prototype used, expressed as CSS custom properties in style.css.
+    (function () {
+      function icon() {
+        var dark = document.documentElement.getAttribute("data-theme") === "dark";
+        document.querySelectorAll(".theme-toggle").forEach(function (b) {
+          b.textContent = dark ? "☀" : "◐";
+        });
+      }
+      window.__toggleTheme = function () {
+        var dark = document.documentElement.getAttribute("data-theme") === "dark";
+        if (dark) document.documentElement.removeAttribute("data-theme");
+        else document.documentElement.setAttribute("data-theme", "dark");
+        try { localStorage.setItem("jsui.theme", dark ? "light" : "dark"); } catch (e) {}
+        icon();
+      };
+      icon();
+    })();
+    window.__copyText = function (id, button) {
+      var node = document.getElementById(id);
+      if (!node || !navigator.clipboard) return;
+      navigator.clipboard.writeText(node.textContent || "").then(function () {
+        var old = button.textContent;
+        button.textContent = "Copied";
+        setTimeout(function () { button.textContent = old; }, 1200);
+      });
+    };
+    document.body.addEventListener("applicationWorkflowChanged", function (event) {
+      var detail = event.detail || {};
+      if (window.__paintStatus) window.__paintStatus(detail.job_id, detail.crm_status);
+      else window.location.reload();
+    });
+  </script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

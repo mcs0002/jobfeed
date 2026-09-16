@@ -1,0 +1,83 @@
+<section id="apply-panel-{{ job.id }}" class="apply-panel">
+  <div class="apply-panel-head">
+    <div>
+      <div class="dp-section-label">Attended application</div>
+      {% if job.application_workflow %}
+      <div class="apply-state as-{{ job.application_workflow.status }}">{{ job.application_workflow.status|replace('_', ' ') }}</div>
+      <div class="apply-state launch-{{ job.application_workflow.launch_status }}">launch {{ job.application_workflow.launch_status|replace('_', ' ') }}</div>
+      {% endif %}
+    </div>
+    {% if job.application_workflow %}<a href="/applications">All applications</a>{% endif %}
+  </div>
+
+  {% if not job.application_workflow %}
+    {% if job.url|safe_url %}
+    <form hx-post="/job/{{ job.id }}/apply" hx-target="#apply-panel-{{ job.id }}" hx-swap="outerHTML">
+      <button class="apply-start" type="submit">Start attended application</button>
+    </form>
+    <p>Creates the queue entry and exact Antigravity handoff. It does not log in, fill, or submit anything.</p>
+    {% else %}
+    <p>This role has no safe application URL to hand off.</p>
+    {% endif %}
+  {% else %}
+    {% set w = job.application_workflow %}
+    {% if w.launch_status == 'idle' and w.status != 'completed' %}
+    <form hx-post="/application/{{ w.workflow_id }}/launch" hx-target="#apply-panel-{{ job.id }}" hx-swap="outerHTML" hx-trigger="load">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <noscript><button type="submit">Open in Antigravity</button></noscript>
+    </form>
+    {% elif w.launch_status in ('pending', 'running') %}
+    <div hx-get="/application/{{ w.workflow_id }}/panel" hx-target="#apply-panel-{{ job.id }}" hx-swap="outerHTML" hx-trigger="every 2s"></div>
+    <p>Opening a fresh Antigravity conversation and entering the two handoff messages.</p>
+    {% elif w.launch_status == 'succeeded' %}
+    <p>Handoff entered in a fresh Antigravity conversation.</p>
+    {% elif w.launch_status == 'failed' and w.status != 'completed' %}
+    <p>Automatic launch stopped safely: {{ w.launch_error_code|replace('_', ' ') }}. The manual handoff below still works.</p>
+    <form hx-post="/application/{{ w.workflow_id }}/launch" hx-target="#apply-panel-{{ job.id }}" hx-swap="outerHTML">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <button type="submit">Retry automatic launch</button>
+    </form>
+    {% endif %}
+    {% if w.detail %}<p class="apply-detail">{{ w.detail }}</p>{% endif %}
+    {% if job.cap_warning %}
+    <div class="cap-warning">
+      <strong>{{ job.company }} caps applications{% if job.cap_warning.view.cap %} at {{ job.cap_warning.view.cap }} per {{ job.cap_warning.view.cycle or 'cycle' }}{% endif %}.</strong>
+      {% if job.cap_warning.quote %}<blockquote class="mail-evidence">{{ job.cap_warning.quote }}</blockquote>{% endif %}
+      {% if job.cap_warning.others %}
+      <p>You already have {{ job.cap_warning.others|length }} other application{{ 's' if job.cap_warning.others|length != 1 }} at this firm:</p>
+      <ul>{% for o in job.cap_warning.others %}<li>{{ o.title }} — {{ o.status|replace('_', ' ') }}</li>{% endfor %}</ul>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    <div class="apply-step">
+      <strong>Manual fallback 1. Start a new Antigravity session on the M1</strong>
+      <code id="browser-command-{{ w.workflow_id }}">{{ w.primary_prompt }}</code>
+      <button type="button" onclick="window.__copyText('browser-command-{{ w.workflow_id }}', this)">Copy opening message</button>
+    </div>
+    <div class="apply-step">
+      <strong>Manual fallback 2. Optional reminder once it reaches review</strong>
+      <code id="followup-prompt-{{ w.workflow_id }}">{{ w.followup_prompt }}</code>
+      <button type="button" onclick="window.__copyText('followup-prompt-{{ w.workflow_id }}', this)">Copy follow-up</button>
+    </div>
+    <p class="apply-truth">Automatic launch uses the local Accessibility helper. These copy controls remain the fallback and never submit an application.</p>
+
+    <div class="apply-owner-actions">
+      {% if w.status not in ('completed', 'failed') %}
+      <form hx-post="/application/{{ w.workflow_id }}/status" hx-target="#apply-panel-{{ job.id }}" hx-swap="outerHTML">
+        <input type="hidden" name="status" value="completed">
+        <button type="submit">I submitted it</button>
+      </form>
+      <span>Only use this after you personally submit on the employer site.</span>
+      {% endif %}
+      {% if w.status == 'failed' %}
+      <form hx-post="/application/{{ w.workflow_id }}/status" hx-target="#apply-panel-{{ job.id }}" hx-swap="outerHTML">
+        <input type="hidden" name="status" value="queued">
+        <button type="submit">Retry handoff</button>
+      </form>
+      {% elif w.status == 'completed' %}
+      <span>Recorded as applied after your manual submission.</span>
+      {% endif %}
+    </div>
+  {% endif %}
+</section>

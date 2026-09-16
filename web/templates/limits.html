@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="lp">
+  <div class="lp-head">
+    <h1>Application limits</h1>
+    <p class="lp-lede">
+      Where a firm caps applications per recruitment cycle, the choice of which
+      role to spend the allowance on is made at the first submission and cannot
+      be taken back. Rows where you have starred more roles than the cap allows
+      are listed first — those are the decisions waiting on you.
+    </p>
+    <div class="lp-stats">
+      <span><b>{{ n_known }}</b> firms with a known cap</span>
+      <span><b>{{ n_checked }}</b> checked</span>
+      {% if n_starred_unknown %}<span><b>{{ n_starred_unknown }}</b> starred firms with no cap found</span>{% endif %}
+    </div>
+  </div>
+
+  <table class="limtable">
+    <thead>
+      <tr>
+        <th>Firm</th><th>Cap</th><th>★</th><th>Sent</th><th>What it says</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for r in rows %}
+      {% set over = r.known and r.favorites > r.cap %}
+      {# a region-varying cap still counts as over-starred: the smallest stated
+         allowance is the one that binds in at least one of the regions #}
+      <tr class="{% if over %}is-over{% elif r.at_cap %}is-atcap{% endif %}">
+        <td class="lt-co">
+          <a href="/?company={{ r.company|urlencode }}">{{ r.company }}</a>
+        </td>
+        <td class="lt-cap">
+          {% if r.known %}
+            <span class="lim-cap-sm">{% if r.varies %}≥{% endif %}{{ r.cap }}{% if r.cycle %}<span class="lt-cycle"> / {{ r.cycle }}</span>{% endif %}</span>
+            {% if r.proof == 'form' %}<span class="lim-tag form" title="Stated on the application form, {{ r.form_checked }}">form ✓</span>
+            {% elif r.proof == 'form_region' %}<span class="lim-tag form" title="One region's rule stated on the application form, {{ r.form_checked }}: {{ r.form_quote }}">form ✓ (one region)</span>
+            {% elif r.proof == 'unconfirmed' %}<span class="lim-tag unconfirmed" title="The application form stated no cap ({{ r.form_checked }}); this figure is from the careers site only">?</span>{% endif %}
+            {% if r.varies %}<span class="lim-tag advisory">by region</span>{% endif %}
+            {% if r.strength == 'advisory' %}<span class="lim-tag advisory">guidance</span>{% endif %}
+            {% if r.proof != 'form' and r.limit.confidence == 'manual' %}<span class="lim-tag manual">yours</span>{% endif %}
+            {% if r.limit.locations_count_separately == 1 %}<div class="lt-flag">locations count separately</div>{% endif %}
+            {% if r.limit.shared_across_programmes == 1 %}<div class="lt-flag">shared with internships</div>{% endif %}
+          {% elif r.checked %}
+            <span class="lt-unknown">{% if r.limit.form_verdict == 'absent' %}none on the form{% else %}none found{% endif %}</span>
+          {% else %}
+            <span class="lt-unknown">not researched</span>
+          {% endif %}
+        </td>
+        <td class="lt-num{% if over %} over{% endif %}">{{ r.favorites or '' }}</td>
+        <td class="lt-num">{{ r.used_total or '' }}</td>
+        <td class="lt-quote">
+          {% if r.known and r.quote %}
+            <span class="lt-q">{{ r.quote }}</span>
+            {% if r.source_url %}<a href="{{ r.source_url|safe_url }}" target="_blank" rel="noopener">↗</a>{% endif %}
+          {% elif r.checked %}
+            <span class="lt-why">{{ r.limit.quote }}</span>
+          {% else %}
+            <span class="lt-why">no early-careers page configured</span>
+          {% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <p class="lp-foot">
+    A cap is only ever recorded from text fetched off the firm's own site, with
+    the sentence it came from stored alongside it, from an attended run that
+    read it on the application form (<b>form ✓</b>, which outranks the site), or
+    from you typing it in. <b>?</b> marks a site figure the application form
+    itself did not repeat. Nothing here is inferred.
+    “Sent” counts roles at status applied or later, all time; the detail pane
+    shows the rolling-12-month figure the cap is actually measured against.
+  </p>
+</div>
+{% endblock %}

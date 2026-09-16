@@ -1,0 +1,107 @@
+{# One company's application cap, as shown in the role detail pane.
+
+   Every stated cap carries its verbatim quote and a link to the page it came
+   from, because the number on its own is not checkable and this is a decision
+   he cannot take back: once the first application goes in at a capped firm,
+   the other starred locations are gone. #}
+<div class="lim" id="lim-{{ company|replace(' ', '-')|replace('.', '')|replace('(', '')|replace(')', '')|replace('&', '') }}">
+  <div class="dp-section-label">Application limit
+    {% if saved %}<span class="lim-saved">saved</span>{% endif %}
+  </div>
+
+  {% if lim.known %}
+    <div class="lim-head{% if lim.at_cap and not lim.varies %} at-cap{% endif %}">
+      {% if lim.varies %}
+        <span class="lim-cap">Varies by region — at least {{ lim.cap }} per {{ lim.cycle or 'cycle' }}</span>
+        <span class="lim-tag advisory" title="Different allowances by region — read the wording below">by region</span>
+      {% else %}
+        <span class="lim-cap">{{ lim.cap }} application{{ '' if lim.cap == 1 else 's' }}{% if lim.cycle %} per {{ lim.cycle }}{% endif %}</span>
+      {% endif %}
+      {% if lim.proof == 'form' %}<span class="lim-tag form" title="Stated on the application form itself, seen by an attended run on {{ lim.form_checked }}">on the form ✓</span>
+      {% elif lim.proof == 'form_region' %}<span class="lim-tag form" title="An application form on {{ lim.form_checked }} stated the rule for its own region; the regional wording below still governs the rest">one region on the form ✓</span>
+      {% elif lim.proof == 'unconfirmed' %}<span class="lim-tag unconfirmed" title="An attended run went through the application form on {{ lim.form_checked }} and it stated no cap. This figure comes from the careers site only.">not on the form ?</span>{% endif %}
+      {% if lim.strength == 'advisory' %}<span class="lim-tag advisory" title="The firm words this as guidance, not a rule">guidance</span>
+      {% elif lim.strength == 'hard' %}<span class="lim-tag hard" title="The firm states this as a rule it enforces">rule</span>{% endif %}
+      {% if lim.proof != 'form' and lim.limit.confidence == 'manual' %}<span class="lim-tag manual" title="You entered this yourself">yours</span>{% endif %}
+      <span class="lim-used">{{ lim.used_recent }} used in the last 12 months</span>
+      {% if lim.remaining is not none and not lim.varies %}
+        <span class="lim-remaining{% if lim.at_cap %} none{% endif %}">{{ lim.remaining }} left</span>
+      {% endif %}
+    </div>
+
+    {% if lim.varies %}
+      <div class="lim-warn">This firm sets a different allowance per region, so there is no single number. The figure shown is the smallest stated. Read the wording before choosing which locations to spend it on.</div>
+    {% endif %}
+    {% if lim.limit.locations_count_separately == 1 %}
+      <div class="lim-warn">Each location counts separately — starring this programme in several cities does not mean you can apply to several.</div>
+    {% elif lim.limit.locations_count_separately == 0 %}
+      <div class="lim-ok">Location is chosen inside the one application.</div>
+    {% endif %}
+    {% if lim.limit.shared_across_programmes == 1 %}
+      <div class="lim-warn">Internship and graduate applications draw on the same allowance.</div>
+    {% endif %}
+
+    {% if lim.quote %}
+      <blockquote class="lim-quote">{{ lim.quote }}</blockquote>
+    {% endif %}
+    {% if lim.proof == 'form_region' and lim.form_quote %}
+      <div class="lim-src">application form, {{ lim.form_checked }}, for its own region:</div>
+      <blockquote class="lim-quote">{{ lim.form_quote }}</blockquote>
+    {% endif %}
+    <div class="lim-src">
+      {% if lim.proof == 'form' %}application form, {{ lim.form_checked }}
+      {% else %}
+      {% if lim.source_url %}<a href="{{ lim.source_url|safe_url }}" target="_blank" rel="noopener">source ↗</a> · {% endif %}
+      checked {{ (lim.limit.checked_at or '')[:10] }}
+      {% endif %}
+    </div>
+
+  {% elif lim.checked %}
+    <div class="lim-none">
+      No cap found.
+      <span class="lim-none-why">{% if lim.limit.form_verdict == 'absent' %}the application form stated none ({{ lim.form_checked }}){% if lim.limit.quote %} · {% endif %}{% endif %}{{ lim.limit.quote or ('' if lim.limit.form_verdict == 'absent' else 'checked, nothing stated') }}</span>
+      {% if lim.limit.source_url %}<a href="{{ lim.limit.source_url|safe_url }}" target="_blank" rel="noopener">page ↗</a>{% endif %}
+    </div>
+    <div class="lim-used-only">{{ lim.used_total }} application{{ '' if lim.used_total == 1 else 's' }} sent to this firm so far ({{ lim.used_recent }} in the last 12 months).</div>
+  {% else %}
+    <div class="lim-none">Not researched — no early-careers page configured for this firm.</div>
+    <div class="lim-used-only">{{ lim.used_total }} application{{ '' if lim.used_total == 1 else 's' }} sent to this firm so far.</div>
+  {% endif %}
+
+  <details class="lim-edit">
+    <summary>{% if lim.known %}Correct this{% else %}Set the limit{% endif %}</summary>
+    <p class="lim-edit-hint">The application form itself is the best source there is, and the one the research pass can't reach — it sits behind a login. If it states a cap, put it here.</p>
+    <form hx-post="/company/limit" hx-target="closest .lim" hx-swap="outerHTML">
+      <input type="hidden" name="company" value="{{ company }}">
+      <div class="lim-fields">
+        <label>Max
+          <input type="number" name="max_per_cycle" min="1" max="20" style="width:4.5em"
+                 value="{{ lim.cap if lim.limit and lim.limit.confidence == 'manual' else '' }}"
+                 placeholder="—">
+        </label>
+        <label>per
+          <input type="text" name="cycle" placeholder="recruitment year" style="width:11em"
+                 value="{{ lim.limit.cycle if lim.limit and lim.limit.confidence == 'manual' else '' }}">
+        </label>
+        <label>Locations count separately
+          <select name="locations_count_separately">
+            <option value="">unknown</option>
+            <option value="yes">yes</option>
+            <option value="no">no</option>
+          </select>
+        </label>
+        <label>Shared with internships
+          <select name="shared_across_programmes">
+            <option value="">unknown</option>
+            <option value="yes">yes</option>
+            <option value="no">no</option>
+          </select>
+        </label>
+      </div>
+      <input type="text" name="source_url" placeholder="where you saw it (URL, optional)" class="lim-wide">
+      <textarea name="quote" rows="2" placeholder="what it said, in their words (optional)" class="lim-wide"></textarea>
+      <button type="submit">Save limit</button>
+      <span class="lim-edit-note">Leave Max empty to clear back to “unknown”.</span>
+    </form>
+  </details>
+</div>

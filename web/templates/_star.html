@@ -1,0 +1,4 @@
+<button type="button" class="star{% if job.favorite %} on{% endif %}"
+  hx-post="/job/{{ job.id }}/favorite" hx-target="this" hx-swap="outerHTML"
+  aria-label="{% if job.favorite %}Remove from favorites{% else %}Add to favorites{% endif %}"
+  title="{% if job.favorite %}Favorited — click to remove{% else %}Mark as favorite{% endif %}">{% if job.favorite %}★{% else %}☆{% endif %}</button>

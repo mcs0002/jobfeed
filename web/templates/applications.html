@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+{% block title %}Applications — Jobfeed{% endblock %}
+{% block main_class %}page applications-page{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>Attended applications</h1>
+</div>
+
+<section class="run-metrics" aria-label="Agent run efficiency">
+  <div class="run-metrics-head">
+    <h2>Agent run efficiency</h2>
+    <span>Last 7 days <b>·</b> all time</span>
+  </div>
+  <div class="run-metrics-grid">
+    <div class="run-metric" title="Agent-started workflows that reached the review-ready checkpoint.">
+      <span class="run-metric-label">Reached review</span>
+      <strong>{{ efficiency.recent.reached_review }}</strong>
+      <span>{{ efficiency.all.reached_review }} all time</span>
+    </div>
+    <div class="run-metric" title="Median time from the first agent-started stamp to review ready. Queue and submission time are excluded.">
+      <span class="run-metric-label">Median to review</span>
+      <strong>{{ efficiency.recent.median }}</strong>
+      <span>{{ efficiency.all.median }} all time</span>
+    </div>
+    <div class="run-metric" title="Fastest time from the first agent-started stamp to review ready. Queue and submission time are excluded.">
+      <span class="run-metric-label">Fastest to review</span>
+      <strong>{{ efficiency.recent.fastest }}</strong>
+      <span>{{ efficiency.all.fastest }} all time</span>
+    </div>
+    <div class="run-metric" title="Agent-started workflows resolved as failed before review, divided by review-ready plus failed outcomes. Open runs are excluded.">
+      <span class="run-metric-label">Failure rate</span>
+      <strong>{{ efficiency.recent.failure_rate }}</strong>
+      <span>{{ efficiency.all.failure_rate }} all time</span>
+    </div>
+  </div>
+</section>
+
+{% if actions %}
+<section class="todo-box">
+  <h2>Needs your action <span>{{ actions|length }}</span></h2>
+  <div class="todo-list">
+  {% for a in actions %}
+  <article class="todo-item">
+    <div class="todo-urgency {{ a.due_tone }}">
+      <strong>{{ a.due_label }}</strong>
+      {% if a.due_display %}<span>{{ a.due_display }}</span>{% endif %}
+    </div>
+    <div class="todo-content">
+      <span class="todo-company">{{ a.company or 'Application task' }}</span>
+      <h3>{{ a.title or a.subject or 'Action required' }}</h3>
+      <p class="todo-instruction">{{ a.action_required }}</p>
+      <div class="todo-footer">
+        <div class="todo-meta">
+          <span>Received {{ a.received_at[:10] }}</span>
+          {% if a.title and a.subject %}<span>{{ a.subject }}</span>{% endif %}
+        </div>
+        <div class="todo-actions">
+          {% if a.action_url %}<a class="todo-open" href="{{ a.action_url }}" target="_blank" rel="noopener noreferrer">Open task ↗</a>
+          {% else %}<span class="todo-no-link">No direct link</span>{% endif %}
+          <form method="post" action="/application-mail/{{ a.message_key }}/dismiss">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <button type="submit" class="todo-done">Done</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </article>
+  {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{% if pending_mail %}
+<section class="mail-queue">
+  <h2>Inbox needs a decision ({{ pending_mail|length }})</h2>
+  <p class="mail-queue-note">Recruiting mail the nightly pass could not attach to exactly one role you have acted on. Nothing was changed.</p>
+  {% for m in pending_mail %}
+  <article class="mail-item">
+    <div class="mail-item-head">
+      <span class="apply-state as-{{ m.proposed_status }}">{{ m.proposed_status|replace('_', ' ') }}</span>
+      <strong>{{ m.subject }}</strong>
+    </div>
+    <p class="mail-meta">{{ m.received_at[:16]|replace('T', ' ') }} · {{ m.sender }}</p>
+    <p class="mail-reason">{{ m.match_reason }}</p>
+    {% if m.evidence %}<blockquote class="mail-evidence">{{ m.evidence }}</blockquote>{% endif %}
+    <div class="mail-actions">
+      {% if m.roles %}
+      <form method="post" action="/application-mail/{{ m.message_key }}/adopt">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <select name="job_id" aria-label="Role this message belongs to">
+          {% for r in m.roles %}
+          <option value="{{ r.id }}">{{ r.title }}{% if r.location %} — {{ r.location }}{% endif %}{% if r.status != 'new' %} ({{ r.status }}){% endif %}</option>
+          {% endfor %}
+        </select>
+        <button type="submit">Mark {{ m.proposed_status|replace('_', ' ') }}</button>
+      </form>
+      {% else %}
+      <span class="mail-meta">No role on the board matched this firm — open it in Browse and set the status there.</span>
+      {% endif %}
+      <form method="post" action="/application-mail/{{ m.message_key }}/dismiss">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <button type="submit" class="mail-dismiss">Dismiss</button>
+      </form>
+    </div>
+  </article>
+  {% endfor %}
+</section>
+{% endif %}
+
+{% if workflows %}
+<div class="application-list">
+  {% for w in workflows %}
+  <article class="application-row">
+    <div class="application-summary">
+      <div class="application-statuses">
+      <div class="apply-state as-{{ w.status }}">{{ w.status|replace('_', ' ') }}</div>
+      <div class="apply-state launch-{{ w.launch_status }}">launch {{ w.launch_status|replace('_', ' ') }}</div>
+      {% if w.submitted_confirmed_at %}<div class="apply-state as-submitted" title="{{ w.submitted_evidence }}">submitted · confirmed by employer</div>{% endif %}
+      </div>
+      <div class="application-identity">
+        <span class="application-company">{{ w.company }}</span>
+        <h2><a href="/job/{{ w.job_id }}">{{ w.title }}</a></h2>
+        <div class="application-context">
+          {% if w.location %}
+          <span class="application-context-item">
+            <span class="application-context-label">Location</span>
+            <span class="application-context-value">{{ w.location }}</span>
+          </span>
+          {% endif %}
+          <time class="application-context-item application-updated" datetime="{{ w.updated_at }}">
+            <span class="application-context-label">Updated</span>
+            <span class="application-context-value">{{ w.updated_at[:16]|replace('T', ' ') }}</span>
+          </time>
+        </div>
+      </div>
+      <div class="application-row-actions">
+        {% if w.primary_action %}<a class="application-primary" href="{{ w.primary_action.url }}" target="_blank" rel="noopener noreferrer">{{ w.primary_action.label }} ↗</a>{% endif %}
+        <a class="application-secondary" href="/job/{{ w.job_id }}">Open role</a>
+      </div>
+    </div>
+    <details class="application-details">
+      <summary>Details</summary>
+      <div class="application-row-stats">
+    {% if w.detail %}<p class="apply-detail">{{ w.detail }}</p>{% endif %}
+    {% if w.timeline %}
+    <ol class="application-timeline">
+      {% for step in w.timeline %}
+      <li{% if step.label == 'total' %} class="tl-total"{% endif %}>
+        <span class="tl-label">{{ step.label }}</span>
+        <span class="tl-at">{% if step.show_date %}{{ step.date }} {% endif %}{{ step.at }}</span>
+        <span class="tl-since">{% if step.since %}{% if step.label == 'total' %}{{ step.since }}{% else %}+{{ step.since }}{% endif %}{% endif %}</span>
+      </li>
+      {% endfor %}
+      {% if w.launch_attempts and w.launch_attempts > 1 %}
+      <li class="tl-warn"><span class="tl-label">launch attempts</span><span class="tl-since">{{ w.launch_attempts }}</span></li>
+      {% endif %}
+      {% if w.launch_error_code %}
+      <li class="tl-warn"><span class="tl-label">last launch error</span><span class="tl-since">{{ w.launch_error_code|replace('_', ' ') }}</span></li>
+      {% endif %}
+    </ol>
+    {% endif %}
+    {% if w.generated %}
+    <div class="generated">
+      <h3>Generated for this application ({{ w.generated|length }})</h3>
+      {% for g in w.generated %}
+      <details class="generated-item">
+        <summary>
+          <span class="apply-state as-generated">{{ g.kind }}</span>
+          <span class="mail-subject">{{ g.request_id }}</span>
+          <span class="mail-meta">
+            {%- if g.counts.words %}{{ g.counts.words }} words · {{ g.counts.characters }} chars
+            {%- if g.counts.lines %} · {{ g.counts.lines }} lines{% endif %}
+            {%- elif g.pages %}{{ g.pages }} page{% if g.pages != 1 %}s{% endif %}{% endif -%}
+          </span>
+        </summary>
+        <pre class="generated-text">{{ g.text }}</pre>
+      </details>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% if w.mail %}
+    <ul class="application-mail">
+      {% for m in w.mail %}
+      <li>
+        <span class="mail-line">
+          <span class="apply-state as-{{ m.proposed_status }}">{{ m.proposed_status|replace('_', ' ') }}</span>
+          <span class="mail-subject">{{ m.subject }}</span>
+          <span class="mail-meta">{{ m.received_at[:10] }}{% if m.outcome != 'applied' %} · {{ m.outcome|replace('_', ' ') }}{% endif %}</span>
+        </span>
+        {% if m.evidence %}<blockquote class="mail-evidence">{{ m.evidence }}</blockquote>{% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+      </div>
+    </details>
+  </article>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% if not workflows %}
+<div class="empty-state">No application workflows yet. Select a role in Browse and start one from its detail pane.</div>
+{% endif %}
+{% endblock %}
