@@ -1,0 +1,86 @@
+{# The attended application's state. Starting one lives in _apply_button.html
+   beside Open posting; before a run exists this section is an empty, hidden
+   swap target for that button's response. #}
+{% if not job.application_workflow %}
+<section id="apply-panel-{{ job.id }}" class="apply-panel" hidden></section>
+{% else %}
+{% set w = job.application_workflow %}
+<section id="apply-panel-{{ job.id }}" class="apply-panel">
+  <div class="apply-panel-head">
+    <div>
+      <div class="dp-section-label">Attended application</div>
+      <div class="apply-state as-{{ w.status }}">{{ w.status|replace('_', ' ') }}</div>
+      {% if w.status != 'completed' %}<div class="apply-state launch-{{ w.launch_status }}">launch {{ w.launch_status|replace('_', ' ') }}</div>{% endif %}
+    </div>
+    <a href="/applications">All applications</a>
+  </div>
+
+  {% set run = job.application_run %}
+  {% if run and run.state == 'queued' %}
+  <div hx-get="/application/{{ w.workflow_id }}/panel" hx-target="#apply-panel-{{ job.id }}" hx-swap="outerHTML" hx-trigger="every 5s"></div>
+  <p>Queued{% if job.queue_ahead %} behind {{ job.queue_ahead }} application{{ 's' if job.queue_ahead != 1 }}{% endif %}. It starts in a new tab once the current browser agent is confirmed stopped{% if not job.autopilot.enabled or job.autopilot.paused_reason %}, but the queue is <a href="/applications#autopilot">paused</a>{% endif %}.</p>
+  <form method="post" action="/application-run/{{ run.run_id }}/cancel">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <button type="submit">Remove from queue</button>
+  </form>
+  {% elif w.launch_status == 'idle' and w.status != 'completed' and not run %}
+  <form hx-post="/application/{{ w.workflow_id }}/launch" hx-target="#apply-panel-{{ job.id }}" hx-swap="outerHTML" hx-trigger="load">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <noscript><button type="submit">Open in Antigravity</button></noscript>
+  </form>
+  {% elif w.launch_status in ('pending', 'running') %}
+  <div hx-get="/application/{{ w.workflow_id }}/panel" hx-target="#apply-panel-{{ job.id }}" hx-swap="outerHTML" hx-trigger="every 2s"></div>
+  <p>Opening a fresh Antigravity conversation.</p>
+  {% elif run and run.state in ('running', 'draining') %}
+  <div hx-get="/application/{{ w.workflow_id }}/panel" hx-target="#apply-panel-{{ job.id }}" hx-swap="outerHTML" hx-trigger="every 10s"></div>
+  <p>{% if run.state == 'running' %}The browser agent is filling this form.{% else %}Outcome reported; waiting for the agent to be confirmed stopped before the next one starts.{% endif %}{% if run.recovery_required %} <a href="/applications#autopilot">Needs you: {{ run.recovery_reason }}</a>{% endif %}</p>
+  {% elif w.launch_status == 'failed' and w.status != 'completed' %}
+  <p>Automatic launch stopped safely: {{ w.launch_error_code|replace('_', ' ') }}.</p>
+  <form hx-post="/application/{{ w.workflow_id }}/launch" hx-target="#apply-panel-{{ job.id }}" hx-swap="outerHTML">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <button type="submit">Retry automatic launch</button>
+  </form>
+  {% elif w.launch_status == 'succeeded' and w.status in ('needs_user_action', 'failed') %}
+  <form hx-post="/application/{{ w.workflow_id }}/launch" hx-target="#apply-panel-{{ job.id }}" hx-swap="outerHTML">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <button type="submit" title="Queues a new attempt; it opens a new tab and starts when no other agent is running.">Run the agent again</button>
+  </form>
+  {% endif %}
+  {% if w.detail %}<p class="apply-detail">{{ w.detail }}</p>{% endif %}
+
+  {% if job.cap_warning %}
+  <div class="cap-warning">
+    <strong>{{ job.company }} caps applications{% if job.cap_warning.view.cap %} at {{ job.cap_warning.view.cap }} per {{ job.cap_warning.view.cycle or 'cycle' }}{% endif %}.</strong>
+    {% if job.cap_warning.quote %}<blockquote class="mail-evidence">{{ job.cap_warning.quote }}</blockquote>{% endif %}
+    {% if job.cap_warning.others %}
+    <p>You already have {{ job.cap_warning.others|length }} other application{{ 's' if job.cap_warning.others|length != 1 }} at this firm:</p>
+    <ul>{% for o in job.cap_warning.others %}<li>{{ o.title }} — {{ o.status|replace('_', ' ') }}</li>{% endfor %}</ul>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  {% if w.status == 'completed' and w.updated_by == 'owner' %}
+  <p>Recorded as applied after your manual submission.</p>
+  {% endif %}
+
+  {% if w.status != 'completed' %}
+  <div class="apply-owner-actions">
+    {% if w.status != 'failed' %}
+    <form hx-post="/application/{{ w.workflow_id }}/status" hx-target="#apply-panel-{{ job.id }}" hx-swap="outerHTML">
+      <input type="hidden" name="status" value="completed">
+      <button type="submit">I submitted it</button>
+    </form>
+    {% else %}
+    <form hx-post="/application/{{ w.workflow_id }}/status" hx-target="#apply-panel-{{ job.id }}" hx-swap="outerHTML">
+      <input type="hidden" name="status" value="queued">
+      <button type="submit">Retry handoff</button>
+    </form>
+    {% endif %}
+    {# Restarting a run needs the whole opening message, not the /browser line
+       alone, or the retry reports to no workflow (Squarepoint, 2026-09-13). #}
+    <code id="browser-command-{{ w.workflow_id }}" hidden>{{ w.primary_prompt }}</code>
+    <button type="button" class="apply-copy" onclick="window.__copyText('browser-command-{{ w.workflow_id }}', this)">Copy opening message</button>
+  </div>
+  {% endif %}
+</section>
+{% endif %}

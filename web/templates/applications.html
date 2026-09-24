@@ -1,0 +1,347 @@
+{% extends "base.html" %}
+{% block title %}Applications — Jobfeed{% endblock %}
+{% block main_class %}page applications-page{% endblock %}
+{% block content %}
+{#- A metric tile, or nothing when the window and all time are both empty:
+    a wall of zeros and dashes reads as broken, not as "no runs yet". -#}
+{% macro metric(label, tip, recent, all, sub=none) -%}
+{%- set blank = (0, '0', '—', '', '0%', '0s', '0.0') -%}
+{%- if recent not in blank or all not in blank -%}
+    <div class="run-metric" title="{{ tip }}">
+      <span class="run-metric-label">{{ label }}</span>
+      <strong>{{ recent }}</strong>
+      <span>{{ sub if sub is not none else all ~ ' all time' }}</span>
+    </div>
+{%- endif -%}
+{%- endmacro %}
+<div class="page-head">
+  <h1>Attended applications</h1>
+</div>
+{% set n_queued = workflows|selectattr('status', 'equalto', 'queued')|list|length %}
+{% set n_active = workflows|selectattr('status', 'in', ['in_progress', 'needs_user_action', 'review_ready'])|list|length %}
+{% set n_done = workflows|selectattr('status', 'equalto', 'completed')|list|length %}
+<div class="summary-cards">
+  <div class="scard"><div class="k">Queued</div><div class="v">{{ n_queued }}</div></div>
+  <div class="scard"><div class="k">In progress</div><div class="v">{{ n_active }}</div><div class="sub">running, review or needs you</div></div>
+  <div class="scard"><div class="k">Submitted</div><div class="v good">{{ n_done }}</div></div>
+  <div class="scard"><div class="k">To do</div><div class="v{% if actions or pending_mail %} closing{% endif %}">{{ actions|length + pending_mail|length }}</div><div class="sub">tasks and mail to place</div></div>
+</div>
+
+<section class="autopilot" id="autopilot" aria-label="Autopilot queue">
+  {% set q = queue %}
+  <div class="run-metrics-head">
+    <h2 title="One browser agent at a time, each in its own tab. The next application starts only after the previous agent is confirmed stopped; every form still stops before submit.">Autopilot queue</h2>
+    <form method="post" action="/autopilot" class="autopilot-toggle">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      {% if q.settings.enabled and not q.settings.paused_reason %}
+      <span class="apply-state as-in_progress">running</span>
+      <button type="submit" name="action" value="pause">Pause</button>
+      {% else %}
+      <span class="apply-state as-failed">paused</span>
+      <button type="submit" name="action" value="resume">Resume</button>
+      {% endif %}
+    </form>
+  </div>
+  {% if q.settings.paused_reason %}<p class="autopilot-warn">Paused by a safety check: {{ q.settings.paused_reason }}. Resume once you have looked.</p>{% endif %}
+  {% if q.active %}
+  <div class="autopilot-active">
+    <span class="apply-state as-{{ 'needs_user_action' if q.active.recovery_required else 'in_progress' }}">{{ q.active.state }}</span>
+    <a href="/job/{{ q.active.job_id }}"><strong>{{ q.active.company }}</strong> · {{ q.active.title }}</a>
+    <span class="mail-meta">attempt {{ q.active.attempt_no }} · since {{ (q.active.launching_at or '')[11:16] }}{% if q.active.last_activity_at %} · last activity {{ q.active.last_activity_at[11:16] }}{% endif %}</span>
+    {% if q.active.recovery_required %}
+    <p class="autopilot-warn">Needs you: {{ q.active.recovery_reason }}. If the agent's conversation in Antigravity has stopped (or you stopped it), confirm below and the queue moves on.</p>
+    <form method="post" action="/application-run/{{ q.active.run_id }}/confirm-stopped">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <button type="submit">The agent is stopped</button>
+    </form>
+    {% endif %}
+  </div>
+  {% else %}
+  <p class="mail-meta">No agent running.</p>
+  {% endif %}
+  {% if q.queued %}
+  <ol class="autopilot-queue">
+    {% for r in q.queued %}
+    <li>
+      <a href="/job/{{ r.job_id }}"><strong>{{ r.company }}</strong> · {{ r.title }}</a>
+      <span class="mail-meta">queued {{ r.queued_at[:16]|replace('T', ' ') }}{% if r.attempt_no > 1 %} · attempt {{ r.attempt_no }}{% endif %}</span>
+      <form method="post" action="/application-run/{{ r.run_id }}/cancel">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <button type="submit" class="mail-dismiss">Remove</button>
+      </form>
+    </li>
+    {% endfor %}
+  </ol>
+  {% endif %}
+  {% if q.recent %}
+  <details class="autopilot-recent">
+    <summary>Recent runs</summary>
+    <ul>
+      {% for r in q.recent %}
+      <li><span class="apply-state as-{{ 'needs_user_action' if r.state == 'parked' else r.state }}">{{ r.state|replace('_', ' ') }}</span>
+        <a href="/job/{{ r.job_id }}">{{ r.company }} · {{ r.title }}</a>
+        <span class="mail-meta">stopped {{ (r.agent_stopped_at or '')[11:16] }} by {{ r.stop_source|replace('_', ' ') }}</span></li>
+      {% endfor %}
+    </ul>
+  </details>
+  {% endif %}
+</section>
+
+{# One row of the numbers that say whether the agent is healthy; the rest
+   fold away. Two sections of thirteen tiles was a wall he had to read past
+   to reach the inbox (2026-09-24). #}
+<section class="run-metrics" aria-label="Agent runs">
+  <div class="run-metrics-head">
+    <h2>Agent runs</h2>
+    <span>Last 7 days <b>·</b> all time</span>
+  </div>
+  <div class="run-metrics-grid one-row">
+    {{ metric('Reached review', 'Agent-started workflows that reached the review-ready checkpoint.', efficiency.recent.reached_review, efficiency.all.reached_review) }}
+    {{ metric('Median to review', 'Median time from the first agent-started stamp to review ready. Queue and submission time are excluded.', efficiency.recent.median, efficiency.all.median) }}
+    {{ metric('Failure rate', 'Agent-started workflows resolved as failed before review, divided by review-ready plus failed outcomes. Open runs are excluded.', efficiency.recent.failure_rate, efficiency.all.failure_rate) }}
+    {{ metric('Agent time', 'Median time the browser agent spent per application, summed over its sessions (restarts included).', process.recent.median_agent_time, process.all.median_agent_time) }}
+    {{ metric('Restarted', 'Applications that needed more than one browser-agent session.', process.recent.restarted, process.all.restarted) }}
+    {{ metric('Failed steps', 'Agent steps that ended in an error (timeouts, stale uids, refused commands).', process.recent.failed_steps, process.all.failed_steps) }}
+  </div>
+  <details class="agent-more">
+    <summary>All agent metrics</summary>
+    <div class="run-metrics-grid one-row">
+      {{ metric('Fastest to review', 'Fastest time from the first agent-started stamp to review ready. Queue and submission time are excluded.', efficiency.recent.fastest, efficiency.all.fastest) }}
+      {{ metric('Generations', 'Median model generations per application, parent and browser agent together.', process.recent.median_generations, process.all.median_generations) }}
+      {{ metric('Tool calls', 'Median browser-agent tool calls per application. Each costs one model turn, so this drives run time.', process.recent.median_tool_calls, process.all.median_tool_calls) }}
+      {{ metric('Per generation', "Median seconds per browser-agent generation: the model's speed, which the setup cannot change.", process.recent.sec_per_generation, process.all.sec_per_generation) }}
+      {{ metric('Permission prompts', 'Prompts raised by agent tool calls. Each one blocks the run until answered.', process.recent.prompts, process.all.prompts) }}
+      {{ metric('Snapshot re-reads', 'Times a run re-read the same page snapshot file: a loop signature.', process.recent.snapshot_rereads, process.all.snapshot_rereads) }}
+      {{ metric('Outside searches', 'Searches outside the granted files, which raise a permission prompt.', process.recent.outside_searches, process.all.outside_searches) }}
+      {{ metric('Own tab', 'Applications whose browser agent opened its own tab instead of taking over the selected one (required from 2026-09-19), and the count of actions on a tab the agent did not open.', process.recent.own_tab, process.all.own_tab, process.recent.tab_violations ~ " breaches · " ~ process.all.own_tab ~ " all time") }}
+      {{ metric('Applications', 'Applications an agent worked on in the window.', process.recent.applications, process.all.applications) }}
+    </div>
+  </details>
+</section>
+
+<div class="apps-split">
+  <section class="apps-col apps-inbox" aria-label="Inbox">
+    <h2>Inbox{% if pending_mail %} <span class="apps-count warn">{{ pending_mail|length }} to place</span>{% endif %}</h2>
+    {% if pending_mail %}
+    <p class="mail-queue-note">Mail the nightly pass could not attach to exactly one role. Nothing was changed.</p>
+  {% for m in pending_mail %}
+  <article class="mail-item">
+    <div class="mail-item-head">
+      <span class="apply-state as-{{ m.proposed_status }}">{{ m.proposed_status|replace('_', ' ') }}</span>
+      <strong>{{ m.subject }}</strong>
+    </div>
+    <p class="mail-meta">{{ m.received_at[:16]|replace('T', ' ') }} · {{ m.sender }}</p>
+    <p class="mail-reason">{{ m.match_reason }}{% if m.reason_kind and m.reason_kind != 'none' %} · {{ m.reason_kind|replace('_', ' ') }}{% endif %}</p>
+    {% if m.evidence %}<blockquote class="mail-evidence">{{ m.evidence }}</blockquote>{% endif %}
+    {% if m.rejection_reason and m.rejection_reason != m.evidence %}<blockquote class="mail-evidence">{{ m.rejection_reason }}</blockquote>{% endif %}
+    {% if m.reapply_after %}<p class="mail-reason">No new application until {{ m.reapply_after }}: {{ m.reapply_quote }}</p>{% elif m.reapply_kind == 'cycle_rule' %}<p class="mail-reason">Application-cycle rule: {{ m.reapply_quote }}</p>{% endif %}
+    <div class="mail-actions">
+      {% if m.roles %}
+      <form method="post" action="/application-mail/{{ m.message_key }}/adopt">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <select name="job_id" aria-label="Role this message belongs to">
+          {% for r in m.roles %}
+          <option value="{{ r.id }}">{% if m.any_role %}{{ r.company }} · {% endif %}{{ r.title }}{% if r.location %} — {{ r.location }}{% endif %}{% if r.status != 'new' %} ({{ r.status }}){% endif %}</option>
+          {% endfor %}
+        </select>
+        <button type="submit">Mark {{ m.proposed_status|replace('_', ' ') }}</button>
+      </form>
+      {% else %}
+      <span class="mail-meta">Nothing on the board to attach this to yet — open the role in Browse and set the status there.</span>
+      {% endif %}
+      <form method="post" action="/application-mail/{{ m.message_key }}/dismiss">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <button type="submit" class="mail-dismiss">Dismiss</button>
+      </form>
+    </div>
+  </article>
+  {% endfor %}
+    {% endif %}
+    {% if unplaced_mail %}
+    <p class="mail-queue-note">From an employer, but the pass could not read a status from it. Placing one files it against the role and changes nothing else.</p>
+    {% for m in unplaced_mail %}
+    <article class="mail-item">
+      <div class="mail-item-head"><strong>{{ m.subject }}</strong></div>
+      <p class="mail-meta">{{ m.received_at[:16]|replace('T', ' ') }} · {{ m.sender }}</p>
+      <p class="mail-reason">Not classified · sender matched {{ m.sender_match }}{% if m.any_role %} · firm not read from the sender, pick the role{% endif %}</p>
+      <div class="mail-actions">
+        {% if m.roles %}
+        <form method="post" action="/application-mail/{{ m.message_key }}/adopt">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <select name="job_id" aria-label="Role this message belongs to">
+            {% for r in m.roles %}
+            <option value="{{ r.id }}">{% if m.any_role %}{{ r.company }} · {% endif %}{{ r.title }}{% if r.location %} — {{ r.location }}{% endif %}{% if r.status != 'new' %} ({{ r.status }}){% endif %}</option>
+            {% endfor %}
+          </select>
+          <button type="submit">File against role</button>
+        </form>
+        {% else %}
+        <span class="mail-meta">Nothing on the board to file this against yet.</span>
+        {% endif %}
+        <form method="post" action="/application-mail/{{ m.message_key }}/dismiss">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <button type="submit" class="mail-dismiss">Dismiss</button>
+        </form>
+      </div>
+    </article>
+    {% endfor %}
+    {% endif %}
+    {% if recent_mail %}
+    <div class="apps-feed-label">Last 24 hours on your roles</div>
+    <ul class="inbox-feed">
+      {% for m in recent_mail %}
+      <li class="inbox-feed-item">
+        <div class="inbox-head">
+          <span class="apply-state as-{{ m.proposed_status or 'note' }}">{{ (m.proposed_status or 'note')|replace('_', ' ') }}</span>
+          <a class="inbox-subject" href="/job/{{ m.job_id }}">{{ m.company }} · {{ m.title }}</a>
+          <span class="inbox-date">{{ m.received_at[:10] }}</span>
+        </div>
+        <div class="inbox-from">{{ m.subject }}{% if m.reason_kind and m.reason_kind != 'none' %} · <span class="inbox-kind">{{ m.reason_kind|replace('_', ' ') }}</span>{% endif %}</div>
+        {% if m.rejection_reason %}<blockquote class="mail-evidence">{{ m.rejection_reason }}</blockquote>
+        {% elif m.evidence %}<blockquote class="mail-evidence">{{ m.evidence }}</blockquote>{% endif %}
+        {% if m.reapply_after %}<div class="inbox-from">No new application until {{ m.reapply_after }}</div>{% elif m.reapply_kind == 'cycle_rule' %}<div class="inbox-from">Application-cycle rule: {{ m.reapply_quote }}</div>{% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+    {% elif not pending_mail and not unplaced_mail %}
+    <p class="apps-empty">No new mail in the last 24 hours, and nothing to place.</p>
+    {% endif %}
+  </section>
+
+  <section class="apps-col apps-todo todo-box" aria-label="To do">
+    <h2>To do{% if actions %} <span>{{ actions|length }}</span>{% endif %}</h2>
+    {% if actions %}
+  <div class="todo-list">
+  {% for a in actions %}
+  <article class="todo-item">
+    <div class="todo-urgency {{ a.due_tone }}">
+      <strong>{{ a.due_label }}</strong>
+      {% if a.due_display %}<span>{{ a.due_display }}</span>{% endif %}
+    </div>
+    <div class="todo-content">
+      <span class="todo-company">{{ a.company or 'Application task' }}</span>
+      <h3>{{ a.title or a.subject or 'Action required' }}</h3>
+      <p class="todo-instruction">{{ a.action_required }}</p>
+      <div class="todo-footer">
+        <div class="todo-meta">
+          <span>Received {{ a.received_at[:10] }}</span>
+          {% if a.title and a.subject %}<span>{{ a.subject }}</span>{% endif %}
+        </div>
+        <div class="todo-actions">
+          {% if a.action_url %}<a class="todo-open" href="{{ a.action_url }}" target="_blank" rel="noopener noreferrer">Open task ↗</a>
+          {% else %}<span class="todo-no-link">No direct link</span>{% endif %}
+          <form method="post" action="/application-mail/{{ a.message_key }}/dismiss">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <button type="submit" class="todo-done">Done</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </article>
+  {% endfor %}
+  </div>
+    {% else %}
+    <p class="apps-empty">Nothing waiting on you.</p>
+    {% endif %}
+  </section>
+</div>
+
+{% if workflows %}
+<div class="application-list">
+  {% for w in workflows %}
+  <article class="application-row">
+    <div class="application-summary">
+      <div class="application-statuses">
+      <div class="apply-state as-{{ w.status }}">{{ w.status|replace('_', ' ') }}</div>
+      <div class="apply-state launch-{{ w.launch_status }}">launch {{ w.launch_status|replace('_', ' ') }}</div>
+      {% if w.submitted_confirmed_at %}<div class="apply-state as-submitted" title="{{ w.submitted_evidence }}">submitted · confirmed by employer</div>{% endif %}
+      </div>
+      <div class="application-identity">
+        <span class="application-company">{{ w.company }}</span>
+        <h2><a href="/job/{{ w.job_id }}">{{ w.title }}</a></h2>
+        <div class="application-context">
+          {% if w.location %}
+          <span class="application-context-item">
+            <span class="application-context-label">Location</span>
+            <span class="application-context-value">{{ w.location }}</span>
+          </span>
+          {% endif %}
+          <time class="application-context-item application-updated" datetime="{{ w.updated_at }}">
+            <span class="application-context-label">Updated</span>
+            <span class="application-context-value">{{ w.updated_at[:16]|replace('T', ' ') }}</span>
+          </time>
+        </div>
+      </div>
+      <div class="application-row-actions">
+        {% if w.primary_action %}<a class="application-primary" href="{{ w.primary_action.url }}" target="_blank" rel="noopener noreferrer">{{ w.primary_action.label }} ↗</a>{% endif %}
+        <a class="application-secondary" href="/job/{{ w.job_id }}">Open role</a>
+      </div>
+    </div>
+    <details class="application-details">
+      <summary>Details{% if w.run_stats.sessions %} <span class="details-peek">{{ w.run_stats.agent_time }} · {{ w.run_stats.generations }} generations · {{ w.run_stats.tool_calls }} calls{% if w.run_stats.sessions > 1 %} · {{ w.run_stats.sessions }} sessions{% endif %}
+      {{- "" }}</span>{% endif %}</summary>
+      <div class="application-row-stats">
+    {% set rs = w.run_stats %}
+    {% set show_stats = rs.sessions %}
+    {% if show_stats %}
+    <dl class="run-stat-grid">
+      {% if rs.sessions %}
+      <div><dt>Agent time</dt><dd>{{ rs.agent_time }}</dd></div>
+      <div><dt>Sessions</dt><dd>{{ rs.sessions }} browser{% if rs.parents %} · {{ rs.parents }} parent{% endif %}</dd></div>
+      <div><dt>Generations</dt><dd>{{ rs.generations }}{% if rs.sub_generations != rs.generations %} <small>({{ rs.sub_generations }} browser)</small>{% endif %}</dd></div>
+      <div><dt>Per generation</dt><dd>{{ rs.sec_per_generation or '—' }}{% if rs.sec_per_generation %}s{% endif %}</dd></div>
+      <div><dt>Tool calls</dt><dd>{{ rs.tool_calls }} <small>({{ rs.browser_calls }} browser)</small></dd></div>
+      <div><dt>Snapshots</dt><dd>{{ rs.snapshots_written }} written · {{ rs.snapshot_reads }} read{% if rs.snapshot_rereads %} · <b class="warn">{{ rs.snapshot_rereads }} re-read</b>{% endif %}</dd></div>
+      <div{% if rs.failed_steps %} class="warn"{% endif %}><dt>Failed steps</dt><dd>{{ rs.failed_steps }}</dd></div>
+      <div{% if rs.prompts %} class="warn"{% endif %}><dt>Permission prompts</dt><dd>{{ rs.prompts }}</dd></div>
+      <div{% if rs.outside_searches %} class="warn"{% endif %}><dt>Outside searches</dt><dd>{{ rs.outside_searches }}</dd></div>
+      <div{% if rs.tab_violations or not rs.own_tab %} class="warn"{% endif %}><dt>Own tab</dt><dd>{% if rs.own_tab %}yes{% else %}no{% endif %}{% if rs.tab_violations %} · {{ rs.tab_violations }} breach{% if rs.tab_violations != 1 %}es{% endif %}{% endif %}</dd></div>
+      <div><dt>Model</dt><dd>{{ rs.model or '—' }}</dd></div>
+      {% endif %}
+    </dl>
+    {% endif %}
+    {% if w.detail %}<p class="apply-detail">{{ w.detail }}</p>{% endif %}
+    {% if w.timeline %}
+    <ol class="application-timeline">
+      {% for step in w.timeline %}
+      <li{% if step.label == 'total' %} class="tl-total"{% endif %}>
+        <span class="tl-label">{{ step.label }}</span>
+        <span class="tl-at">{% if step.show_date %}{{ step.date }} {% endif %}{{ step.at }}</span>
+        <span class="tl-since">{% if step.since %}{% if step.label == 'total' %}{{ step.since }}{% else %}+{{ step.since }}{% endif %}{% endif %}</span>
+      </li>
+      {% endfor %}
+      {% if w.launch_attempts and w.launch_attempts > 1 %}
+      <li class="tl-warn"><span class="tl-label">launch attempts</span><span class="tl-since">{{ w.launch_attempts }}</span></li>
+      {% endif %}
+      {% if w.launch_error_code %}
+      <li class="tl-warn"><span class="tl-label">last launch error</span><span class="tl-since">{{ w.launch_error_code|replace('_', ' ') }}</span></li>
+      {% endif %}
+    </ol>
+    {% endif %}
+    {% if w.mail %}
+    <ul class="application-mail">
+      {% for m in w.mail %}
+      <li>
+        <span class="mail-line">
+          <span class="apply-state as-{{ m.proposed_status }}">{{ m.proposed_status|replace('_', ' ') }}</span>
+          <span class="mail-subject">{{ m.subject }}</span>
+          <span class="mail-meta">{{ m.received_at[:10] }}{% if m.outcome != 'applied' %} · {{ m.outcome|replace('_', ' ') }}{% endif %}{% if m.reason_kind and m.reason_kind != 'none' %} · {{ m.reason_kind|replace('_', ' ') }}{% endif %}</span>
+        </span>
+        {% if m.evidence %}<blockquote class="mail-evidence">{{ m.evidence }}</blockquote>{% endif %}
+        {% if m.rejection_reason and m.rejection_reason != m.evidence %}<blockquote class="mail-evidence">{{ m.rejection_reason }}</blockquote>{% endif %}
+        {% if m.reapply_after %}<p class="mail-meta">No new application until {{ m.reapply_after }}: {{ m.reapply_quote }}</p>{% elif m.reapply_kind == 'cycle_rule' %}<p class="mail-meta">Application-cycle rule: {{ m.reapply_quote }}</p>{% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+      </div>
+    </details>
+  </article>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% if not workflows %}
+<div class="empty-state">No application workflows yet. Select a role in Browse and start one from its detail pane.</div>
+{% endif %}
+{% endblock %}

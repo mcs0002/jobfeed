@@ -1,0 +1,57 @@
+{# What the inbox said about this role, as a thread, oldest first, and any
+   waiting period an employer set. Mail from the same firm that the nightly
+   pass could not attach to one role is listed too, with Attach, so it is
+   placed where he is looking. Wrapped in one id so an Attach swaps the card. #}
+<div id="inbox-{{ job.id }}" class="inbox-wrap">
+{% if job.cooldowns %}
+<div class="cap-warning">
+  {% for c in job.cooldowns %}
+  <strong>{{ c.company }} will not accept a new application {% if c.job_id == job.id %}for this role{% else %}for {{ c.title }}{% endif %} until {{ c.reapply_after }}.</strong>
+  {% if c.reapply_quote %}<blockquote class="mail-evidence">{{ c.reapply_quote }}</blockquote>{% endif %}
+  {% endfor %}
+</div>
+{% endif %}
+{% if job.inbox or job.waiting_mail %}
+<section class="dp-inbox">
+  <div class="dp-section-label">Inbox · {{ job.inbox|length }} message{{ 's' if job.inbox|length != 1 }}</div>
+  {% if job.inbox %}
+  <ol class="inbox-thread">
+    {% for m in job.inbox|reverse %}
+    <li class="inbox-msg{% if loop.last %} is-latest{% endif %}">
+      <div class="inbox-head">
+        <span class="apply-state as-{{ m.proposed_status or 'note' }}">{{ (m.proposed_status or 'note')|replace('_', ' ') }}</span>
+        <span class="inbox-subject">{{ m.subject }}</span>
+        <span class="inbox-date">{{ m.received_at[:10] }}</span>
+      </div>
+      <div class="inbox-from">{{ m.sender }}{% if m.reason_kind and m.reason_kind != 'none' %} · <span class="inbox-kind">{{ m.reason_kind|replace('_', ' ') }}</span>{% endif %}</div>
+      {% if m.rejection_reason %}<blockquote class="mail-evidence">{{ m.rejection_reason }}</blockquote>
+      {% elif m.evidence %}<blockquote class="mail-evidence">{{ m.evidence }}</blockquote>{% endif %}
+      {% if m.reapply_after %}<div class="inbox-from">No new application until {{ m.reapply_after }}</div>{% elif m.reapply_kind == 'cycle_rule' %}<div class="inbox-from">Application-cycle rule: {{ m.reapply_quote }}</div>{% endif %}
+    </li>
+    {% endfor %}
+  </ol>
+  {% endif %}
+  {% if job.waiting_mail %}
+  <div class="inbox-waiting">
+    <div class="inbox-waiting-label">Not attached yet · {{ job.company }} mail the nightly pass could not place on one role</div>
+    {% for m in job.waiting_mail %}
+    <div class="inbox-msg is-waiting">
+      <div class="inbox-head">
+        <span class="apply-state as-{{ m.proposed_status }}">{{ m.proposed_status|replace('_', ' ') }}</span>
+        <span class="inbox-subject">{{ m.subject }}</span>
+        <span class="inbox-date">{{ m.received_at[:10] }}</span>
+      </div>
+      <div class="inbox-from">{{ m.sender }}</div>
+      {% if m.evidence %}<blockquote class="mail-evidence">{{ m.evidence }}</blockquote>{% endif %}
+      <form hx-post="/application-mail/{{ m.message_key }}/adopt" hx-target="#inbox-{{ job.id }}" hx-swap="outerHTML">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <input type="hidden" name="job_id" value="{{ job.id }}">
+        <button type="submit" class="inbox-attach">Attach to this role</button>
+      </form>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+</section>
+{% endif %}
+</div>

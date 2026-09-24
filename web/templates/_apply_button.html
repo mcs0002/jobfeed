@@ -1,0 +1,13 @@
+{# The attended application, one step from Open posting because it is the next
+   thing he does with a role. Before a run exists it starts one; the panel
+   below is swapped in by the response and this button removes itself. After,
+   it names the run's state and jumps to the panel. #}
+{% set w = job.application_workflow %}
+{% if w %}
+<a class="btn-apply as-{{ w.status }}" href="#apply-panel-{{ job.id }}">Application · {{ w.status|replace('_', ' ') }}</a>
+{% elif job.url|safe_url %}
+<form class="dp-apply-start" hx-post="/job/{{ job.id }}/apply" hx-target="#apply-panel-{{ job.id }}" hx-swap="outerHTML"
+      hx-on::after-request="if (event.detail.successful) this.remove()">
+  <button class="btn-apply" type="submit" title="Opens an Antigravity run that fills the form up to the review gate. You submit.">Auto apply</button>
+</form>
+{% endif %}

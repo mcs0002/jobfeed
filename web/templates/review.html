@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Review — Jobfeed{% endblock %}
+{% block main_class %}page{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>Tagging review</h1>
+</div>
+
+<p class="page-lede">Random samples of what the tagger hides: the manager gate and the <code>other</code> bin can be wrong without ever surfacing. Confirm or fix a row and it joins the frozen evaluation set.</p>
+<p class="page-meta"><b>{{ evaluation.total }}</b> labelled · {{ evaluation.corrected }} corrected · {{ evaluation.false_manager }} false manager · {{ evaluation.false_other }} finance roles wrongly hidden as other</p>
+
+<div class="summary-cards">
+  <a class="scard{% if bucket == 'manager' %} on{% endif %}" href="/review?bucket=manager">
+    <div class="k">Hidden as manager</div><div class="v">{{ counts.manager }}</div></a>
+  <a class="scard{% if bucket == 'other' %} on{% endif %}" href="/review?bucket=other">
+    <div class="k">Binned as other</div><div class="v">{{ counts.other }}</div></a>
+  <a class="scard{% if bucket == 'purge' %} on{% endif %}" href="/review?bucket=purge">
+    <div class="k">Other + queued for deletion</div><div class="v{% if counts.purge %} bad{% endif %}">{{ counts.purge }}</div></a>
+</div>
+
+<div class="revhead">
+  <span>
+    {% if bucket == 'manager' %}Live roles the manager gate is hiding right now.
+    {% elif bucket == 'other' %}Live roles tagged non-finance.
+    {% else %}Tagged non-finance and already off their board — the next purge deletes these.
+    {% endif %}
+    Showing {{ rows|length }} at random.
+  </span>
+  <a class="reshuffle" href="/review?bucket={{ bucket }}">Resample</a>
+</div>
+
+{% if not rows %}
+  <p class="empty">Nothing in this bucket.</p>
+{% else %}
+<div class="table-card">
+<table class="revtable">
+  <thead><tr>
+    <th>Company</th><th>Title</th><th>Location</th>
+    <th>Human label <span class="th-sub">area · desk · seniority · type</span></th><th></th>
+  </tr></thead>
+  <tbody>
+  {% for r in rows %}
+    <tr>
+      <td class="revco">{{ r.company }}</td>
+      <td><a href="/job/{{ r.id }}">{{ r.title }}</a></td>
+      <td class="revloc">{{ r.location or '—' }}</td>
+      <td>
+        <form class="review-form" method="post" action="/review/{{ r.id }}/evaluate">
+          <input type="hidden" name="bucket" value="{{ bucket }}">
+          <select name="area" aria-label="Area for {{ r.title }}">{% for v in areas %}<option value="{{ v }}"{% if v == r.area %} selected{% endif %}>{{ v }}</option>{% endfor %}</select>
+          <select name="desk" aria-label="Desk for {{ r.title }}">{% for v in desks %}<option value="{{ v }}"{% if v == r.desk %} selected{% endif %}>{{ v or 'no desk' }}</option>{% endfor %}</select>
+          <select name="seniority" aria-label="Seniority for {{ r.title }}">{% for v in seniorities %}<option value="{{ v }}"{% if v == r.seniority %} selected{% endif %}>{{ v }}</option>{% endfor %}</select>
+          <select name="job_type" aria-label="Type for {{ r.title }}">{% for v in job_types %}<option value="{{ v }}"{% if v == r.job_type %} selected{% endif %}>{{ v }}</option>{% endfor %}</select>
+          <button type="submit" class="reshuffle">Save</button>
+        </form>
+      </td>
+      <td>{% if r.url %}<a class="ext" href="{{ r.url|safe_url }}" target="_blank" rel="noopener" title="Original posting">↗</a>{% endif %}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,3721 @@
+{
+  "gold": {
+    "n": 100,
+    "confidence": {
+      "high": 83,
+      "medium": 16,
+      "low": 1
+    }
+  },
+  "runs": {
+    "deepseek-1": {
+      "n": 100,
+      "n_high_confidence": 83,
+      "accuracy": {
+        "area": 0.83,
+        "desk": 0.99,
+        "seniority": 0.71,
+        "job_type": 1.0,
+        "loc_country": 0.95,
+        "work_mode": 0.99
+      },
+      "accuracy_high_confidence": {
+        "area": 0.8313253012048193,
+        "desk": 1.0,
+        "seniority": 0.7831325301204819,
+        "job_type": 1.0,
+        "loc_country": 0.9518072289156626,
+        "work_mode": 1.0
+      },
+      "desk_accuracy_on_market_union": 0.6666666666666666,
+      "desk_market_union_n": 3,
+      "joint_exact": 0.58,
+      "joint_exact_high_confidence": 0.6626506024096386,
+      "finance_inclusion": {
+        "tp": 41,
+        "fp": 16,
+        "fn": 1,
+        "tn": 42,
+        "precision": 0.7192982456140351,
+        "recall": 0.9761904761904762,
+        "f1": 0.8282828282828282,
+        "errors": [
+          [
+            "G009",
+            "false_negative"
+          ],
+          [
+            "G010",
+            "false_positive"
+          ],
+          [
+            "G022",
+            "false_positive"
+          ],
+          [
+            "G050",
+            "false_positive"
+          ],
+          [
+            "G057",
+            "false_positive"
+          ],
+          [
+            "G058",
+            "false_positive"
+          ],
+          [
+            "G062",
+            "false_positive"
+          ],
+          [
+            "G064",
+            "false_positive"
+          ],
+          [
+            "G071",
+            "false_positive"
+          ],
+          [
+            "G077",
+            "false_positive"
+          ],
+          [
+            "G080",
+            "false_positive"
+          ],
+          [
+            "G084",
+            "false_positive"
+          ],
+          [
+            "G087",
+            "false_positive"
+          ],
+          [
+            "G089",
+            "false_positive"
+          ],
+          [
+            "G090",
+            "false_positive"
+          ],
+          [
+            "G091",
+            "false_positive"
+          ],
+          [
+            "G093",
+            "false_positive"
+          ]
+        ]
+      },
+      "default_visibility": {
+        "tp": 34,
+        "fp": 19,
+        "fn": 1,
+        "tn": 46,
+        "precision": 0.6415094339622641,
+        "recall": 0.9714285714285714,
+        "f1": 0.7727272727272727,
+        "errors": [
+          [
+            "G009",
+            "false_negative"
+          ],
+          [
+            "G010",
+            "false_positive"
+          ],
+          [
+            "G019",
+            "false_positive"
+          ],
+          [
+            "G022",
+            "false_positive"
+          ],
+          [
+            "G043",
+            "false_positive"
+          ],
+          [
+            "G050",
+            "false_positive"
+          ],
+          [
+            "G058",
+            "false_positive"
+          ],
+          [
+            "G062",
+            "false_positive"
+          ],
+          [
+            "G064",
+            "false_positive"
+          ],
+          [
+            "G071",
+            "false_positive"
+          ],
+          [
+            "G077",
+            "false_positive"
+          ],
+          [
+            "G080",
+            "false_positive"
+          ],
+          [
+            "G084",
+            "false_positive"
+          ],
+          [
+            "G085",
+            "false_positive"
+          ],
+          [
+            "G087",
+            "false_positive"
+          ],
+          [
+            "G089",
+            "false_positive"
+          ],
+          [
+            "G090",
+            "false_positive"
+          ],
+          [
+            "G091",
+            "false_positive"
+          ],
+          [
+            "G093",
+            "false_positive"
+          ],
+          [
+            "G094",
+            "false_positive"
+          ]
+        ]
+      },
+      "mismatches": [
+        {
+          "gold_id": "G001",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "analyst",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G003",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "manager",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G006",
+          "confidence": "medium",
+          "diffs": {
+            "seniority": [
+              "intern",
+              "analyst"
+            ]
+          }
+        },
+        {
+          "gold_id": "G009",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "middle-office",
+              "other"
+            ],
+            "loc_country": [
+              "United States",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G010",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "other",
+              "asset-management"
+            ]
+          }
+        },
+        {
+          "gold_id": "G011",
+          "confidence": "medium",
+          "diffs": {
+            "seniority": [
+              "associate",
+              "analyst"
+            ]
+          }
+        },
+        {
+          "gold_id": "G012",
+          "confidence": "medium",
+          "diffs": {
+            "seniority": [
+              "associate",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G013",
+          "confidence": "medium",
+          "diffs": {
+            "loc_country": [
+              "",
+              "United States"
+            ]
+          }
+        },
+        {
+          "gold_id": "G019",
+          "confidence": "medium",
+          "diffs": {
+            "seniority": [
+              "manager",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G022",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "other",
+              "risk"
+            ]
+          }
+        },
+        {
+          "gold_id": "G023",
+          "confidence": "medium",
+          "diffs": {
+            "seniority": [
+              "analyst",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G027",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "analyst",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G033",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "intern",
+              "associate"
+            ]
+          }
+        },
+        {
+          "gold_id": "G040",
+          "confidence": "medium",
+          "diffs": {
+            "seniority": [
+              "analyst",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G041",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "associate",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G043",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "manager",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G050",
+          "confidence": "low",
+          "diffs": {
+            "area": [
+              "other",
+              "quant"
+            ]
+          }
+        },
+        {
+          "gold_id": "G051",
+          "confidence": "medium",
+          "diffs": {
+            "seniority": [
+              "associate",
+              ""
+            ],
+            "work_mode": [
+              "hybrid",
+              "onsite"
+            ]
+          }
+        },
+        {
+          "gold_id": "G056",
+          "confidence": "high",
+          "diffs": {
+            "loc_country": [
+              "",
+              "Switzerland"
+            ]
+          }
+        },
+        {
+          "gold_id": "G057",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "other",
+              "wealth"
+            ]
+          }
+        },
+        {
+          "gold_id": "G058",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "other",
+              "wealth"
+            ]
+          }
+        },
+        {
+          "gold_id": "G061",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "manager",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G062",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "other",
+              "wealth"
+            ],
+            "loc_country": [
+              "",
+              "United States"
+            ]
+          }
+        },
+        {
+          "gold_id": "G064",
+          "confidence": "medium",
+          "diffs": {
+            "area": [
+              "other",
+              "consulting"
+            ]
+          }
+        },
+        {
+          "gold_id": "G066",
+          "confidence": "medium",
+          "diffs": {
+            "seniority": [
+              "associate",
+              "analyst"
+            ]
+          }
+        },
+        {
+          "gold_id": "G067",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "manager",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G068",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "associate",
+              "analyst"
+            ]
+          }
+        },
+        {
+          "gold_id": "G071",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "other",
+              "wealth"
+            ],
+            "seniority": [
+              "manager",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G074",
+          "confidence": "medium",
+          "diffs": {
+            "seniority": [
+              "associate",
+              "analyst"
+            ]
+          }
+        },
+        {
+          "gold_id": "G077",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "other",
+              "consulting"
+            ]
+          }
+        },
+        {
+          "gold_id": "G080",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "other",
+              "wealth"
+            ],
+            "seniority": [
+              "associate",
+              "analyst"
+            ]
+          }
+        },
+        {
+          "gold_id": "G084",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "other",
+              "wealth"
+            ],
+            "seniority": [
+              "associate",
+              "analyst"
+            ]
+          }
+        },
+        {
+          "gold_id": "G085",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "manager",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G086",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "manager",
+              "analyst"
+            ]
+          }
+        },
+        {
+          "gold_id": "G087",
+          "confidence": "medium",
+          "diffs": {
+            "area": [
+              "other",
+              "markets"
+            ],
+            "desk": [
+              "",
+              "sales"
+            ],
+            "seniority": [
+              "associate",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G089",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "other",
+              "accounting"
+            ]
+          }
+        },
+        {
+          "gold_id": "G090",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "other",
+              "risk"
+            ]
+          }
+        },
+        {
+          "gold_id": "G091",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "other",
+              "wealth"
+            ],
+            "seniority": [
+              "associate",
+              "analyst"
+            ],
+            "loc_country": [
+              "",
+              "United States"
+            ]
+          }
+        },
+        {
+          "gold_id": "G093",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "other",
+              "accounting"
+            ],
+            "seniority": [
+              "associate",
+              "analyst"
+            ]
+          }
+        },
+        {
+          "gold_id": "G094",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "manager",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G097",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "manager",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G099",
+          "confidence": "medium",
+          "diffs": {
+            "seniority": [
+              "analyst",
+              ""
+            ]
+          }
+        }
+      ]
+    },
+    "deepseek-2": {
+      "n": 100,
+      "n_high_confidence": 83,
+      "accuracy": {
+        "area": 0.83,
+        "desk": 0.99,
+        "seniority": 0.72,
+        "job_type": 1.0,
+        "loc_country": 0.95,
+        "work_mode": 0.99
+      },
+      "accuracy_high_confidence": {
+        "area": 0.8313253012048193,
+        "desk": 1.0,
+        "seniority": 0.7831325301204819,
+        "job_type": 1.0,
+        "loc_country": 0.9518072289156626,
+        "work_mode": 1.0
+      },
+      "desk_accuracy_on_market_union": 0.6666666666666666,
+      "desk_market_union_n": 3,
+      "joint_exact": 0.59,
+      "joint_exact_high_confidence": 0.6626506024096386,
+      "finance_inclusion": {
+        "tp": 41,
+        "fp": 16,
+        "fn": 1,
+        "tn": 42,
+        "precision": 0.7192982456140351,
+        "recall": 0.9761904761904762,
+        "f1": 0.8282828282828282,
+        "errors": [
+          [
+            "G009",
+            "false_negative"
+          ],
+          [
+            "G010",
+            "false_positive"
+          ],
+          [
+            "G022",
+            "false_positive"
+          ],
+          [
+            "G050",
+            "false_positive"
+          ],
+          [
+            "G057",
+            "false_positive"
+          ],
+          [
+            "G058",
+            "false_positive"
+          ],
+          [
+            "G062",
+            "false_positive"
+          ],
+          [
+            "G064",
+            "false_positive"
+          ],
+          [
+            "G071",
+            "false_positive"
+          ],
+          [
+            "G077",
+            "false_positive"
+          ],
+          [
+            "G080",
+            "false_positive"
+          ],
+          [
+            "G084",
+            "false_positive"
+          ],
+          [
+            "G087",
+            "false_positive"
+          ],
+          [
+            "G089",
+            "false_positive"
+          ],
+          [
+            "G090",
+            "false_positive"
+          ],
+          [
+            "G091",
+            "false_positive"
+          ],
+          [
+            "G093",
+            "false_positive"
+          ]
+        ]
+      },
+      "default_visibility": {
+        "tp": 34,
+        "fp": 19,
+        "fn": 1,
+        "tn": 46,
+        "precision": 0.6415094339622641,
+        "recall": 0.9714285714285714,
+        "f1": 0.7727272727272727,
+        "errors": [
+          [
+            "G009",
+            "false_negative"
+          ],
+          [
+            "G010",
+            "false_positive"
+          ],
+          [
+            "G019",
+            "false_positive"
+          ],
+          [
+            "G022",
+            "false_positive"
+          ],
+          [
+            "G043",
+            "false_positive"
+          ],
+          [
+            "G050",
+            "false_positive"
+          ],
+          [
+            "G058",
+            "false_positive"
+          ],
+          [
+            "G062",
+            "false_positive"
+          ],
+          [
+            "G064",
+            "false_positive"
+          ],
+          [
+            "G071",
+            "false_positive"
+          ],
+          [
+            "G077",
+            "false_positive"
+          ],
+          [
+            "G080",
+            "false_positive"
+          ],
+          [
+            "G084",
+            "false_positive"
+          ],
+          [
+            "G085",
+            "false_positive"
+          ],
+          [
+            "G087",
+            "false_positive"
+          ],
+          [
+            "G089",
+            "false_positive"
+          ],
+          [
+            "G090",
+            "false_positive"
+          ],
+          [
+            "G091",
+            "false_positive"
+          ],
+          [
+            "G093",
+            "false_positive"
+          ],
+          [
+            "G094",
+            "false_positive"
+          ]
+        ]
+      },
+      "mismatches": [
+        {
+          "gold_id": "G001",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "analyst",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G003",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "manager",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G006",
+          "confidence": "medium",
+          "diffs": {
+            "seniority": [
+              "intern",
+              "analyst"
+            ]
+          }
+        },
+        {
+          "gold_id": "G009",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "middle-office",
+              "other"
+            ],
+            "loc_country": [
+              "United States",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G010",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "other",
+              "asset-management"
+            ]
+          }
+        },
+        {
+          "gold_id": "G011",
+          "confidence": "medium",
+          "diffs": {
+            "seniority": [
+              "associate",
+              "analyst"
+            ]
+          }
+        },
+        {
+          "gold_id": "G012",
+          "confidence": "medium",
+          "diffs": {
+            "seniority": [
+              "associate",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G013",
+          "confidence": "medium",
+          "diffs": {
+            "loc_country": [
+              "",
+              "United States"
+            ]
+          }
+        },
+        {
+          "gold_id": "G019",
+          "confidence": "medium",
+          "diffs": {
+            "seniority": [
+              "manager",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G022",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "other",
+              "risk"
+            ]
+          }
+        },
+        {
+          "gold_id": "G023",
+          "confidence": "medium",
+          "diffs": {
+            "seniority": [
+              "analyst",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G027",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "analyst",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G033",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "intern",
+              "associate"
+            ]
+          }
+        },
+        {
+          "gold_id": "G041",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "associate",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G043",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "manager",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G050",
+          "confidence": "low",
+          "diffs": {
+            "area": [
+              "other",
+              "quant"
+            ]
+          }
+        },
+        {
+          "gold_id": "G051",
+          "confidence": "medium",
+          "diffs": {
+            "seniority": [
+              "associate",
+              ""
+            ],
+            "work_mode": [
+              "hybrid",
+              "onsite"
+            ]
+          }
+        },
+        {
+          "gold_id": "G056",
+          "confidence": "high",
+          "diffs": {
+            "loc_country": [
+              "",
+              "Switzerland"
+            ]
+          }
+        },
+        {
+          "gold_id": "G057",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "other",
+              "wealth"
+            ]
+          }
+        },
+        {
+          "gold_id": "G058",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "other",
+              "wealth"
+            ]
+          }
+        },
+        {
+          "gold_id": "G061",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "manager",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G062",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "other",
+              "wealth"
+            ],
+            "loc_country": [
+              "",
+              "United States"
+            ]
+          }
+        },
+        {
+          "gold_id": "G064",
+          "confidence": "medium",
+          "diffs": {
+            "area": [
+              "other",
+              "consulting"
+            ]
+          }
+        },
+        {
+          "gold_id": "G066",
+          "confidence": "medium",
+          "diffs": {
+            "seniority": [
+              "associate",
+              "analyst"
+            ]
+          }
+        },
+        {
+          "gold_id": "G067",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "manager",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G068",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "associate",
+              "analyst"
+            ]
+          }
+        },
+        {
+          "gold_id": "G071",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "other",
+              "wealth"
+            ],
+            "seniority": [
+              "manager",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G074",
+          "confidence": "medium",
+          "diffs": {
+            "seniority": [
+              "associate",
+              "analyst"
+            ]
+          }
+        },
+        {
+          "gold_id": "G077",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "other",
+              "consulting"
+            ]
+          }
+        },
+        {
+          "gold_id": "G080",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "other",
+              "wealth"
+            ],
+            "seniority": [
+              "associate",
+              "analyst"
+            ]
+          }
+        },
+        {
+          "gold_id": "G084",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "other",
+              "wealth"
+            ],
+            "seniority": [
+              "associate",
+              "analyst"
+            ]
+          }
+        },
+        {
+          "gold_id": "G085",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "manager",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G086",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "manager",
+              "analyst"
+            ]
+          }
+        },
+        {
+          "gold_id": "G087",
+          "confidence": "medium",
+          "diffs": {
+            "area": [
+              "other",
+              "markets"
+            ],
+            "desk": [
+              "",
+              "sales"
+            ],
+            "seniority": [
+              "associate",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G089",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "other",
+              "accounting"
+            ]
+          }
+        },
+        {
+          "gold_id": "G090",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "other",
+              "risk"
+            ]
+          }
+        },
+        {
+          "gold_id": "G091",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "other",
+              "wealth"
+            ],
+            "seniority": [
+              "associate",
+              "analyst"
+            ],
+            "loc_country": [
+              "",
+              "United States"
+            ]
+          }
+        },
+        {
+          "gold_id": "G093",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "other",
+              "accounting"
+            ],
+            "seniority": [
+              "associate",
+              "analyst"
+            ]
+          }
+        },
+        {
+          "gold_id": "G094",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "manager",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G097",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "manager",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G099",
+          "confidence": "medium",
+          "diffs": {
+            "seniority": [
+              "analyst",
+              ""
+            ]
+          }
+        }
+      ]
+    },
+    "gemini25-1": {
+      "n": 100,
+      "n_high_confidence": 83,
+      "accuracy": {
+        "area": 0.9,
+        "desk": 0.99,
+        "seniority": 0.67,
+        "job_type": 0.97,
+        "loc_country": 0.98,
+        "work_mode": 0.98
+      },
+      "accuracy_high_confidence": {
+        "area": 0.9036144578313253,
+        "desk": 1.0,
+        "seniority": 0.6987951807228916,
+        "job_type": 0.9759036144578314,
+        "loc_country": 0.9879518072289156,
+        "work_mode": 0.9879518072289156
+      },
+      "desk_accuracy_on_market_union": 0.6666666666666666,
+      "desk_market_union_n": 3,
+      "joint_exact": 0.59,
+      "joint_exact_high_confidence": 0.6506024096385542,
+      "finance_inclusion": {
+        "tp": 42,
+        "fp": 10,
+        "fn": 0,
+        "tn": 48,
+        "precision": 0.8076923076923077,
+        "recall": 1.0,
+        "f1": 0.8936170212765957,
+        "errors": [
+          [
+            "G010",
+            "false_positive"
+          ],
+          [
+            "G022",
+            "false_positive"
+          ],
+          [
+            "G050",
+            "false_positive"
+          ],
+          [
+            "G058",
+            "false_positive"
+          ],
+          [
+            "G062",
+            "false_positive"
+          ],
+          [
+            "G071",
+            "false_positive"
+          ],
+          [
+            "G077",
+            "false_positive"
+          ],
+          [
+            "G084",
+            "false_positive"
+          ],
+          [
+            "G087",
+            "false_positive"
+          ],
+          [
+            "G089",
+            "false_positive"
+          ]
+        ]
+      },
+      "default_visibility": {
+        "tp": 35,
+        "fp": 14,
+        "fn": 0,
+        "tn": 51,
+        "precision": 0.7142857142857143,
+        "recall": 1.0,
+        "f1": 0.8333333333333333,
+        "errors": [
+          [
+            "G010",
+            "false_positive"
+          ],
+          [
+            "G019",
+            "false_positive"
+          ],
+          [
+            "G022",
+            "false_positive"
+          ],
+          [
+            "G043",
+            "false_positive"
+          ],
+          [
+            "G050",
+            "false_positive"
+          ],
+          [
+            "G058",
+            "false_positive"
+          ],
+          [
+            "G062",
+            "false_positive"
+          ],
+          [
+            "G071",
+            "false_positive"
+          ],
+          [
+            "G077",
+            "false_positive"
+          ],
+          [
+            "G084",
+            "false_positive"
+          ],
+          [
+            "G085",
+            "false_positive"
+          ],
+          [
+            "G087",
+            "false_positive"
+          ],
+          [
+            "G089",
+            "false_positive"
+          ],
+          [
+            "G094",
+            "false_positive"
+          ]
+        ]
+      },
+      "mismatches": [
+        {
+          "gold_id": "G001",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "analyst",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G002",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "analyst",
+              "intern"
+            ],
+            "job_type": [
+              "job",
+              "internship"
+            ]
+          }
+        },
+        {
+          "gold_id": "G003",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "manager",
+              "analyst"
+            ]
+          }
+        },
+        {
+          "gold_id": "G006",
+          "confidence": "medium",
+          "diffs": {
+            "job_type": [
+              "job",
+              "internship"
+            ]
+          }
+        },
+        {
+          "gold_id": "G009",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "associate",
+              "analyst"
+            ]
+          }
+        },
+        {
+          "gold_id": "G010",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "other",
+              "asset-management"
+            ]
+          }
+        },
+        {
+          "gold_id": "G011",
+          "confidence": "medium",
+          "diffs": {
+            "seniority": [
+              "associate",
+              "analyst"
+            ]
+          }
+        },
+        {
+          "gold_id": "G012",
+          "confidence": "medium",
+          "diffs": {
+            "seniority": [
+              "associate",
+              "analyst"
+            ]
+          }
+        },
+        {
+          "gold_id": "G013",
+          "confidence": "medium",
+          "diffs": {
+            "loc_country": [
+              "",
+              "United States"
+            ]
+          }
+        },
+        {
+          "gold_id": "G019",
+          "confidence": "medium",
+          "diffs": {
+            "seniority": [
+              "manager",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G022",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "other",
+              "risk"
+            ]
+          }
+        },
+        {
+          "gold_id": "G023",
+          "confidence": "medium",
+          "diffs": {
+            "seniority": [
+              "analyst",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G027",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "analyst",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G033",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "intern",
+              "associate"
+            ],
+            "job_type": [
+              "internship",
+              "job"
+            ]
+          }
+        },
+        {
+          "gold_id": "G041",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "associate",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G043",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "manager",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G050",
+          "confidence": "low",
+          "diffs": {
+            "area": [
+              "other",
+              "quant"
+            ]
+          }
+        },
+        {
+          "gold_id": "G051",
+          "confidence": "medium",
+          "diffs": {
+            "seniority": [
+              "associate",
+              "analyst"
+            ],
+            "work_mode": [
+              "hybrid",
+              "onsite"
+            ]
+          }
+        },
+        {
+          "gold_id": "G055",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "analyst",
+              "associate"
+            ]
+          }
+        },
+        {
+          "gold_id": "G058",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "other",
+              "asset-management"
+            ]
+          }
+        },
+        {
+          "gold_id": "G060",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "associate",
+              "analyst"
+            ]
+          }
+        },
+        {
+          "gold_id": "G061",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "manager",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G062",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "other",
+              "wealth"
+            ],
+            "seniority": [
+              "analyst",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G066",
+          "confidence": "medium",
+          "diffs": {
+            "seniority": [
+              "associate",
+              "analyst"
+            ]
+          }
+        },
+        {
+          "gold_id": "G067",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "manager",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G068",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "associate",
+              "analyst"
+            ]
+          }
+        },
+        {
+          "gold_id": "G071",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "other",
+              "wealth"
+            ],
+            "seniority": [
+              "manager",
+              ""
+            ],
+            "work_mode": [
+              "remote",
+              "hybrid"
+            ]
+          }
+        },
+        {
+          "gold_id": "G074",
+          "confidence": "medium",
+          "diffs": {
+            "seniority": [
+              "associate",
+              "analyst"
+            ]
+          }
+        },
+        {
+          "gold_id": "G077",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "other",
+              "consulting"
+            ]
+          }
+        },
+        {
+          "gold_id": "G080",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "associate",
+              "analyst"
+            ]
+          }
+        },
+        {
+          "gold_id": "G083",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "associate",
+              "analyst"
+            ]
+          }
+        },
+        {
+          "gold_id": "G084",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "other",
+              "wealth"
+            ],
+            "seniority": [
+              "associate",
+              "analyst"
+            ]
+          }
+        },
+        {
+          "gold_id": "G085",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "manager",
+              "associate"
+            ]
+          }
+        },
+        {
+          "gold_id": "G086",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "manager",
+              "analyst"
+            ]
+          }
+        },
+        {
+          "gold_id": "G087",
+          "confidence": "medium",
+          "diffs": {
+            "area": [
+              "other",
+              "markets"
+            ],
+            "desk": [
+              "",
+              "sales"
+            ]
+          }
+        },
+        {
+          "gold_id": "G089",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "other",
+              "accounting"
+            ],
+            "seniority": [
+              "associate",
+              "analyst"
+            ]
+          }
+        },
+        {
+          "gold_id": "G091",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "associate",
+              "analyst"
+            ],
+            "loc_country": [
+              "",
+              "United States"
+            ]
+          }
+        },
+        {
+          "gold_id": "G093",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "associate",
+              "analyst"
+            ]
+          }
+        },
+        {
+          "gold_id": "G094",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "manager",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G097",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "manager",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G099",
+          "confidence": "medium",
+          "diffs": {
+            "seniority": [
+              "analyst",
+              ""
+            ]
+          }
+        }
+      ]
+    },
+    "gemini25-2": {
+      "n": 100,
+      "n_high_confidence": 83,
+      "accuracy": {
+        "area": 0.89,
+        "desk": 0.99,
+        "seniority": 0.68,
+        "job_type": 0.97,
+        "loc_country": 0.96,
+        "work_mode": 0.98
+      },
+      "accuracy_high_confidence": {
+        "area": 0.9036144578313253,
+        "desk": 1.0,
+        "seniority": 0.7108433734939759,
+        "job_type": 0.9759036144578314,
+        "loc_country": 0.963855421686747,
+        "work_mode": 0.9879518072289156
+      },
+      "desk_accuracy_on_market_union": 0.6666666666666666,
+      "desk_market_union_n": 3,
+      "joint_exact": 0.59,
+      "joint_exact_high_confidence": 0.6506024096385542,
+      "finance_inclusion": {
+        "tp": 41,
+        "fp": 10,
+        "fn": 1,
+        "tn": 48,
+        "precision": 0.803921568627451,
+        "recall": 0.9761904761904762,
+        "f1": 0.8817204301075269,
+        "errors": [
+          [
+            "G010",
+            "false_positive"
+          ],
+          [
+            "G022",
+            "false_positive"
+          ],
+          [
+            "G023",
+            "false_negative"
+          ],
+          [
+            "G050",
+            "false_positive"
+          ],
+          [
+            "G058",
+            "false_positive"
+          ],
+          [
+            "G062",
+            "false_positive"
+          ],
+          [
+            "G071",
+            "false_positive"
+          ],
+          [
+            "G077",
+            "false_positive"
+          ],
+          [
+            "G084",
+            "false_positive"
+          ],
+          [
+            "G087",
+            "false_positive"
+          ],
+          [
+            "G089",
+            "false_positive"
+          ]
+        ]
+      },
+      "default_visibility": {
+        "tp": 34,
+        "fp": 14,
+        "fn": 1,
+        "tn": 51,
+        "precision": 0.7083333333333334,
+        "recall": 0.9714285714285714,
+        "f1": 0.8192771084337349,
+        "errors": [
+          [
+            "G010",
+            "false_positive"
+          ],
+          [
+            "G019",
+            "false_positive"
+          ],
+          [
+            "G022",
+            "false_positive"
+          ],
+          [
+            "G023",
+            "false_negative"
+          ],
+          [
+            "G043",
+            "false_positive"
+          ],
+          [
+            "G050",
+            "false_positive"
+          ],
+          [
+            "G058",
+            "false_positive"
+          ],
+          [
+            "G062",
+            "false_positive"
+          ],
+          [
+            "G071",
+            "false_positive"
+          ],
+          [
+            "G077",
+            "false_positive"
+          ],
+          [
+            "G084",
+            "false_positive"
+          ],
+          [
+            "G085",
+            "false_positive"
+          ],
+          [
+            "G087",
+            "false_positive"
+          ],
+          [
+            "G089",
+            "false_positive"
+          ],
+          [
+            "G094",
+            "false_positive"
+          ]
+        ]
+      },
+      "mismatches": [
+        {
+          "gold_id": "G001",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "analyst",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G002",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "analyst",
+              "intern"
+            ],
+            "job_type": [
+              "job",
+              "internship"
+            ]
+          }
+        },
+        {
+          "gold_id": "G003",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "manager",
+              "analyst"
+            ]
+          }
+        },
+        {
+          "gold_id": "G006",
+          "confidence": "medium",
+          "diffs": {
+            "job_type": [
+              "job",
+              "internship"
+            ]
+          }
+        },
+        {
+          "gold_id": "G009",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "associate",
+              "analyst"
+            ],
+            "loc_country": [
+              "United States",
+              "Netherlands"
+            ]
+          }
+        },
+        {
+          "gold_id": "G010",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "other",
+              "asset-management"
+            ]
+          }
+        },
+        {
+          "gold_id": "G011",
+          "confidence": "medium",
+          "diffs": {
+            "seniority": [
+              "associate",
+              "analyst"
+            ]
+          }
+        },
+        {
+          "gold_id": "G012",
+          "confidence": "medium",
+          "diffs": {
+            "seniority": [
+              "associate",
+              "analyst"
+            ]
+          }
+        },
+        {
+          "gold_id": "G013",
+          "confidence": "medium",
+          "diffs": {
+            "loc_country": [
+              "",
+              "United States"
+            ]
+          }
+        },
+        {
+          "gold_id": "G019",
+          "confidence": "medium",
+          "diffs": {
+            "seniority": [
+              "manager",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G022",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "other",
+              "risk"
+            ]
+          }
+        },
+        {
+          "gold_id": "G023",
+          "confidence": "medium",
+          "diffs": {
+            "area": [
+              "wealth",
+              "other"
+            ],
+            "seniority": [
+              "analyst",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G027",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "analyst",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G033",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "intern",
+              "associate"
+            ],
+            "job_type": [
+              "internship",
+              "job"
+            ]
+          }
+        },
+        {
+          "gold_id": "G041",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "associate",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G043",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "manager",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G050",
+          "confidence": "low",
+          "diffs": {
+            "area": [
+              "other",
+              "quant"
+            ]
+          }
+        },
+        {
+          "gold_id": "G051",
+          "confidence": "medium",
+          "diffs": {
+            "seniority": [
+              "associate",
+              "analyst"
+            ],
+            "work_mode": [
+              "hybrid",
+              "onsite"
+            ]
+          }
+        },
+        {
+          "gold_id": "G058",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "other",
+              "asset-management"
+            ]
+          }
+        },
+        {
+          "gold_id": "G060",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "associate",
+              "analyst"
+            ]
+          }
+        },
+        {
+          "gold_id": "G061",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "manager",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G062",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "other",
+              "wealth"
+            ],
+            "seniority": [
+              "analyst",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G065",
+          "confidence": "high",
+          "diffs": {
+            "loc_country": [
+              "Netherlands",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G066",
+          "confidence": "medium",
+          "diffs": {
+            "seniority": [
+              "associate",
+              "analyst"
+            ]
+          }
+        },
+        {
+          "gold_id": "G067",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "manager",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G068",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "associate",
+              "analyst"
+            ]
+          }
+        },
+        {
+          "gold_id": "G071",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "other",
+              "wealth"
+            ],
+            "seniority": [
+              "manager",
+              ""
+            ],
+            "work_mode": [
+              "remote",
+              "onsite"
+            ]
+          }
+        },
+        {
+          "gold_id": "G074",
+          "confidence": "medium",
+          "diffs": {
+            "seniority": [
+              "associate",
+              "analyst"
+            ]
+          }
+        },
+        {
+          "gold_id": "G077",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "other",
+              "consulting"
+            ]
+          }
+        },
+        {
+          "gold_id": "G080",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "associate",
+              "analyst"
+            ]
+          }
+        },
+        {
+          "gold_id": "G083",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "associate",
+              "analyst"
+            ]
+          }
+        },
+        {
+          "gold_id": "G084",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "other",
+              "wealth"
+            ],
+            "seniority": [
+              "associate",
+              "analyst"
+            ]
+          }
+        },
+        {
+          "gold_id": "G085",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "manager",
+              "associate"
+            ]
+          }
+        },
+        {
+          "gold_id": "G086",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "manager",
+              "analyst"
+            ]
+          }
+        },
+        {
+          "gold_id": "G087",
+          "confidence": "medium",
+          "diffs": {
+            "area": [
+              "other",
+              "markets"
+            ],
+            "desk": [
+              "",
+              "sales"
+            ]
+          }
+        },
+        {
+          "gold_id": "G089",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "other",
+              "accounting"
+            ],
+            "seniority": [
+              "associate",
+              "analyst"
+            ]
+          }
+        },
+        {
+          "gold_id": "G091",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "associate",
+              "analyst"
+            ],
+            "loc_country": [
+              "",
+              "United States"
+            ]
+          }
+        },
+        {
+          "gold_id": "G093",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "associate",
+              "analyst"
+            ]
+          }
+        },
+        {
+          "gold_id": "G094",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "manager",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G097",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "manager",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G099",
+          "confidence": "medium",
+          "diffs": {
+            "seniority": [
+              "analyst",
+              ""
+            ]
+          }
+        }
+      ]
+    },
+    "gemini38-1": {
+      "n": 100,
+      "n_high_confidence": 83,
+      "accuracy": {
+        "area": 0.88,
+        "desk": 0.98,
+        "seniority": 0.73,
+        "job_type": 0.98,
+        "loc_country": 0.97,
+        "work_mode": 0.97
+      },
+      "accuracy_high_confidence": {
+        "area": 0.8795180722891566,
+        "desk": 0.9879518072289156,
+        "seniority": 0.7710843373493976,
+        "job_type": 0.9879518072289156,
+        "loc_country": 0.9759036144578314,
+        "work_mode": 0.9759036144578314
+      },
+      "desk_accuracy_on_market_union": 0.3333333333333333,
+      "desk_market_union_n": 3,
+      "joint_exact": 0.59,
+      "joint_exact_high_confidence": 0.6385542168674698,
+      "finance_inclusion": {
+        "tp": 41,
+        "fp": 10,
+        "fn": 1,
+        "tn": 48,
+        "precision": 0.803921568627451,
+        "recall": 0.9761904761904762,
+        "f1": 0.8817204301075269,
+        "errors": [
+          [
+            "G004",
+            "false_negative"
+          ],
+          [
+            "G010",
+            "false_positive"
+          ],
+          [
+            "G022",
+            "false_positive"
+          ],
+          [
+            "G050",
+            "false_positive"
+          ],
+          [
+            "G057",
+            "false_positive"
+          ],
+          [
+            "G058",
+            "false_positive"
+          ],
+          [
+            "G062",
+            "false_positive"
+          ],
+          [
+            "G084",
+            "false_positive"
+          ],
+          [
+            "G087",
+            "false_positive"
+          ],
+          [
+            "G091",
+            "false_positive"
+          ],
+          [
+            "G093",
+            "false_positive"
+          ]
+        ]
+      },
+      "default_visibility": {
+        "tp": 34,
+        "fp": 13,
+        "fn": 1,
+        "tn": 52,
+        "precision": 0.723404255319149,
+        "recall": 0.9714285714285714,
+        "f1": 0.8292682926829269,
+        "errors": [
+          [
+            "G004",
+            "false_negative"
+          ],
+          [
+            "G010",
+            "false_positive"
+          ],
+          [
+            "G019",
+            "false_positive"
+          ],
+          [
+            "G022",
+            "false_positive"
+          ],
+          [
+            "G043",
+            "false_positive"
+          ],
+          [
+            "G050",
+            "false_positive"
+          ],
+          [
+            "G058",
+            "false_positive"
+          ],
+          [
+            "G062",
+            "false_positive"
+          ],
+          [
+            "G084",
+            "false_positive"
+          ],
+          [
+            "G085",
+            "false_positive"
+          ],
+          [
+            "G087",
+            "false_positive"
+          ],
+          [
+            "G091",
+            "false_positive"
+          ],
+          [
+            "G093",
+            "false_positive"
+          ],
+          [
+            "G094",
+            "false_positive"
+          ]
+        ]
+      },
+      "mismatches": [
+        {
+          "gold_id": "G001",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "analyst",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G002",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "analyst",
+              "intern"
+            ],
+            "job_type": [
+              "job",
+              "internship"
+            ]
+          }
+        },
+        {
+          "gold_id": "G003",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "manager",
+              "analyst"
+            ]
+          }
+        },
+        {
+          "gold_id": "G004",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "ibd",
+              "other"
+            ]
+          }
+        },
+        {
+          "gold_id": "G006",
+          "confidence": "medium",
+          "diffs": {
+            "desk": [
+              "sales",
+              "structuring"
+            ],
+            "job_type": [
+              "job",
+              "internship"
+            ]
+          }
+        },
+        {
+          "gold_id": "G009",
+          "confidence": "high",
+          "diffs": {
+            "loc_country": [
+              "United States",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G010",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "other",
+              "asset-management"
+            ]
+          }
+        },
+        {
+          "gold_id": "G012",
+          "confidence": "medium",
+          "diffs": {
+            "seniority": [
+              "associate",
+              "analyst"
+            ]
+          }
+        },
+        {
+          "gold_id": "G013",
+          "confidence": "medium",
+          "diffs": {
+            "loc_country": [
+              "",
+              "United States"
+            ]
+          }
+        },
+        {
+          "gold_id": "G019",
+          "confidence": "medium",
+          "diffs": {
+            "seniority": [
+              "manager",
+              "associate"
+            ]
+          }
+        },
+        {
+          "gold_id": "G021",
+          "confidence": "high",
+          "diffs": {
+            "work_mode": [
+              "remote",
+              "hybrid"
+            ]
+          }
+        },
+        {
+          "gold_id": "G022",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "other",
+              "risk"
+            ]
+          }
+        },
+        {
+          "gold_id": "G023",
+          "confidence": "medium",
+          "diffs": {
+            "seniority": [
+              "analyst",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G027",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "analyst",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G033",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "intern",
+              "associate"
+            ]
+          }
+        },
+        {
+          "gold_id": "G043",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "manager",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G050",
+          "confidence": "low",
+          "diffs": {
+            "area": [
+              "other",
+              "quant"
+            ]
+          }
+        },
+        {
+          "gold_id": "G051",
+          "confidence": "medium",
+          "diffs": {
+            "seniority": [
+              "associate",
+              ""
+            ],
+            "work_mode": [
+              "hybrid",
+              "onsite"
+            ]
+          }
+        },
+        {
+          "gold_id": "G056",
+          "confidence": "high",
+          "diffs": {
+            "loc_country": [
+              "",
+              "Switzerland"
+            ]
+          }
+        },
+        {
+          "gold_id": "G057",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "other",
+              "wealth"
+            ]
+          }
+        },
+        {
+          "gold_id": "G058",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "other",
+              "wealth"
+            ]
+          }
+        },
+        {
+          "gold_id": "G061",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "manager",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G062",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "other",
+              "wealth"
+            ]
+          }
+        },
+        {
+          "gold_id": "G064",
+          "confidence": "medium",
+          "diffs": {
+            "seniority": [
+              "analyst",
+              "associate"
+            ]
+          }
+        },
+        {
+          "gold_id": "G067",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "manager",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G068",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "associate",
+              "analyst"
+            ]
+          }
+        },
+        {
+          "gold_id": "G071",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "manager",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G074",
+          "confidence": "medium",
+          "diffs": {
+            "seniority": [
+              "associate",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G078",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "analyst",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G080",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "associate",
+              "analyst"
+            ]
+          }
+        },
+        {
+          "gold_id": "G084",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "other",
+              "wealth"
+            ],
+            "seniority": [
+              "associate",
+              "analyst"
+            ]
+          }
+        },
+        {
+          "gold_id": "G085",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "manager",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G086",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "manager",
+              "analyst"
+            ]
+          }
+        },
+        {
+          "gold_id": "G087",
+          "confidence": "medium",
+          "diffs": {
+            "area": [
+              "other",
+              "middle-office"
+            ],
+            "seniority": [
+              "associate",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G090",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "associate",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G091",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "other",
+              "middle-office"
+            ],
+            "seniority": [
+              "associate",
+              "analyst"
+            ]
+          }
+        },
+        {
+          "gold_id": "G092",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "quant",
+              "markets"
+            ],
+            "desk": [
+              "",
+              "trading"
+            ],
+            "work_mode": [
+              "onsite",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G093",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "other",
+              "accounting"
+            ]
+          }
+        },
+        {
+          "gold_id": "G094",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "manager",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G097",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "manager",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G099",
+          "confidence": "medium",
+          "diffs": {
+            "seniority": [
+              "analyst",
+              ""
+            ]
+          }
+        }
+      ]
+    },
+    "gemini38-2": {
+      "n": 100,
+      "n_high_confidence": 83,
+      "accuracy": {
+        "area": 0.88,
+        "desk": 0.99,
+        "seniority": 0.74,
+        "job_type": 0.99,
+        "loc_country": 0.95,
+        "work_mode": 0.96
+      },
+      "accuracy_high_confidence": {
+        "area": 0.8674698795180723,
+        "desk": 0.9879518072289156,
+        "seniority": 0.7710843373493976,
+        "job_type": 1.0,
+        "loc_country": 0.9518072289156626,
+        "work_mode": 0.963855421686747
+      },
+      "desk_accuracy_on_market_union": 0.6666666666666666,
+      "desk_market_union_n": 3,
+      "joint_exact": 0.6,
+      "joint_exact_high_confidence": 0.6265060240963856,
+      "finance_inclusion": {
+        "tp": 41,
+        "fp": 9,
+        "fn": 1,
+        "tn": 49,
+        "precision": 0.82,
+        "recall": 0.9761904761904762,
+        "f1": 0.8913043478260869,
+        "errors": [
+          [
+            "G010",
+            "false_positive"
+          ],
+          [
+            "G022",
+            "false_positive"
+          ],
+          [
+            "G023",
+            "false_negative"
+          ],
+          [
+            "G057",
+            "false_positive"
+          ],
+          [
+            "G058",
+            "false_positive"
+          ],
+          [
+            "G062",
+            "false_positive"
+          ],
+          [
+            "G080",
+            "false_positive"
+          ],
+          [
+            "G084",
+            "false_positive"
+          ],
+          [
+            "G089",
+            "false_positive"
+          ],
+          [
+            "G093",
+            "false_positive"
+          ]
+        ]
+      },
+      "default_visibility": {
+        "tp": 34,
+        "fp": 12,
+        "fn": 1,
+        "tn": 53,
+        "precision": 0.7391304347826086,
+        "recall": 0.9714285714285714,
+        "f1": 0.8395061728395062,
+        "errors": [
+          [
+            "G010",
+            "false_positive"
+          ],
+          [
+            "G019",
+            "false_positive"
+          ],
+          [
+            "G022",
+            "false_positive"
+          ],
+          [
+            "G023",
+            "false_negative"
+          ],
+          [
+            "G043",
+            "false_positive"
+          ],
+          [
+            "G058",
+            "false_positive"
+          ],
+          [
+            "G062",
+            "false_positive"
+          ],
+          [
+            "G080",
+            "false_positive"
+          ],
+          [
+            "G084",
+            "false_positive"
+          ],
+          [
+            "G085",
+            "false_positive"
+          ],
+          [
+            "G089",
+            "false_positive"
+          ],
+          [
+            "G093",
+            "false_positive"
+          ],
+          [
+            "G094",
+            "false_positive"
+          ]
+        ]
+      },
+      "mismatches": [
+        {
+          "gold_id": "G001",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "analyst",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G003",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "manager",
+              "analyst"
+            ]
+          }
+        },
+        {
+          "gold_id": "G006",
+          "confidence": "medium",
+          "diffs": {
+            "job_type": [
+              "job",
+              "internship"
+            ]
+          }
+        },
+        {
+          "gold_id": "G009",
+          "confidence": "high",
+          "diffs": {
+            "loc_country": [
+              "United States",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G010",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "other",
+              "asset-management"
+            ]
+          }
+        },
+        {
+          "gold_id": "G012",
+          "confidence": "medium",
+          "diffs": {
+            "seniority": [
+              "associate",
+              "analyst"
+            ]
+          }
+        },
+        {
+          "gold_id": "G014",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "analyst",
+              ""
+            ],
+            "loc_country": [
+              "United Kingdom",
+              "London"
+            ],
+            "work_mode": [
+              "hybrid",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G015",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "analyst",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G019",
+          "confidence": "medium",
+          "diffs": {
+            "seniority": [
+              "manager",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G021",
+          "confidence": "high",
+          "diffs": {
+            "work_mode": [
+              "remote",
+              "hybrid"
+            ]
+          }
+        },
+        {
+          "gold_id": "G022",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "other",
+              "risk"
+            ]
+          }
+        },
+        {
+          "gold_id": "G023",
+          "confidence": "medium",
+          "diffs": {
+            "area": [
+              "wealth",
+              "other"
+            ],
+            "seniority": [
+              "analyst",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G027",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "analyst",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G028",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "intern",
+              "analyst"
+            ]
+          }
+        },
+        {
+          "gold_id": "G033",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "intern",
+              "associate"
+            ]
+          }
+        },
+        {
+          "gold_id": "G036",
+          "confidence": "medium",
+          "diffs": {
+            "loc_country": [
+              "",
+              "France"
+            ]
+          }
+        },
+        {
+          "gold_id": "G043",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "manager",
+              "associate"
+            ]
+          }
+        },
+        {
+          "gold_id": "G051",
+          "confidence": "medium",
+          "diffs": {
+            "seniority": [
+              "associate",
+              "analyst"
+            ],
+            "work_mode": [
+              "hybrid",
+              "onsite"
+            ]
+          }
+        },
+        {
+          "gold_id": "G056",
+          "confidence": "high",
+          "diffs": {
+            "loc_country": [
+              "",
+              "Switzerland"
+            ]
+          }
+        },
+        {
+          "gold_id": "G057",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "other",
+              "wealth"
+            ]
+          }
+        },
+        {
+          "gold_id": "G058",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "other",
+              "wealth"
+            ]
+          }
+        },
+        {
+          "gold_id": "G061",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "manager",
+              "associate"
+            ]
+          }
+        },
+        {
+          "gold_id": "G062",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "other",
+              "wealth"
+            ],
+            "seniority": [
+              "analyst",
+              ""
+            ],
+            "loc_country": [
+              "",
+              "United States"
+            ]
+          }
+        },
+        {
+          "gold_id": "G067",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "manager",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G071",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "manager",
+              "associate"
+            ],
+            "work_mode": [
+              "remote",
+              "onsite"
+            ]
+          }
+        },
+        {
+          "gold_id": "G074",
+          "confidence": "medium",
+          "diffs": {
+            "seniority": [
+              "associate",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G075",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "analyst",
+              "associate"
+            ]
+          }
+        },
+        {
+          "gold_id": "G078",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "analyst",
+              "associate"
+            ]
+          }
+        },
+        {
+          "gold_id": "G080",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "other",
+              "wealth"
+            ]
+          }
+        },
+        {
+          "gold_id": "G084",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "other",
+              "wealth"
+            ]
+          }
+        },
+        {
+          "gold_id": "G085",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "risk",
+              "quant"
+            ],
+            "seniority": [
+              "manager",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G086",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "manager",
+              "analyst"
+            ]
+          }
+        },
+        {
+          "gold_id": "G087",
+          "confidence": "medium",
+          "diffs": {
+            "seniority": [
+              "associate",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G089",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "other",
+              "accounting"
+            ]
+          }
+        },
+        {
+          "gold_id": "G090",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "associate",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G092",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "quant",
+              "markets"
+            ],
+            "desk": [
+              "",
+              "trading"
+            ]
+          }
+        },
+        {
+          "gold_id": "G093",
+          "confidence": "high",
+          "diffs": {
+            "area": [
+              "other",
+              "accounting"
+            ]
+          }
+        },
+        {
+          "gold_id": "G094",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "manager",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G097",
+          "confidence": "high",
+          "diffs": {
+            "seniority": [
+              "manager",
+              ""
+            ]
+          }
+        },
+        {
+          "gold_id": "G099",
+          "confidence": "medium",
+          "diffs": {
+            "seniority": [
+              "analyst",
+              ""
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "stability": {
+    "deepseek": {
+      "area": 1.0,
+      "desk": 1.0,
+      "seniority": 0.99,
+      "job_type": 1.0,
+      "loc_country": 1.0,
+      "work_mode": 1.0,
+      "joint_exact": 0.99
+    },
+    "gemini25": {
+      "area": 0.99,
+      "desk": 1.0,
+      "seniority": 0.99,
+      "job_type": 1.0,
+      "loc_country": 0.98,
+      "work_mode": 0.99,
+      "joint_exact": 0.95
+    },
+    "gemini38": {
+      "area": 0.92,
+      "desk": 0.99,
+      "seniority": 0.83,
+      "job_type": 0.99,
+      "loc_country": 0.96,
+      "work_mode": 0.97,
+      "joint_exact": 0.73
+    }
+  }
+}

@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Grad schemes — Jobfeed{% endblock %}
+{% block main_class %}page{% endblock %}
+{% block content %}
+<div class="cp">
+  <div class="page-head cp-head">
+    <h1>Grad schemes</h1>
+    <p class="page-lede cp-lede">Programmes that live on a firm's own page and never reach an ATS board. Each line is what the page said at the last sweep; the tick is yours.</p>
+    {% if sweep.season %}
+      <div class="cp-sweep{% if stale %} is-stale{% endif %}">
+        Last swept <b>{{ sweep.swept_on }}</b>
+        ({{ 'today' if sweep.stale_days == 0 else
+            'yesterday' if sweep.stale_days == 1 else
+            sweep.stale_days ~ ' days ago' }}) — {{ sweep.n_firms }} firms read,
+        {{ sweep.rows|length }} programmes found.
+        {% if stale %}
+          <b>Stale.</b> Autumn windows close inside a month; re-run
+          <code>jobfeed/campus_sweep.py</code> before trusting a status here.
+        {% endif %}
+      </div>
+    {% else %}
+      <div class="cp-sweep is-stale">
+        No sweep on this machine yet. Run <code>python -m jobfeed.campus_sweep</code>
+        to populate this page.
+      </div>
+    {% endif %}
+    <div class="summary-cards">
+      <div class="scard"><div class="k">To work</div><div class="v">{{ counts.live }}</div></div>
+      <div class="scard"><div class="k">Applied</div><div class="v good">{{ counts.applied }}</div></div>
+      <div class="scard"><div class="k">Skipped</div><div class="v">{{ counts.skipped }}</div></div>
+      <div class="scard"><div class="k">Firms swept</div><div class="v">{{ sweep.n_firms if sweep.season else '—' }}</div></div>
+    </div>
+  </div>
+
+  <form class="cp-filters" method="get" action="/campus">
+    <input type="hidden" name="show" value="{{ show }}">
+    <input type="search" name="q" value="{{ q }}" placeholder="firm, programme, city">
+    <button type="submit">Search</button>
+  </form>
+
+  <nav class="cp-tabs">
+    {% for key, label in [('live', 'To work'), ('unclear', 'Window not stated'),
+                          ('applied', 'Applied'), ('skipped', 'Skipped'),
+                          ('closed', 'Closed'), ('all', 'All')] %}
+      <a href="/campus?show={{ key }}{% if q %}&q={{ q|urlencode }}{% endif %}"
+         class="{% if show == key %}on{% endif %}">{{ label }}</a>
+    {% endfor %}
+  </nav>
+
+  {% if rows %}
+    <ul class="cp-list">
+      {% for row in rows %}{% include "_campus_row.html" %}{% endfor %}
+    </ul>
+  {% else %}
+    <p class="cp-empty">Nothing here{% if q %} for “{{ q }}”{% endif %}.</p>
+  {% endif %}
+
+  {% if sweep.walls and show in ('all', 'live') %}
+    <details class="cp-walls">
+      <summary>{{ sweep.walls|length }} firms that can only be checked by hand</summary>
+      <p>Investigated and confirmed unreadable without a browser. The URL is
+        current; the site is the obstacle.</p>
+      <ul>
+        {% for w in sweep.walls %}
+          <li><a href="{{ w.url|safe_url }}" target="_blank" rel="noopener">{{ w.firm }}</a>
+            <span class="cp-note">{{ w.reason }}</span></li>
+        {% endfor %}
+      </ul>
+    </details>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,176 @@
+"""WCN/TAL.net server-rendered job board scraper."""
+import re
+
+from bs4 import BeautifulSoup
+
+from ._http import fix_encoding, make_session
+
+HEADERS = {"User-Agent": "Mozilla/5.0 (compatible; job-scraper/1.0)"}
+
+
+def scrape(board_url: str, fetch_detail: bool = True,
+           id_scope: str = "") -> list[dict]:
+    """Scrape a tal.net/WCN board.
+
+    ``id_scope`` namespaces row ids per tenant. Vacancy numbers are per tenant,
+    so the bare ``talnet_<n>`` id lets two tenants collide on one primary key
+    and the second firm's role is silently skipped as already seen. The eight
+    targets wired before 2026-09-23 keep bare ids (re-keying them would orphan
+    their stored status, stars and applications); every new tenant sets
+    ``talnet_id_scope`` on its target. Two targets on one tenant (Evercore)
+    share a scope, so a role listed on both boards stays one row.
+
+    ``fetch_detail`` controls the classic table layout's per-job detail GET
+    (used only to read the location). Set it False for tenants behind **Oleeo
+    Protect** — its anti-bot trips on request volume (listing + one GET per job
+    = ~N+1 sequential requests), and once tripped the IP is ALTCHA-gated for
+    *every* tal.net tenant on that scan. Some boards (e.g. Evercore) don't even
+    server-render the location on the detail page, so the loop is pure cost —
+    skip it, store the listing, and let the tagger infer location from the title.
+    The tile layout never fetches details, so this flag doesn't affect it.
+    """
+    session = make_session()
+    jobs: dict = {}
+    total = None
+    page_size = None
+    start = 0
+    rows_seen = 0  # raw rows parsed, pre-dedup (boards can list one opp twice)
+    MAX_PAGES = 40  # runaway guard (~2000 roles at 50/page)
+
+    for _ in range(MAX_PAGES):
+        # tal.net paginates by a `start` offset (50/page); the first page carries
+        # no param so the exact single-page behaviour is preserved for the many
+        # boards under one page.
+        params = {"start": start} if start else {}
+        response = session.get(board_url, params=params, headers=HEADERS, timeout=30)
+        response.raise_for_status()
+        fix_encoding(response)
+        # Oleeo Protect (ALTCHA proof-of-work) answers with a 200 "Quick Check
+        # Needed" page and no results markup, which would otherwise parse as an
+        # empty board. Seen on bankcampuscareers and Nomura campus, 2026-09-13.
+        # A bot-check wall, not ours to solve: fail loudly so the source reads
+        # as errored rather than silently empty.
+        if "oleeoProtect" in response.text or "Quick Check Needed" in response.text:
+            raise RuntimeError("TAL.net board is behind an Oleeo Protect bot check")
+        soup = BeautifulSoup(response.text, "html.parser")
+
+        if total is None:
+            total_el = soup.select_one(".results_meta h2")
+            total_match = re.search(
+                r"(\d[\d,]*)\s+results?", total_el.get_text(" ", strip=True)
+            ) if total_el else None
+            total = int(total_match.group(1).replace(",", "")) if total_match else 0
+
+        # Two server-rendered layouts ship under tal.net/WCN. The classic one is
+        # a <table.solr_search_list> (location only on the detail page → per-job
+        # fetch). The newer "tile" layout (e.g. L.E.K.) puts each role in an
+        # <li.opp-container> with the location inline (.candidate-opp-field-3),
+        # so no detail fetch is needed. Detect the tile layout first and parse it
+        # inline; otherwise fall back to the classic table path unchanged.
+        tiles = soup.select("li.opp-container a.subject[href]")
+        if tiles:
+            page_jobs, page_rows = _parse_tiles(tiles, id_scope)
+        else:
+            page_jobs, page_rows = _parse_table(
+                soup, session, fetch_detail=fetch_detail, id_scope=id_scope)
+        rows_seen += page_rows
+
+        before = len(jobs)
+        jobs.update(page_jobs)
+        if page_size is None:
+            page_size = page_rows
+
+        # Stop when this page added nothing, or we've reached the reported total,
+        # or there's no total to page against (single-page board).
+        if len(jobs) == before or not page_jobs or not total or rows_seen >= total:
+            break
+        start += page_size or page_rows
+
+    # Compare RAW row count to the reported total: boards sometimes list the
+    # same opp id twice (MS Campus, 2026-08), so the deduped dict legitimately
+    # holds fewer than `total`. Only a raw shortfall means we missed rows.
+    if total and rows_seen < total:
+        raise RuntimeError(
+            f"TAL.net board reported {total} jobs but exposed {rows_seen}"
+        )
+    return list(jobs.values())
+
+
+def _row_id(job_id: str, id_scope: str) -> str:
+    return f"talnet_{id_scope}_{job_id}" if id_scope else f"talnet_{job_id}"
+
+
+def _parse_tiles(tiles, id_scope: str = "") -> tuple[dict, int]:
+    """Newer tile layout: location is inline, no detail fetch."""
+    jobs = {}
+    rows = 0
+    for link in tiles:
+        url = link.get("href", "")
+        match = re.search(r"/opp/(\d+)", url)
+        if not match:
+            continue
+        job_id = match.group(1)
+        rows += 1
+        if not url.startswith("http"):
+            url = "https://" + url.lstrip("/") if "tal.net" in url else url
+        location = ""
+        tile = link.find_parent("li", class_="opp-container")
+        if tile is not None:
+            field = tile.select_one(".candidate-opp-field-3")
+            if field is not None:
+                label = field.select_one(".candidate-opp-field-label")
+                if label is not None:
+                    label.extract()  # drop the "Location:" label, keep the value
+                location = field.get_text(" ", strip=True)
+        jobs[job_id] = {
+            "id": _row_id(job_id, id_scope),
+            "title": link.get_text(" ", strip=True),
+            "url": link.get("href", ""),
+            "location": " ".join(location.split()),
+            "posted": "",
+        }
+    return jobs, rows
+
+
+def _parse_table(soup, session, fetch_detail: bool = True,
+                 id_scope: str = "") -> tuple[dict, int]:
+    """Classic table layout. Location lives on each detail page, so reading it
+    costs one GET per job — skipped when ``fetch_detail`` is False (Oleeo
+    Protect tenants), leaving location blank for the tagger to infer."""
+    jobs = {}
+    rows = 0
+    for link in soup.select("table.solr_search_list tr.details_row a.subject[href]"):
+        url = link.get("href", "")
+        match = re.search(r"/opp/(\d+)", url)
+        if not match:
+            continue
+        job_id = match.group(1)
+        rows += 1
+        location = ""
+        if fetch_detail:
+            detail = session.get(url, headers=HEADERS, timeout=30)
+            detail.raise_for_status()
+            fix_encoding(detail)
+            detail_soup = BeautifulSoup(detail.text, "html.parser")
+            for strong in detail_soup.find_all("strong"):
+                if "location:" not in strong.get_text(" ", strip=True).lower():
+                    continue
+                parts = []
+                for sibling in strong.next_siblings:
+                    if getattr(sibling, "name", None) in {"br", "p"}:
+                        break
+                    text = sibling.get_text(" ", strip=True) if hasattr(
+                        sibling, "get_text"
+                    ) else str(sibling).strip()
+                    if text:
+                        parts.append(text)
+                location = " ".join(parts).replace("\xa0", " ").strip()
+                break
+        jobs[job_id] = {
+            "id": _row_id(job_id, id_scope),
+            "title": link.get_text(" ", strip=True),
+            "url": url,
+            "location": " ".join(location.split()),
+            "posted": "",
+        }
+    return jobs, rows

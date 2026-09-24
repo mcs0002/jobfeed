@@ -1,0 +1,533 @@
+{% extends "base.html" %}
+{% block body_class %}browse{% endblock %}
+{% block main_class %}browse-split{% endblock %}
+
+{% block content %}
+<div class="list-pane">
+  {% if why_preview %}
+  <div class="why-preview-note" role="note">
+    <span><strong>Preview only</strong> Deterministic context from the active filters and existing role facets. No score, ranking, or data change.</span>
+    <a href="/">Exit preview</a>
+  </div>
+  {% endif %}
+  {% if scan_stale_days %}
+  <div class="stale-banner" role="alert">
+    No scan has run for {{ scan_stale_days }} days — the nightly job on the M1 may be dead
+    (check deliver.log / launchctl).
+  </div>
+  {% endif %}
+  <div class="list-head">
+    {% include "_tabs.html" %}
+
+    <div class="list-toolbar">
+      <button type="button" class="filters-btn" id="filters-btn" aria-expanded="false"
+        onclick="window.__toggleFilters()">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="6" x2="20" y2="6"></line><line x1="7" y1="12" x2="17" y2="12"></line><line x1="10" y1="18" x2="14" y2="18"></line></svg>
+        Filters<span class="fbadge" id="filters-badge" hidden></span>
+        <span class="caret" id="filters-caret">▼</span>
+      </button>
+      {# Firm search (2026-09-24): suggestions are firm names, and the
+         choice resolves to the exact `firm` filter (the firm plus its
+         "Firm (…)" source labels). Text that names no single firm falls
+         back to the company-contains filter. Titles are not searched: the
+         old free-text box was removed because it read as a location search
+         while matching only title and company. #}
+      <input type="search" class="firm-search" id="firm-search" list="firm-names"
+        placeholder="Firm…" aria-label="Filter by firm" autocomplete="off"
+        value="{{ params.get('firm') or params.get('company') or '' }}">
+      <datalist id="firm-names">{% for f in firm_names %}<option value="{{ f }}">{% endfor %}</datalist>
+      {% include "_chips.html" %}
+      {% include "_list_count.html" %}
+      <a class="toolbar-reset" id="browse-reset" href="{{ browse_path|default('/') }}"
+        {% if not chips and not params.get('area') %}hidden{% endif %}>Reset all</a>
+    </div>
+
+    <div class="filter-scrim" id="filter-scrim" hidden onclick="window.__toggleFilters(false)"></div>
+    <div class="filter-sheet" id="filter-sheet" hidden>
+      <div class="sheet-head">
+        <span class="sh-title">Filters</span>
+        <button type="button" class="sh-close" onclick="window.__toggleFilters(false)" aria-label="Close filters">✕</button>
+    </div>
+    <form class="filter-panel" id="filter-form"
+      hx-get="{{ browse_partial_path|default('/partials/jobs') }}" hx-target="#results" hx-swap="innerHTML"
+      hx-trigger="change" hx-sync="body:replace">
+      <input type="hidden" name="area" value="{{ params.get('area','') }}">
+      {# Set by the firm search; hidden so a firm survives every other filter change. #}
+      <input type="hidden" name="firm" value="{{ params.get('firm','') }}">
+      <input type="hidden" name="company" value="{{ params.get('company','') }}">
+
+      {# S3: every control is a .fp-select wrapper (fixed height, own caret,
+         and a .set state that is the panel's main affordance). #}
+      {% macro selbox(name, label, title='') %}
+      <span class="fp-select"><select name="{{ name }}" aria-label="{{ label }}"{% if title %} title="{{ title }}"{% endif %}>{{ caller() }}</select><span class="fp-caret" aria-hidden="true">▼</span></span>
+      {% endmacro %}
+
+      {% macro facet(name, label) %}
+      {% call selbox(name, label) %}
+        <option value="">{{ label }}: any</option>
+        {% for v in facets[name] %}
+          <option value="{{ v }}" {% if params.get(name)==v %}selected{% endif %}>{{ v }}</option>
+        {% endfor %}
+      {% endcall %}
+      {% endmacro %}
+
+      {% set lang_names = {'de':'German','fr':'French','it':'Italian','es':'Spanish','nl':'Dutch','da':'Danish','sv':'Swedish','no':'Norwegian','fi':'Finnish','pt':'Portuguese','pl':'Polish','zh':'Chinese','ja':'Japanese','ko':'Korean','ar':'Arabic','ru':'Russian','tr':'Turkish','el':'Greek','cs':'Czech','hu':'Hungarian','ro':'Romanian'} %}
+
+      <div class="fp-row">
+        <div class="fp-gutter">Role</div>
+        <div class="fp-controls">
+          {{ facet('category', 'Firm type') }}
+          {% call selbox('employ', 'Type', 'All roles (default), full-time only, or internships only') %}
+            <option value="" {% if params.get('employ') not in ('intern','fulltime') %}selected{% endif %}>Type: any</option>
+            <option value="fulltime" {% if params.get('employ')=='fulltime' %}selected{% endif %}>Full-time</option>
+            <option value="intern" {% if params.get('employ')=='intern' %}selected{% endif %}>Internships</option>
+          {% endcall %}
+          {{ facet('desk', 'Desk') }}
+        </div>
+      </div>
+
+      <div class="fp-row">
+        <div class="fp-gutter">Location</div>
+        {% include "_loc_facets.html" %}
+      </div>
+
+      {# Education and Language were filter controls until 2026-08-19 and are
+         now read-only facts on the detail pane. They are things you want to
+         SEE on a role you are already looking at, not axes you slice 8,500
+         roles by — and every control you never touch is one more thing to
+         read past on the ones you do. #}
+
+      <div class="fp-row">
+        <div class="fp-gutter">Timing</div>
+        <div class="fp-controls">
+          {% call selbox('days', 'Posted') %}
+            <option value="">Posted: any</option>
+            {% for d,l in [('7','7d'),('14','14d'),('30','30d')] %}
+              <option value="{{ d }}" {% if params.get('days')==d %}selected{% endif %}>Last {{ l }}</option>
+            {% endfor %}
+          {% endcall %}
+          {% call selbox('start', 'Start', 'Roles with this start date (untagged roles are excluded while active)') %}
+            <option value="">Start: any</option>
+            <option value="asap" {% if params.get('start')=='asap' %}selected{% endif %}>ASAP</option>
+            {% for y in facets['start_years'] %}
+              <option value="{{ y }}" {% if params.get('start')==y %}selected{% endif %}>{{ y }}</option>
+            {% endfor %}
+          {% endcall %}
+          {% call selbox('closing', 'Closing', 'Roles with an application deadline inside this window') %}
+            <option value="">Closing: any</option>
+            <option value="7" {% if params.get('closing')=='7' %}selected{% endif %}>Closing: 7 days</option>
+            <option value="30" {% if params.get('closing')=='30' %}selected{% endif %}>Closing: 30 days</option>
+            <option value="rolling" {% if params.get('closing')=='rolling' %}selected{% endif %}>No stated deadline</option>
+          {% endcall %}
+        </div>
+      </div>
+
+      {# Status sits with the Show toggles: both answer "which slice of MY
+         list", as opposed to Role/Location/Timing which describe the job. #}
+      <div class="fp-row">
+        <div class="fp-gutter">Show</div>
+        <div class="fp-show">
+        {% if request.session.get('role') != 'guest' %}
+        {{ facet('status', 'Status') }}
+        {% endif %}
+        <div class="fp-toggles">
+          {% if request.session.get('role') != 'guest' %}
+          <label class="fp-toggle" title="Show only roles you've starred">
+            <input type="checkbox" name="fav" value="1" {% if params.get('fav') in ['1','true','on'] %}checked{% endif %}>★ Favorites
+          </label>
+          {% endif %}
+          <label class="fp-toggle" title="Show roles requiring 3+ years of experience (hidden by default)">
+            <input type="checkbox" name="show_senior" value="1" {% if params.get('show_senior') in ['1','true','on'] %}checked{% endif %}>Senior 3y+
+          </label>
+          <label class="fp-toggle" title="Show associate-rung roles (entry at PE / asset managers / consulting; post-analyst at banks). Hidden by default.">
+            <input type="checkbox" name="assoc" value="1" {% if params.get('assoc') in ['1','true','on'] %}checked{% endif %}>Associates
+          </label>
+          <label class="fp-toggle" title="Show roles no longer on their company's board (still badged 'delisted'). Hidden by default.">
+            <input type="checkbox" name="show_expired" value="1" {% if params.get('show_expired') in ['1','true','on'] %}checked{% endif %}>Delisted
+          </label>
+        </div>
+        </div>
+      </div>
+
+      <div class="fp-row fp-saved">
+        <div class="fp-gutter">Saved</div>
+        <span id="saved-views"></span>
+        <button type="button" class="btn-save-view" id="save-view-btn" onclick="window.__saveView()" hidden>+ Save current</button>
+      </div>
+    </form>
+      <div class="sheet-foot">
+        <button type="button" class="sh-cta" onclick="window.__toggleFilters()">
+          Show <span id="sheet-count">{{ count }}</span> roles
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="role-list" id="results">
+    {% include "_role_list.html" %}
+  </div>
+</div>
+
+<div class="sheet-backdrop" onclick="window.__closeSheet()"></div>
+<div class="detail-pane" id="detail-pane">
+  {% if sel_job %}{% with job=sel_job, lim=sel_job.lim_view %}{% include "_detail.html" %}{% endwith %}
+  {% else %}<div class="dp-empty">No roles match these filters.</div>{% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+  var LS_VIEWS = document.body.classList.contains("guest") ? "jsui.guest.savedViews" : "jsui.savedViews";
+  var BROWSE_PATH = {{ browse_path|default('/')|tojson }};
+
+  // ── Filter panel disclosure ──────────────────────────────────────────────
+  // One control, two presentations: a floating card on desktop and a bottom
+  // sheet with a scrim on mobile.
+  window.__toggleFilters = function (force) {
+    var sheet = document.getElementById("filter-sheet");
+    var scrim = document.getElementById("filter-scrim");
+    var btn = document.getElementById("filters-btn");
+    var caret = document.getElementById("filters-caret");
+    var open = (force === undefined) ? sheet.hasAttribute("hidden") : !!force;
+    if (open) {
+      sheet.removeAttribute("hidden"); scrim.removeAttribute("hidden");
+      btn.classList.add("on"); caret.textContent = "▲";
+      btn.setAttribute("aria-expanded", "true");
+      document.body.classList.add("filters-open");
+      syncSheetCount();
+    } else {
+      sheet.setAttribute("hidden", ""); scrim.setAttribute("hidden", "");
+      btn.classList.remove("on"); caret.textContent = "▼";
+      btn.setAttribute("aria-expanded", "false");
+      document.body.classList.remove("filters-open");
+    }
+  };
+  // The sheet CTA is a live preview + dismiss — filters apply immediately.
+  function syncSheetCount() {
+    var el = document.getElementById("sheet-count");
+    var src = document.getElementById("list-count");
+    if (!el || !src) return;
+    var m = (src.textContent || "").match(/([\d,]+)\+?\s+role/);
+    if (m) el.textContent = m[1];
+  }
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && !document.getElementById("filter-sheet").hasAttribute("hidden")) {
+      window.__toggleFilters(false);
+    }
+  });
+
+  // ── URL sync: reflect the live filter state into the address bar so a
+  // refresh restores it (and Saved views can capture it). ──────────────────
+  function currentParams() {
+    var form = document.getElementById("filter-form");
+    var p = new URLSearchParams(new FormData(form));
+    // Drop empty values so the URL and saved views stay clean.
+    Array.from(p.keys()).forEach(function (k) { if (!p.get(k)) p.delete(k); });
+    return p;
+  }
+  function syncUrl() {
+    var p = currentParams();
+    var browseQs = p.toString();
+    var browseHref = browseQs ? BROWSE_PATH + "?" + browseQs : BROWSE_PATH;
+    var sel = document.querySelector(".role-card.sel");
+    if (sel) p.set("sel", sel.getAttribute("data-id"));
+    var qs = p.toString();
+    var href = qs ? BROWSE_PATH + "?" + qs : BROWSE_PATH;
+    history.replaceState({}, "", href);
+    try {
+      localStorage.setItem("jsui.lastBrowse", browseHref);
+      document.querySelectorAll("[data-browse-link]").forEach(function (a) {
+        a.setAttribute("href", browseHref);
+      });
+    } catch (e) {}
+  }
+
+  // ── Selection / detail loading ───────────────────────────────────────────
+  function isMobile() { return window.matchMedia("(max-width: 859px)").matches; }
+  window.__closeSheet = function () { document.body.classList.remove("sheet-open"); };
+
+  function markSelected(card) {
+    document.querySelectorAll(".role-card.sel").forEach(function (c) { c.classList.remove("sel"); });
+    if (card) card.classList.add("sel");
+  }
+
+  document.addEventListener("click", function (e) {
+    var star = e.target.closest ? e.target.closest(".role-card .star") : null;
+    // The card star carries data-star-id (data-id is on the CARD). Reading the
+    // wrong attribute passed undefined to toggleStar, so clicking the little
+    // star on a list card silently did nothing — only the detail star worked.
+    if (star) { e.preventDefault(); e.stopPropagation(); toggleStar(star.getAttribute("data-star-id")); return; }
+    var card = e.target.closest ? e.target.closest(".role-card") : null;
+    if (!card) return;
+    // Keep card opening in this one path. When hx-get lived on the card, a
+    // click on its child star also launched a detail GET before the favorite
+    // POST had landed. That stale response repainted the pane's star and left
+    // the selected card and detail pane disagreeing.
+    open(card);
+    if (isMobile()) document.body.classList.add("sheet-open");
+  });
+  document.addEventListener("keydown", function (e) {
+    var card = e.target.closest ? e.target.closest(".role-card") : null;
+    if (!card || e.target.closest(".star")) return;
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); card.click(); }
+  });
+
+  // ── Optimistic star / status updates (server posts fire via htmx) ─────────
+  // Guests: controls are CSS-hidden and the server 403s, but the optimistic UI
+  // must not lie either — every mutator is a no-op for the guest role.
+  var IS_GUEST = document.body.classList.contains("guest");
+  function toggleStar(id) {
+    if (IS_GUEST) return;
+    var on = null;
+    document.querySelectorAll('[data-star-id="' + cssq(id) + '"]').forEach(function (b) {
+      if (on === null) on = !b.classList.contains("on");
+      b.classList.toggle("on", on);
+      b.textContent = on ? "★" : "☆";
+    });
+    postForm("/job/" + encodeURIComponent(id) + "/favorite", {});
+  }
+  window.__toggleStarPane = toggleStar;
+  var STATUS_NAMES = ["new","queued","applied","oa","interview","offer","rejected","ignored"];
+  function paintStatus(id, val) {
+    // Card pill: rebuild dot + label. textContent alone would delete the dot.
+    document.querySelectorAll('.role-card[data-id="' + cssq(id) + '"] .rc-status').forEach(function (el) {
+      el.className = "rc-status st-" + val;
+      el.innerHTML = '<span class="st-dot" aria-hidden="true"></span>';
+      el.appendChild(document.createTextNode(val));
+    });
+    // Card itself carries data-status — that drives the mobile 3px rail.
+    document.querySelectorAll('.role-card[data-id="' + cssq(id) + '"]').forEach(function (c) {
+      c.setAttribute("data-status", val);
+    });
+    var wrap = document.querySelector('.detail-pane .status-select[data-status-wrap="' + cssq(id) + '"]');
+    if (wrap) {
+      STATUS_NAMES.forEach(function (n) { wrap.classList.remove("st-" + n); });
+      wrap.classList.add("st-" + val);
+    }
+    var dot = document.querySelector('.detail-pane .status-select .dot[data-status-id="' + cssq(id) + '"]');
+    if (dot) dot.style.background = statusColor(val);
+    var sel = document.querySelector('.detail-pane select[data-status-id="' + cssq(id) + '"]');
+    if (sel) sel.value = val;
+  }
+  window.__paintStatus = paintStatus;
+  window.__setStatus = function (id, val) {
+    if (IS_GUEST) return;
+    paintStatus(id, val);
+    postForm("/job/" + encodeURIComponent(id) + "/status", { status: val });
+  };
+
+  // ── S15: undo toast ──────────────────────────────────────────────────────
+  // Ignoring a role used to remove it from the list with no way back. The
+  // toast keeps the PREVIOUS status so Undo restores the actual prior state
+  // rather than blanket-resetting to "new".
+  var undoTimer = null;
+  function currentStatus(id) {
+    var card = document.querySelector('.role-card[data-id="' + cssq(id) + '"]');
+    if (card) return card.getAttribute("data-status") || "new";
+    var sel = document.querySelector('.detail-pane select[data-status-id="' + cssq(id) + '"]');
+    return (sel && sel.value) || "new";
+  }
+  function hideToast() {
+    var t = document.getElementById("undo-toast");
+    if (t) t.hidden = true;
+    if (undoTimer) { clearTimeout(undoTimer); undoTimer = null; }
+  }
+  function showUndoToast(id, title, prev) {
+    var t = document.getElementById("undo-toast");
+    var msg = document.getElementById("undo-toast-msg");
+    var btn = document.getElementById("undo-toast-btn");
+    if (!t || !msg || !btn) return;
+    var short = String(title || "this role");
+    if (short.length > 26) short = short.slice(0, 26) + "…";
+    msg.textContent = "Ignored \u201C" + short + "\u201D";
+    btn.onclick = function () { window.__setStatus(id, prev); hideToast(); };
+    t.hidden = false;
+    // A new toast replaces the old one and restarts the clock.
+    if (undoTimer) clearTimeout(undoTimer);
+    undoTimer = setTimeout(hideToast, 5000);
+  }
+  function roleTitle(id) {
+    // Read the title from the DOM rather than inlining it in an onclick — a
+    // real title like `2027 | EMEA | "Markets"` carries quotes that terminate
+    // the attribute and silently truncate the call.
+    var card = document.querySelector('.role-card[data-id="' + cssq(id) + '"] .rc-title');
+    if (card) return card.textContent.trim();
+    var h = document.querySelector('.detail-pane .detail-inner[data-id="' + cssq(id) + '"] h2');
+    return h ? h.textContent.trim() : "this role";
+  }
+  window.__ignoreRole = function (id) {
+    if (IS_GUEST) return;
+    var prev = currentStatus(id);
+    var title = roleTitle(id);
+    window.__setStatus(id, "ignored");
+    showUndoToast(id, title, prev);
+  };
+  function statusColor(v) {
+    return getComputedStyle(document.documentElement).getPropertyValue("--st-" + v).trim() || "var(--muted)";
+  }
+  function cssq(s) { return String(s).replace(/"/g, '\\"'); }
+  function postForm(url, data) {
+    var body = new URLSearchParams(data);
+    fetch(url, { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: body, credentials: "same-origin" });
+  }
+
+  // ── Keyboard nav (j/k move, f fav, e ignore, a applied) ────────────────
+  document.addEventListener("keydown", function (e) {
+    var tag = e.target.tagName;
+    if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") {
+      if (e.key === "Escape" && tag !== "SELECT") e.target.blur();
+      return;
+    }
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    var cards = Array.prototype.slice.call(document.querySelectorAll(".role-card"));
+    if (!cards.length) return;
+    var cur = document.querySelector(".role-card.sel");
+    var idx = cards.indexOf(cur);
+    if (e.key === "j" || e.key === "ArrowDown") { open(cards[Math.min(idx + 1, cards.length - 1)]); e.preventDefault(); }
+    else if (e.key === "k" || e.key === "ArrowUp") { open(cards[Math.max(idx - 1, 0)] || cards[0]); e.preventDefault(); }
+    else if (e.key === "f" && cur) { toggleStar(cur.getAttribute("data-id")); e.preventDefault(); }
+    else if (e.key === "e" && cur) { window.__setStatus(cur.getAttribute("data-id"), "ignored"); e.preventDefault(); }
+    else if (e.key === "a" && cur) { window.__setStatus(cur.getAttribute("data-id"), "applied"); e.preventDefault(); }
+  });
+  function open(card) {
+    if (!card) return;
+    markSelected(card);
+    card.scrollIntoView({ block: "nearest" });
+    htmx.ajax("GET", card.getAttribute("data-detail"), { target: "#detail-pane", swap: "innerHTML" });
+    syncUrl();
+  }
+
+  // ── Saved views (localStorage; a view is a stored query string) ──────────
+  function loadViews() {
+    try {
+      var views = JSON.parse(localStorage.getItem(LS_VIEWS) || "[]");
+      if (!IS_GUEST) return views;
+      return views.filter(function (v) {
+        var p = new URLSearchParams(v.qs || "");
+        return !p.has("status") && !p.has("fav");
+      });
+    } catch (e) { return []; }
+  }
+  function saveViews(v) { try { localStorage.setItem(LS_VIEWS, JSON.stringify(v)); } catch (e) {} }
+  function activeSummary() {
+    var chips = Array.prototype.map.call(document.querySelectorAll("#chips .chip"), function (c) {
+      return c.textContent.replace(/\s*✕\s*$/, "").trim();
+    });
+    var areaTab = document.querySelector(".area-tab.on");
+    var area = areaTab && areaTab.getAttribute("data-area") ? areaTab.childNodes[0].nodeValue.trim() : "";
+    var parts = (area ? [area] : []).concat(chips).filter(Boolean);
+    var s = parts.join(" · ");
+    return s.length > 42 ? s.slice(0, 40) + "…" : s;
+  }
+  window.__saveView = function () {
+    var p = currentParams();
+    var area = (document.querySelector('#filter-form [name="area"]') || {}).value;
+    if (area) p.set("area", area);
+    var qs = p.toString();
+    if (!qs) return;
+    var views = loadViews();
+    views.push({ id: String(Date.now()), name: activeSummary() || "Custom view", qs: qs });
+    saveViews(views); renderViews();
+  };
+  function renderViews() {
+    var host = document.getElementById("saved-views");
+    if (!host) return;
+    var views = loadViews();
+    host.innerHTML = "";
+    views.forEach(function (v) {
+      var wrap = document.createElement("span");
+      wrap.className = "saved-view";
+      var apply = document.createElement("button");
+      apply.type = "button"; apply.className = "apply"; apply.textContent = v.name;
+      apply.onclick = function () { window.location = BROWSE_PATH + "?" + v.qs; };
+      var del = document.createElement("button");
+      del.type = "button"; del.className = "del"; del.title = "Delete saved view"; del.textContent = "✕";
+      del.onclick = function (ev) { ev.stopPropagation(); saveViews(loadViews().filter(function (x) { return x.id !== v.id; })); renderViews(); };
+      wrap.appendChild(apply); wrap.appendChild(del); host.appendChild(wrap);
+    });
+  }
+
+  // ── Filter-control state: the "set" affordance ───────────────────────────
+  // A select's current value is not an attribute, so CSS cannot see it; same
+  // for a checked checkbox's ancestor label. Both states are painted here and
+  // re-synced after every htmx swap (loc facets come back as an OOB swap).
+  function syncFilterStates() {
+    document.querySelectorAll("#filter-form .fp-select").forEach(function (w) {
+      var sel = w.querySelector("select");
+      w.classList.toggle("set", !!(sel && sel.value));
+    });
+    document.querySelectorAll("#filter-form .fp-toggle").forEach(function (l) {
+      var box = l.querySelector('input[type="checkbox"]');
+      l.classList.toggle("on", !!(box && box.checked));
+    });
+  }
+  var filterForm = document.getElementById("filter-form");
+  if (filterForm) filterForm.addEventListener("change", syncFilterStates);
+
+  // ── Firm search: a suggested name, typed exactly or picked, becomes the
+  // exact firm filter; text matching exactly one firm resolves to it; any
+  // other text is a company-contains filter; empty clears both. ────────────
+  (function () {
+    var box = document.getElementById("firm-search");
+    if (!box || !filterForm) return;
+    var names = Array.from(document.querySelectorAll("#firm-names option"))
+      .map(function (o) { return o.value; });
+    function resolve(text) {
+      var t = text.trim().toLowerCase();
+      if (!t) return { firm: "", company: "" };
+      var exact = names.filter(function (n) { return n.toLowerCase() === t; });
+      if (exact.length) return { firm: exact[0], company: "" };
+      var hits = names.filter(function (n) { return n.toLowerCase().indexOf(t) !== -1; });
+      if (hits.length === 1) return { firm: hits[0], company: "" };
+      return { firm: "", company: text.trim() };
+    }
+    var last = null;
+    function apply() {
+      var r = resolve(box.value);
+      var key = r.firm + "|" + r.company;
+      if (key === last) return;
+      last = key;
+      filterForm.querySelector('[name="firm"]').value = r.firm;
+      filterForm.querySelector('[name="company"]').value = r.company;
+      if (r.firm) box.value = r.firm;
+      filterForm.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+    last = resolve(box.value).firm + "|" + resolve(box.value).company;
+    box.addEventListener("change", apply);           // picked a suggestion or blurred
+    box.addEventListener("search", apply);           // Enter, or the clear (x) button
+    box.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") { e.preventDefault(); apply(); }
+    });
+  })();
+
+  // ── Filters badge + Save-current visibility, refreshed after each swap ───
+  function refreshChrome() {
+    syncFilterStates();
+    syncSheetCount();
+    var chips = document.querySelectorAll("#chips .chip").length;
+    var hasArea = !!(document.querySelector('#filter-form [name="area"]') || {}).value;
+    // The badge counts a non-"All" tab as an active filter, per the handoff.
+    var n = chips + (hasArea ? 1 : 0);
+    var badge = document.getElementById("filters-badge");
+    if (badge) { badge.textContent = n; badge.hidden = n === 0; }
+    // Filters button is highlighted when the panel is open (.on) OR when any
+    // filter is active (.has-filters) — two independent reasons, same styling.
+    var btn = document.getElementById("filters-btn");
+    if (btn) btn.classList.toggle("has-filters", n > 0);
+    var reset = document.getElementById("browse-reset");
+    if (reset) reset.hidden = n === 0;
+    var save = document.getElementById("save-view-btn");
+    if (save) save.hidden = !(n > 0);
+  }
+
+  document.body.addEventListener("htmx:afterSwap", function (e) {
+    if (e.detail.target && e.detail.target.id === "results") { syncUrl(); refreshChrome(); }
+  });
+
+  // Record the server-rendered starting view too. This makes Reset all truly
+  // reset the remembered destination even before another filter changes.
+  syncUrl(); renderViews(); refreshChrome();
+})();
+</script>
+{% endblock %}
