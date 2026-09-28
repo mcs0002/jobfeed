@@ -1,0 +1,10 @@
+<div id="status-{{ job.id }}" data-job="{{ job.id }}" class="actions">
+  <form hx-post="/job/{{ job.id }}/status" hx-target="[data-job='{{ job.id }}']" hx-swap="outerHTML" class="stage-form">
+    <select name="status" aria-label="Application stage" onchange="this.form.requestSubmit()">
+      {% for s in ["new","queued","applied","oa","interview","offer","rejected","ignored"] %}
+        <option value="{{ s }}" {% if job.status == s %}selected{% endif %}>{{ s }}</option>
+      {% endfor %}
+    </select>
+    {% if job.applied_at %}<span class="applied-at" title="Applied on">{{ job.applied_at[:10] }}</span>{% endif %}
+  </form>
+</div>

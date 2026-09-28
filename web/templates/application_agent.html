@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>Application workflow status</title>
+  <link rel="stylesheet" href="/static/style.css?v={{ asset_v }}">
+</head>
+<body class="agent-status-page">
+  <main class="agent-status-card">
+    <div class="dp-section-label">Application workflow</div>
+    <h1>{{ job.title if job else workflow.job_id }}</h1>
+    {% if job %}<p>{{ job.company }}</p>{% endif %}
+    <div class="apply-state as-{{ workflow.status }}">{{ workflow.status|replace('_', ' ') }}</div>
+    {% if workflow.detail %}<p class="apply-detail">{{ workflow.detail }}</p>{% endif %}
+    {% if message %}<p class="agent-status-message">{{ message }}</p>{% endif %}
+
+    {% if workflow.status not in ('completed', 'failed') %}
+    <form method="post" action="/application/{{ workflow.workflow_id }}/agent/status">
+      <input type="hidden" name="token" value="{{ token }}">
+      {% if run_id %}<input type="hidden" name="run_id" value="{{ run_id }}">{% endif %}
+      <label for="detail">Short status or exact blocker</label>
+      <textarea id="detail" name="detail" rows="3" maxlength="2000">{{ workflow.detail or '' }}</textarea>
+      <div class="agent-status-actions">
+        {% if workflow.status in ('queued', 'needs_user_action', 'review_ready') %}
+        <button type="submit" name="status" value="in_progress">In progress</button>
+        {% endif %}
+        {% if workflow.status == 'in_progress' %}
+        <button type="submit" name="status" value="needs_user_action">Needs user action</button>
+        <button type="submit" name="status" value="review_ready">Review ready</button>
+        {% endif %}
+        <button type="submit" name="status" value="failed">Failed</button>
+      </div>
+    </form>
+    {% elif workflow.status == 'failed' %}
+    <p>Retry is owner-only from Jobfeed.</p>
+    {% else %}
+    <p>Completed is terminal and can only be recorded by the owner after manual submission.</p>
+    {% endif %}
+  </main>
+</body>
+</html>

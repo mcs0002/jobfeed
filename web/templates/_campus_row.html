@@ -1,0 +1,50 @@
+<li class="cp-row is-{{ row.status }}{% if row.state != 'todo' %} is-{{ row.state }}{% endif %}"
+    id="cp-{{ row.key|replace('|','-') }}">
+  <form class="cp-tick"
+        hx-post="/campus/state"
+        hx-target="closest .cp-row"
+        hx-swap="outerHTML">
+    <input type="hidden" name="key" value="{{ row.key }}">
+    <input type="hidden" name="firm" value="{{ row.firm }}">
+    <input type="hidden" name="programme" value="{{ row.programme }}">
+    <input type="hidden" name="season" value="{{ row.season }}">
+    <button type="submit" name="state" class="cp-box"
+            value="{{ 'todo' if row.state == 'applied' else 'applied' }}"
+            aria-pressed="{{ 'true' if row.state == 'applied' else 'false' }}"
+            title="{{ 'Applied — click to clear' if row.state == 'applied' else 'Mark applied' }}">
+      {{ '☑' if row.state == 'applied' else '☐' }}
+    </button>
+    <button type="submit" name="state" class="cp-skip"
+            value="{{ 'todo' if row.state == 'skipped' else 'skipped' }}"
+            title="{{ 'Bring back' if row.state == 'skipped' else 'Not for me — hide from the working list' }}">
+      {{ '↩' if row.state == 'skipped' else '×' }}
+    </button>
+  </form>
+
+  <div class="cp-main">
+    <div class="cp-title">
+      <a href="{{ row.url|safe_url }}" target="_blank" rel="noopener">{{ row.programme }}</a>
+      <span class="cp-firm">{{ row.firm }}</span>
+      {% if row.category %}<span class="cp-cat">{{ row.category }}</span>{% endif %}
+    </div>
+    <div class="cp-meta">
+      <span class="cp-status s-{{ row.status }}">{{
+        {'open': 'open now', 'opens_later': 'opens later',
+         'unclear': 'window not stated', 'closed': 'closed'}[row.status] }}</span>
+      {% if row.deadline %}
+        <span class="cp-due{% if row.days_left is not none and 0 <= row.days_left <= 14 %} soon{% endif %}">
+          {{ row.deadline }}{% if row.days_left is not none %}
+            ({{ 'today' if row.days_left == 0 else
+                (row.days_left|abs) ~ 'd' ~ (' ago' if row.days_left < 0 else ' left') }}){% endif %}
+        </span>
+      {% endif %}
+      {% if row.intake %}<span>intake {{ row.intake }}</span>{% endif %}
+      {% if row.locations %}<span class="cp-loc">{{ row.locations }}</span>{% endif %}
+      {% if row.apply_via %}<span class="cp-loc">apply via {{ row.apply_via }}</span>{% endif %}
+      {% if row.tracks %}<span class="cp-loc">{{ row.tracks }}</span>{% endif %}
+    </div>
+    {% if row.quote %}<div class="cp-quote">“{{ row.quote }}”</div>{% endif %}
+    {% if row.derived_note %}<div class="cp-note">{{ row.derived_note }}</div>{% endif %}
+    {% if row.notes %}<div class="cp-note">{{ row.notes }}</div>{% endif %}
+  </div>
+</li>

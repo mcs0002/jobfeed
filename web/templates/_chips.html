@@ -1,0 +1,5 @@
+<div class="chips" id="chips"{% if oob %} hx-swap-oob="true"{% endif %}{% if not chips %} hidden{% endif %}>
+  {% for c in chips %}
+  <a class="chip" href="{{ c.url }}">{{ c.label }} <span class="x">✕</span></a>
+  {% endfor %}
+</div>

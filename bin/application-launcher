@@ -1,0 +1,14 @@
+#!/usr/bin/env python3
+"""Stable absolute-path entry point for applications.launcher.
+
+Antigravity grants a permission to an exact command string, so the commands it
+runs must never change shape; they call this file by absolute path.
+"""
+import os
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
+
+from applications.launcher import main  # noqa: E402
+
+raise SystemExit(main())
