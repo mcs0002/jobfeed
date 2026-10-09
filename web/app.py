@@ -35,6 +35,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 from jobfeed import tag
 from jobfeed.envfile import load_dotenv  # noqa: E402
+from jobfeed.dedup import group_postings
 from jobfeed.tag_telemetry import aggregate as tag_telemetry
 from applications import runs as antigravity_runs  # noqa: E402
 from applications import autopilot  # noqa: E402
@@ -1019,6 +1020,9 @@ def _full_detail(db: JobDB, job: dict, request: Request) -> dict:
     _attach_run(db, job, workflow)
     _attach_inbox(db, job)
     job["lim_view"] = _limit_for(db, job.get("company", ""))
+    job["siblings"] = db.sibling_postings(job)
+    if job.get("repost_of"):
+        job["repost_status"] = db.repost_statuses([job["repost_of"]]).get(job["repost_of"], "")
     # Owner-only, and decided here rather than in the template: a guest's full
     # Browse page renders the selected role through this function too, and the
     # panel exposes his application history.
@@ -1316,7 +1320,21 @@ def _new_in(jobs: list[dict], last_seen: str) -> int:
     """Unread roles among the ones listed, by the same test the card's dot
     uses. A global count ignored the view's filters: on 2026-10-03 it read
     "8 new" while all eight were Associate roles the default view hides."""
-    return sum(1 for j in jobs if (j.get("first_seen") or "")[:19] > (last_seen or "")[:19])
+    # A repost is not news: ~7% of 30 days' new rows were roles put back up
+    # under a new id (2026-10-09). The card says "reposted" instead.
+    return sum(1 for j in jobs if not j.get("repost_of")
+               and (j.get("first_seen") or "")[:19] > (last_seen or "")[:19])
+
+
+def _present(db: JobDB, jobs: list[dict]) -> list[dict]:
+    """Group duplicate postings into one card (jobfeed.dedup) and note what he
+    did with the original of any repost."""
+    jobs = group_postings(jobs)
+    originals = db.repost_statuses([j["repost_of"] for j in jobs if j.get("repost_of")])
+    for j in jobs:
+        if j.get("repost_of"):
+            j["repost_status"] = originals.get(j["repost_of"], "")
+    return jobs
 
 
 def _browse_context(request: Request, db: JobDB, *, why_preview: bool = False) -> dict:
@@ -1325,7 +1343,7 @@ def _browse_context(request: Request, db: JobDB, *, why_preview: bool = False) -
     filters = _filters_from_request(request, allow_text_search=False)
     facets = _facets(db, request, filters)
     _reconcile_location(filters, facets)
-    jobs = db.fetch_jobs(limit=PAGE_LIMIT, **filters)
+    jobs = _present(db, db.fetch_jobs(limit=PAGE_LIMIT, **filters))
     if why_preview:
         jobs = [{**job, "browse_reason": _browse_reason(job, request)} for job in jobs]
     tabs = _tabs_for(request, db, filters, browse_path)
@@ -1388,7 +1406,7 @@ def partial_jobs(request: Request, db: JobDB = Depends(get_db), _=Depends(requir
     filters = _filters_from_request(request, allow_text_search=False)
     facets = _facets(db, request, filters)
     _reconcile_location(filters, facets)
-    jobs = db.fetch_jobs(limit=PAGE_LIMIT, **filters)
+    jobs = _present(db, db.fetch_jobs(limit=PAGE_LIMIT, **filters))
     show_unread = not _is_guest(request)
     last_seen = db.get_meta("last_seen_ts", LAST_SEEN_DEFAULT) if show_unread else ""
     return TEMPLATES.TemplateResponse(request, "_jobs_partial.html", {

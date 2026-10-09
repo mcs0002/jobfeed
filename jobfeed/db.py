@@ -342,7 +342,14 @@ EXTRA_COLUMNS = [
     # (2026-08-31 DNS failure, or the M1 being off) would otherwise turn "we
     # stopped looking" into "delete it". Cleared when the role reappears.
     ("delisted_by_age", "INTEGER DEFAULT 0"),
+    # The delisted row this one re-advertises: same firm, title and place,
+    # delisted within REPOST_WINDOW_DAYS before this id first appeared
+    # (2026-10-09). Set once, at insert, by mark_seen.
+    ("repost_of", "TEXT"),
 ]
+
+# How far back a delisted role still counts as the original of a new posting.
+REPOST_WINDOW_DAYS = 90
 
 
 # Columns returned by fetch_jobs() / surfaced in the web UI and JSON API.
@@ -1041,6 +1048,7 @@ class JobDB:
         a stored date: a board that stops repeating a deadline has not
         withdrawn it."""
         now = datetime.now(timezone.utc).isoformat()
+        is_new = not self.seen(job_id)
         self.conn.execute(
             """
             INSERT INTO seen_jobs
@@ -1059,7 +1067,60 @@ class JobDB:
             self.conn.execute(
                 "INSERT OR IGNORE INTO job_descriptions (job_id, description, fetched_at) "
                 "VALUES (?, ?, ?)", (job_id, description, now))
+        if is_new:
+            self._link_repost(job_id, company, title, location)
         self._commit()
+
+    def _link_repost(self, job_id: str, company: str, title: str, location: str) -> None:
+        """A firm that takes a role down and puts it back up under a new id
+        made it look brand new, including roles he had already dismissed.
+        Link the new row to the delisted original and carry over only an
+        'ignored' mark: copying 'applied' would count a second application
+        against the firm's cap, so that history is shown on the card instead."""
+        from .dedup import posting_key
+        base = plain_company(company)
+        cutoff = (datetime.now(timezone.utc)
+                  - timedelta(days=REPOST_WINDOW_DAYS)).isoformat()
+        key = posting_key({"company": company, "title": title, "location": location})
+        candidates = self.conn.execute(
+            "SELECT id, company, title, location, status FROM seen_jobs "
+            "WHERE id <> ? AND delisted_at IS NOT NULL AND delisted_at >= ? "
+            "AND lower(title) = lower(?) AND (company = ? OR company LIKE ? ESCAPE '!') "
+            "ORDER BY delisted_at DESC",
+            (job_id, cutoff, title, base,
+             base.replace("!", "!!").replace("%", "!%").replace("_", "!_") + " (%"),
+        ).fetchall()
+        for cid, ccompany, ctitle, clocation, cstatus in candidates:
+            if posting_key({"company": ccompany, "title": ctitle,
+                            "location": clocation}) != key:
+                continue
+            self.conn.execute(
+                "UPDATE seen_jobs SET repost_of = ?, status = CASE WHEN ? = 'ignored' "
+                "THEN 'ignored' ELSE status END WHERE id = ?", (cid, cstatus, job_id))
+            return
+
+    def repost_statuses(self, ids: list[str]) -> dict[str, str]:
+        """Status of each original a repost points at, for the card's note."""
+        if not ids:
+            return {}
+        marks = ",".join("?" * len(ids))
+        return dict(self.conn.execute(
+            f"SELECT id, status FROM seen_jobs WHERE id IN ({marks})", ids).fetchall())
+
+    def sibling_postings(self, job: dict) -> list[dict]:
+        """Other live postings of the same role (see jobfeed.dedup)."""
+        from .dedup import posting_key
+        base = plain_company(job.get("company"))
+        rows = self.conn.execute(
+            "SELECT id, company, title, url, location, loc_city, status FROM seen_jobs "
+            "WHERE id <> ? AND delisted_at IS NULL AND lower(title) = lower(?) "
+            "AND (company = ? OR company LIKE ? ESCAPE '!')",
+            (job["id"], job.get("title") or "", base,
+             base.replace("!", "!!").replace("%", "!%").replace("_", "!_") + " (%"),
+        ).fetchall()
+        cols = ("id", "company", "title", "url", "location", "loc_city", "status")
+        key = posting_key(job)
+        return [r for r in (dict(zip(cols, row)) for row in rows) if posting_key(r) == key]
 
     def set_deadline(self, job_id: str, deadline: str) -> bool:
         """Record or move the closing date a source states for a stored role.

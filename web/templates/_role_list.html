@@ -21,7 +21,7 @@
   </div>
   <div class="rl-group">
 {% endif %}
-{% set isnew = show_unread and (j.first_seen or '')[:19] > (last_seen|default(''))[:19] %}
+{% set isnew = show_unread and not j.repost_of and (j.first_seen or '')[:19] > (last_seen|default(''))[:19] %}
 <div role="button" tabindex="0" class="role-card{% if isnew %} is-new{% endif %}{% if sel_job and sel_job.id == j.id %} sel{% endif %}"
   data-id="{{ j.id }}"{% if request.session.get('role') != 'guest' %} data-status="{{ j.status }}"{% endif %} data-detail="/job/{{ j.id }}?pane=1">
   <div class="rc-top">
@@ -38,6 +38,8 @@
     {% if j.job_type == 'internship' %}<span class="tag intern">intern</span>{% elif j.job_type == 'graduate-programme' %}<span class="tag grad">grad</span>{% endif %}
     {% if j.min_yoe and j.min_yoe >= 3 %}<span class="tag senior">{{ j.min_yoe }}y+</span>{% endif %}
     {% if j.delisted_at %}<span class="tag delisted">delisted</span>{% endif %}
+    {% if j.also %}<span class="tag dup" title="Also posted {{ j.also|length }} more time{{ '' if j.also|length == 1 else 's' }}: {% for a in j.also %}{{ a.company }}{% if not loop.last %}, {% endif %}{% endfor %}. Open the role for each link.">×{{ 1 + j.also|length }} postings</span>{% endif %}
+    {% if j.repost_of %}<span class="tag repost" title="Re-advertised after an earlier posting of this role was taken down">reposted{% if request.session.get('role') != 'guest' and j.repost_status and j.repost_status != 'new' %} · was {{ j.repost_status }}{% endif %}</span>{% endif %}
     {% set lv = (limits or {}).get(j.company) if request.session.get('role') != 'guest' else none %}
     {% if lv and lv.known and lv.varies %}<span class="tag limit{% if lv.proof == 'unconfirmed' %} unconfirmed{% endif %}" title="This firm's allowance differs by region — open the role for the wording{% if lv.proof == 'unconfirmed' %}. The application form stated no cap.{% endif %}">appl. capped{% if lv.proof == 'unconfirmed' %} ?{% endif %}</span>{% elif lv and lv.known %}<span class="tag limit{% if lv.at_cap %} spent{% endif %}{% if lv.proof == 'unconfirmed' %} unconfirmed{% endif %}" title="{{ lv.cap }} application{{ '' if lv.cap == 1 else 's' }} allowed{% if lv.cycle %} per {{ lv.cycle }}{% endif %} — {{ lv.used_recent }} used in the last 12 months{% if lv.proof == 'form' %}. Stated on the application form itself.{% elif lv.proof == 'unconfirmed' %}. From the careers site only: the application form stated no cap.{% endif %}">{{ lv.used_recent }}/{{ lv.cap }} appl{% if lv.proof == 'form' %} ✓{% elif lv.proof == 'unconfirmed' %} ?{% endif %}</span>{% endif %}
     {% set dl = deadline_days(j.deadline) %}

@@ -5160,9 +5160,10 @@
   "sitemap_jobs": {
    "sitemap_url": "https://www.degroofpetercam.com/sitemap_en-be/sitemap-0.xml",
    "path_contains": "/en-be/careers/",
-   "prefix": "dpam"
+   "prefix": "dpam",
+   "gatsby_page_data": true
   },
-  "notes": "Gatsby careers; job URLs from sitemap, title from slug (page-data.json is 1.3MB/job, avoided). Listing-only."
+  "notes": "Gatsby careers; job URLs from sitemap, then one page-data.json per role (~150 KB gzipped) for the real title, full body, city and date (2026-10-09; before that listing-only, and enrichment stored the site's meta description as every body)."
  },
  {
   "name": "Anima Sgr",

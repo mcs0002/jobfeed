@@ -304,6 +304,15 @@ _SENIOR_TITLE_EXEMPT_RE = re.compile(
     re.IGNORECASE,
 )
 
+# Portfolio / investment operations sit beside the portfolio managers and are
+# tagged middle-office downstream, so they pass the back-office drop that their
+# generic words ("operations analyst") would otherwise trigger: VanEck's "Junior
+# Portfolio Operations Analyst" was dropped at scrape while its "Portfolio
+# Administration Summer Intern" was stored and tagged middle-office (his call,
+# 2026-10-09).
+_BACK_OFFICE_EXEMPT_RE = re.compile(
+    r"\b(?:portfolio|investment)\s+operations?\b", re.IGNORECASE)
+
 # An entry-level programme named after the team it sits in is not a senior
 # role: "2028 Graduate Talent Program - Wealth Management COO - Tokyo" and
 # "2027 Internship - Chief of Staff WMCH - Zurich" were dropped on "coo",
@@ -576,7 +585,7 @@ def is_relevant(job: dict, category: str = "", strict: bool | None = None,
         return False
 
     # --- Unambiguous-noise drops (ALWAYS — never wanted at any source) ---
-    if _hits(title, BACK_OFFICE_DROPS):
+    if _hits(title, BACK_OFFICE_DROPS) and not _BACK_OFFICE_EXEMPT_RE.search(title):
         return False
     if _hits(title, RETAIL_DROPS):
         return False

@@ -7,10 +7,20 @@ Antiforgery.*` cookie); posting that token to
 ``/{TENANT}/JobBoard/{guid}/JobBoardView/LoadSearchResults`` returns
 ``{"opportunities":[{Id,Title,Locations,PostedDate,BriefDescription,...}]}``.
 No browser needed. Job page: ``.../OpportunityDetail?opportunityId={Id}``.
+
+``BriefDescription`` is only a teaser (~400-800 chars), so each role's full body
+is fetched inline through ``enrich.ukg_enrich`` (the Googlebot-rendered detail
+page), keeping the teaser when that fails. Until 2026-10-09 the teaser was
+stored as the description, which made the scan's enrichment pass (it only fills
+EMPTY descriptions) skip every UKG role: the tagger saw 400-800 chars instead of
+3-7k.
 """
 import re
 
+import requests
+
 from ._http import make_session
+from .enrich import ukg_enrich
 
 HEADERS = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
            "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36"}
@@ -74,4 +84,9 @@ def scrape(config: dict) -> list[dict]:
             "description": (item.get("BriefDescription") or "").strip(),
             "posted": (item.get("PostedDate") or "")[:10],
         }
+    detail = requests.Session()
+    for job in jobs.values():
+        full = ukg_enrich.description(job["url"], detail)
+        if len(full) > len(job["description"]):
+            job["description"] = full
     return list(jobs.values())

@@ -51,7 +51,7 @@ DESCRIPTION_STRATEGY = {
     "talentview": ENRICHER,
     "talnet": ENRICHER,
     "icims": ENRICHER,
-    "ukg": ENRICHER,          # Googlebot-UA SSR inlines the full Description
+    "ukg": SCRAPER,           # full Description fetched inline via ukg_enrich (Googlebot-UA SSR)
     "zoho_recruit": ENRICHER,  # detail page embeds full Job_Description hydration
     "hr_manager": ENRICHER,   # AdvertisementContent div on the ad page
     # --- Body returned by the scraper handler (inline or its own extraction) ---

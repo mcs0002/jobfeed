@@ -878,6 +878,14 @@ body.guest .newbar { display: none !important; }
   border-radius: 8px; padding: 9px 12px; margin: 0 0 14px; font-size: 13px; line-height: 1.4;
 }
 .dp-empty { color: var(--muted); font-size: 14px; padding: 40px 4px; text-align: center; }
+/* Duplicate postings and reposts (jobfeed/dedup.py, 2026-10-09). Neutral:
+   information, not a warning. */
+.tag.dup, .tag.repost { border: 1px dashed var(--muted); }
+.dp-repost, .dp-siblings {
+  border: 1px solid var(--bd); border-radius: 8px; padding: 9px 12px;
+  margin: 0 0 14px; font-size: 13px; line-height: 1.5; color: var(--muted);
+}
+.dp-repost a, .dp-siblings a { color: var(--accent); }
 
 /* Bottom-sheet framing (mobile). Backdrop hidden unless the sheet is open. */
 .sheet-backdrop { display: none; }

@@ -650,3 +650,9 @@ class EntryProgrammeTeamNamesTests(unittest.TestCase):
     def test_senior_titles_without_a_programme_marker_still_drop(self):
         for title in ("Chief of Staff to the CEO", "Head of Rates Trading", "Senior Trader"):
             self.assertFalse(is_relevant({"title": title, "location": "Zurich"}), title)
+
+    def test_portfolio_operations_pass_the_back_office_drop(self):
+        for title in ("Junior Portfolio Operations Analyst", "Investment Operations Analyst"):
+            self.assertTrue(is_relevant({"title": title, "location": "Tampa"}), title)
+        for title in ("Operations Analyst", "Regulatory Reporting Analyst", "Fund Accounting Analyst"):
+            self.assertFalse(is_relevant({"title": title, "location": "Tampa"}), title)

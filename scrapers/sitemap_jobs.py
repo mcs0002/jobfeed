@@ -7,7 +7,17 @@ sitemap at a slug that already spells out the role, e.g.
 (here a 1.3 MB Gatsby page-data.json bundling the whole site), we take the job
 URLs straight from the sitemap and derive the title from the slug. Listing-only
 by design (NONE body strategy); the descriptive slug carries the signal.
+
+``gatsby_page_data: true`` (DPAM, 2026-10-09) opts a source into one
+``/page-data/<path>/page-data.json`` fetch per role, which carries the real
+title, the full posting HTML, the city and the creation date. It is ~150 KB
+gzipped and ~0.6 s per role. Until then DPAM stored the site's meta description
+(139 chars) or the generic jobs page as every role's body, because the job page
+itself is a client-rendered shell.
 """
+import datetime as dt
+import html
+import json
 import re
 
 from ._http import make_session
@@ -120,4 +130,41 @@ def scrape(config: dict) -> list[dict]:
     if not jobs:
         raise RuntimeError(
             f"sitemap_jobs: no URLs matching {needle!r} in {sitemap_url}")
+    if config.get("gatsby_page_data"):
+        for job in jobs.values():
+            _gatsby_detail(job, fetch)
     return list(jobs.values())
+
+
+_GATSBY_DATE = re.compile(r"/Date\((\d+)\)/")
+
+
+def _gatsby_detail(job: dict, fetch) -> None:
+    """Fill title/description/location/posted in place from the role's Gatsby
+    page-data.json; leaves the slug-derived row untouched on any failure."""
+    from urllib.parse import urlsplit
+
+    from .enrich.descriptions import _extract_text
+
+    parts = urlsplit(job["url"])
+    try:
+        data = json.loads(fetch(
+            f"{parts.scheme}://{parts.netloc}/page-data{parts.path.rstrip('/')}/page-data.json"))
+        node = data["result"]["data"]["job"]
+    except Exception:
+        return
+    trans = node.get("translations") or []
+    t = next((x for x in trans if x.get("extLocale") == "en"), trans[0] if trans else {})
+    body = "".join(t.get(k) or node.get(k) or "" for k in
+                   ("extJobDescHeader", "externalJobDescription", "extJobDescFooter"))
+    text = _extract_text(html.unescape(body)) if body else ""
+    if text:
+        job["description"] = text
+    if t.get("externalTitle") or node.get("externalTitle"):
+        job["title"] = (t.get("externalTitle") or node.get("externalTitle")).strip()
+    city = ((node.get("locationList") or [{}])[0] or {}).get("city") or ""
+    job["location"] = ", ".join(x for x in (city, node.get("country") or "") if x)
+    m = _GATSBY_DATE.search(str(node.get("createdDateTime") or ""))
+    if m:
+        job["posted"] = dt.datetime.fromtimestamp(
+            int(m.group(1)) / 1000, dt.timezone.utc).date().isoformat()

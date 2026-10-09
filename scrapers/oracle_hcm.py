@@ -1,4 +1,6 @@
 """Oracle Recruiting Cloud public Candidate Experience scraper."""
+import re
+
 from ._http import assert_complete, make_session
 
 HEADERS = {"User-Agent": "Mozilla/5.0 (compatible; job-scraper/1.0)"}
@@ -10,8 +12,11 @@ EXPAND = (
 
 
 def _scrape_keyword(base_url: str, site: str, keyword: str,
-                    jobs: dict, session, page_size: int = 100) -> None:
-    """Paginate one full-text keyword into the shared jobs dict (dedup by Id)."""
+                    jobs: dict, session, page_size: int = 100,
+                    site_number: str | None = None) -> None:
+    """Paginate one full-text keyword into the shared jobs dict (dedup by Id).
+    `site` (number or URL name) keys ids and URLs, so they stay stable;
+    `site_number` is what the search API is asked for."""
     kw_clause = f",keyword={keyword}" if keyword else ""
     offset = 0
     total = None
@@ -29,7 +34,7 @@ def _scrape_keyword(base_url: str, site: str, keyword: str,
                 "onlyData": "true",
                 "expand": EXPAND,
                 "finder": (
-                    f"findReqs;siteNumber={site}{kw_clause},limit={page_size},"
+                    f"findReqs;siteNumber={site_number or site}{kw_clause},limit={page_size},"
                     f"offset={offset},sortBy=POSTING_DATES_DESC"
                 ),
             },
@@ -79,6 +84,30 @@ def _scrape_keyword(base_url: str, site: str, keyword: str,
     assert_complete(len(fetched_ids), total, f"Oracle HCM/{site}")
 
 
+_SITE_NUMBER = re.compile(r"^CX(?:_\d+)?$")
+_SITE_NUMBER_IN_PAGE = re.compile(r"\bCX_\d+\b")
+
+
+def _site_number(base_url: str, site: str, session) -> str:
+    """The `CX_n` site number the search API needs, for a site given by number
+    or by its URL name. The API IGNORES an unknown siteNumber and returns every
+    requisition on the tenant: until 2026-10-09 "LazardProfessionalCareers" and
+    "LazardStudentCareers" each pulled all 126 Lazard roles (105 live rows
+    stored twice) and "BDOExperiencedCareers" pulled the campus site's 95 too.
+    The site's own page names its number; anything ambiguous raises rather
+    than silently scraping the whole tenant."""
+    if _SITE_NUMBER.match(site):
+        return site
+    r = session.get(f"{base_url}/hcmUI/CandidateExperience/en/sites/{site}",
+                    headers=HEADERS, timeout=40)
+    r.raise_for_status()
+    found = set(_SITE_NUMBER_IN_PAGE.findall(r.text))
+    if len(found) != 1:
+        raise RuntimeError(f"Oracle HCM/{site}: cannot resolve the site number "
+                           f"(found {sorted(found) or 'none'})")
+    return found.pop()
+
+
 def scrape(config: dict) -> list[dict]:
     base_url = config["base_url"].rstrip("/")
     site = config["site"]
@@ -90,5 +119,6 @@ def scrape(config: dict) -> list[dict]:
     # heavy + negative-filter path for the big ones.
     jobs: dict = {}
     session = make_session()
-    _scrape_keyword(base_url, site, config.get("keyword", ""), jobs, session)
+    _scrape_keyword(base_url, site, config.get("keyword", ""), jobs, session,
+                    site_number=_site_number(base_url, site, session))
     return list(jobs.values())

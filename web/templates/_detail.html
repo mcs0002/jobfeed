@@ -13,6 +13,15 @@
   <div class="dp-delisted">This posting was delisted {{ days_ago(job.delisted_at) }} ({{ job.delisted_at[:10] }}) — it's no longer on the company's board, so the live link is likely dead. Use the captured description below.</div>
   {% endif %}
 
+  {% if job.repost_of %}
+  <div class="dp-repost">Reposted: an earlier posting of this role was taken down and put back up under a new id{% if request.session.get('role') != 'guest' and job.repost_status and job.repost_status != 'new' %} (you marked the earlier one <b>{{ job.repost_status }}</b>){% endif %}. <a href="/job/{{ job.repost_of|urlencode }}">Earlier posting →</a></div>
+  {% endif %}
+  {% if job.siblings %}
+  <div class="dp-siblings">Also posted as:
+    {% for s in job.siblings %}<a href="{{ s.url|safe_url }}" target="_blank" rel="noopener">{{ s.company }}{% if s.status and s.status != 'new' and request.session.get('role') != 'guest' %} ({{ s.status }}){% endif %} ↗</a>{% if not loop.last %} · {% endif %}{% endfor %}
+  </div>
+  {% endif %}
+
   <div class="dp-actions">
     {% if job.url|safe_url %}
     <a class="btn-open{% if job.delisted_at %} dead{% endif %}" href="{{ job.url|safe_url }}" target="_blank" rel="noopener"{% if job.delisted_at %} title="This posting was delisted — the link may 404"{% endif %}>Open posting{% if job.delisted_at %} (may be dead){% endif %} ↗</a>
