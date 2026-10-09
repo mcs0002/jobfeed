@@ -1,0 +1,10 @@
+<div class="fp-controls" id="loc-facets"{% if oob %} hx-swap-oob="true"{% endif %}>
+  {% for name, label in [('loc_region','Region'),('loc_country','Country'),('loc_city','City')] %}
+  <span class="fp-select"><select name="{{ name }}" aria-label="{{ label }}">
+    <option value="">{{ label }}: any</option>
+    {% for v in facets[name] %}
+    <option value="{{ v }}" {% if params.get(name)==v %}selected{% endif %}>{{ v }}</option>
+    {% endfor %}
+  </select><span class="fp-caret" aria-hidden="true">▼</span></span>
+  {% endfor %}
+</div>

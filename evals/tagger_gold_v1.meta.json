@@ -1,0 +1,74 @@
+{
+  "version": 1,
+  "created": "2026-09-09",
+  "purpose": "Independent accuracy benchmark for the six UI-critical tag fields; stored production labels were hidden during initial adjudication.",
+  "source": {
+    "database": "/private/tmp/bench-snapshot.db on the M1",
+    "sha256": "8802876a6cf785adb085e63f71fd5e68443b2f33f8f373fd80af821c8ee78186",
+    "sample_seed": 20260909,
+    "sample_size": 100,
+    "deduplication_key": ["normalized company", "normalized title", "normalized location"],
+    "eligibility": "active rows with a non-empty description",
+    "blind_input_sha256": "9e51bc597c136a9bee67fe4ff0a1856e96dc15e9c0eb842327d2abfe968b0ef3"
+  },
+  "labels": {
+    "rater": "Codex",
+    "fields": ["area", "desk", "seniority", "job_type", "loc_country", "work_mode"],
+    "initial_locked_sha256": "30cec189860dc9f3a7a66178c311eb71791034f2e46d126c28b814b9c945baaa",
+    "final_labels_sha256": "d57577be2c097d0ac3163142ea15880371eb5939e693dd93f976e74944a1075f",
+    "final_gold_sha256": "a4590d7e389636500f63a3d5dfcf05a1ecdf46755a4a8c2d4710de36abfbbbdd",
+    "confidence_counts": {"high": 83, "medium": 16, "low": 1},
+    "source_only_consistency_edits_before_predictions_were_inspected": [
+      "G012 seniority",
+      "G051 seniority and work_mode",
+      "G074 seniority",
+      "G078 seniority",
+      "G087 seniority",
+      "G099 seniority"
+    ],
+    "post_reveal_source_adjudications": [
+      "G009 area and desk: markets/trading to middle-office/blank because the requirements describe trading operations, logistics and front-office support",
+      "G093 area: accounting to other because the work is technology-controls and SOC attestation, not audit of financial accounts"
+    ]
+  },
+  "runs": {
+    "deepseek-v4-pro": {
+      "configuration": "pipe output, thinking disabled",
+      "clean_runs": "2/2",
+      "area_accuracy": [0.83, 0.83],
+      "seniority_accuracy": [0.71, 0.72],
+      "joint_exact": [0.58, 0.59],
+      "area_stability": 1.0
+    },
+    "gemini-2.5-flash": {
+      "configuration": "json_rows, reasoning_effort none, exclusions addendum",
+      "clean_runs": "2/2",
+      "area_accuracy": [0.90, 0.89],
+      "seniority_accuracy": [0.67, 0.68],
+      "joint_exact": [0.59, 0.59],
+      "area_stability": 0.99,
+      "hardened_exact_row_verification": {
+        "clean": true,
+        "area_accuracy": 0.89,
+        "high_confidence_area_accuracy": 0.927710843373494,
+        "prediction_sha256": "f3450b7dac5ba1f479b71cc411d19b8f09f3124f2d0224c989fa988d61d50bc1"
+      }
+    },
+    "gemini-3.8-flash": {
+      "configuration": "json_rows, default temperature, reasoning_effort none, exclusions addendum",
+      "clean_runs": "1/2",
+      "area_accuracy": [0.88, 0.88],
+      "seniority_accuracy": [0.73, 0.74],
+      "joint_exact": [0.59, 0.60],
+      "area_stability": 0.92,
+      "failure": "The second run returned only one valid row for a 13-row batch and required two sub-batch retries."
+    }
+  },
+  "interpretation": "Gemini 2.5 Flash is the strongest tested area classifier and produced fewer false finance inclusions than DeepSeek. DeepSeek remains stronger on seniority. Gemini 3.8 Flash is more expensive, less accurate on area, less stable, and failed the clean-run criterion.",
+  "limitations": [
+    "The set is independently model-labelled, not human ground truth.",
+    "Two source-based area corrections were made after candidate outputs were revealed and are listed above; the locked pre-reveal labels still favored Gemini 2.5 Flash by three to four area points.",
+    "One hundred roles is enough to expose large errors but not to estimate small differences precisely.",
+    "This version should remain immutable; prompt tuning should use a separate development set and a new holdout version."
+  ]
+}

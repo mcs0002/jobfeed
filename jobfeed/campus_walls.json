@@ -1,0 +1,116 @@
+{
+ "Accuracy": {
+  "reason": "TLS handshake rejected by the host, no HTTP response",
+  "checked": "2026-09-09",
+  "url": "https://careers.accuracy.com/",
+  "evidence": "fetch_error: SSLError: Failed to perform, curl: (35) TLS connect error: error:10000458:SSL routines:OPENSSL_internal:TLS"
+ },
+ "Apax Partners": {
+  "reason": "TLS handshake rejected by the host, no HTTP response",
+  "checked": "2026-09-09",
+  "url": "https://apaxpartners.com/team/careers/",
+  "evidence": "fetch_error: SSLError: Failed to perform, curl: (35) TLS connect error: error:10000438:SSL routines:OPENSSL_internal:TLS"
+ },
+ "Bain & Company": {
+  "reason": "bot wall: 403 to every browser identity the scraper can present",
+  "checked": "2026-09-09",
+  "url": "https://www.bain.com/careers/work-with-us/internships-programs/associate-consultant-internship/",
+  "evidence": "http_403"
+ },
+ "Baker Tilly": {
+  "reason": "JS-only page: the HTML carries no content, it is rendered client-side",
+  "checked": "2026-09-09",
+  "url": "https://careers.bakertilly.com/student-opportunities",
+  "evidence": "js_shell: 0 chars of text"
+ },
+ "CPP Investments": {
+  "reason": "renders almost no text server-side (consent wall or client-side render)",
+  "checked": "2026-09-09",
+  "url": "https://www.cppinvestments.com/careers/early-career-candidates/graduate-programs/",
+  "evidence": "thin_page: 0 chars of text"
+ },
+ "Centerview Partners": {
+  "reason": "renders almost no text server-side (consent wall or client-side render)",
+  "checked": "2026-09-09",
+  "url": "https://www.centerviewpartners.com/careers.aspx",
+  "evidence": "thin_page: 19 chars of text"
+ },
+ "Central Bank of Ireland": {
+  "reason": "renders almost no text server-side (consent wall or client-side render)",
+  "checked": "2026-09-09",
+  "url": "https://www.centralbank.ie/careers/graduate-entry-level-candidates",
+  "evidence": "thin_page: 49 chars of text"
+ },
+ "Coinbase Institutional": {
+  "reason": "no early-careers page found anywhere on the domain (paths, sitemap and homepage links all probed)",
+  "checked": "2026-09-09",
+  "url": "https://www.coinbase.com/careers/university",
+  "evidence": "http_404"
+ },
+ "Copenhagen Energy Trading": {
+  "reason": "renders almost no text server-side (consent wall or client-side render)",
+  "checked": "2026-09-09",
+  "url": "https://copenhagen-energytrading.com/vacancies/",
+  "evidence": "thin_page: 115 chars of text"
+ },
+ "DTCC": {
+  "reason": "renders almost no text server-side (consent wall or client-side render)",
+  "checked": "2026-09-09",
+  "url": "https://www.dtcc.com/careers/early-career-programs",
+  "evidence": "thin_page: 28 chars of text"
+ },
+ "Franklin Templeton": {
+  "reason": "renders almost no text server-side (consent wall or client-side render)",
+  "checked": "2026-09-09",
+  "url": "https://www.franklintempleton.com/about-us/who-we-are/our-people/careers",
+  "evidence": "thin_page: 0 chars of text"
+ },
+ "J. Safra Sarasin": {
+  "reason": "renders almost no text server-side (consent wall or client-side render)",
+  "checked": "2026-09-09",
+  "url": "https://www.jsafrasarasin.com/content/jsafrasarasin/language-masters/en/company/careers.html",
+  "evidence": "thin_page: 7 chars of text"
+ },
+ "MFS Investment Management": {
+  "reason": "renders almost no text server-side (consent wall or client-side render)",
+  "checked": "2026-09-09",
+  "url": "https://www.mfs.com/en-us/individual-investor/about-mfs/careers.html",
+  "evidence": "thin_page: 7 chars of text"
+ },
+ "MarketAxess": {
+  "reason": "JS-only page: the HTML carries no content, it is rendered client-side",
+  "checked": "2026-09-09",
+  "url": "https://www.marketaxess.com/careers/early-careers",
+  "evidence": "js_shell: 72 chars of text"
+ },
+ "Rokos Capital Management": {
+  "reason": "renders almost no text server-side (consent wall or client-side render)",
+  "checked": "2026-09-09",
+  "url": "https://www.rokoscapital.com/careers",
+  "evidence": "thin_page: 293 chars of text"
+ },
+ "SMBC (APAC)": {
+  "reason": "renders almost no text server-side (consent wall or client-side render)",
+  "checked": "2026-09-09",
+  "url": "https://www.smbc.co.jp/asia/careers/university-recruiting/",
+  "evidence": "thin_page: 57 chars of text"
+ },
+ "Shell Trading & Supply": {
+  "reason": "renders almost no text server-side (consent wall or client-side render)",
+  "checked": "2026-09-09",
+  "url": "https://www.shell.com/careers/about-careers-at-shell/our-business-at-a-glance/trader-development-programme.html",
+  "evidence": "thin_page: 65 chars of text"
+ },
+ "Tikehau Capital": {
+  "reason": "returns HTTP 429 to every request, hours apart, on all browser identities (rate-limit-shaped bot wall)",
+  "checked": "2026-09-09",
+  "url": "https://www.tikehaucapital.com/en/careers/graduate-program",
+  "evidence": "http_429 on 2026-09-09 across three attempts"
+ },
+ "Union Investment": {
+  "reason": "renders almost no text server-side (consent wall or client-side render)",
+  "checked": "2026-09-09",
+  "url": "https://karriere.union-investment.de/nachwuchskraefte/studienbegleitend",
+  "evidence": "thin_page: 98 chars of text"
+ }
+}

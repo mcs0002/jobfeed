@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Log in — Jobfeed</title>
+  <link rel="stylesheet" href="/static/style.css?v={{ asset_v }}">
+</head>
+<body class="login-body">
+  <form class="login-card" method="post" action="/login">
+    <h1>Jobfeed</h1>
+    {% if error %}<p class="error">{{ error }}</p>{% endif %}
+    <input type="text" name="username" placeholder="Username" autocomplete="username" autocapitalize="none" autofocus required>
+    <input type="password" name="password" placeholder="Password" autocomplete="current-password" required>
+    <button type="submit">Log in</button>
+  </form>
+</body>
+</html>

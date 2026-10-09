@@ -1,0 +1,47 @@
+{# Company context: owner-only (job.company_ctx is None for guests, set
+   server-side in web/app.py _full_detail). History and relevant openings are
+   separate on purpose; the full list of openings is a link, not a list. #}
+{% set ctx = job.company_ctx %}
+{% if ctx %}
+<div class="dp-company firm-row">
+  <div class="dp-section-label">Your applications at {{ ctx.firm }}</div>
+  <div class="firm-val">
+  {% if ctx.applications %}
+  <div class="cc-summary">
+    <strong>{{ ctx.applications|length }}</strong> application{{ '' if ctx.applications|length == 1 else 's' }}
+    {% for st, n in ctx.status_counts %}<span class="dp-status st-{{ st }}"><span class="st-dot" aria-hidden="true"></span>{{ n }} {{ st }}</span>{% endfor %}
+  </div>
+  <table class="cc-apps">
+    {% for a in ctx.applications %}
+    <tr{% if a.is_current %} class="is-current"{% endif %}>
+      <td class="cc-title"><a href="/job/{{ a.id }}">{{ a.title }}</a>{% if a.is_current %} <span class="cc-tag">this role</span>{% endif %}{% if a.delisted_at %} <span class="cc-tag">delisted</span>{% endif %}</td>
+      <td class="cc-city">{{ a.city or '—' }}</td>
+      <td class="cc-date">{{ a.date or '—' }}</td>
+      <td><span class="dp-status st-{{ a.status }}"><span class="st-dot" aria-hidden="true"></span>{{ a.status }}</span></td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <p class="cc-empty">No applications to {{ ctx.firm }} yet.</p>
+  {% endif %}
+  </div>
+</div>
+<div class="firm-row">
+  <div class="dp-section-label">Open roles</div>
+  <div class="firm-val">
+  <details class="cc-relevant">
+    <summary>Relevant open roles{% if ctx.relevant %} ({{ ctx.relevant|length }}){% endif %}</summary>
+    {% if ctx.relevant %}
+    <ul>
+      {% for r in ctx.relevant %}
+      <li><a href="/job/{{ r.id }}">{{ r.title }}</a> <span class="cc-meta">{{ r.city or '—' }}{% if r.desk %} · {{ r.desk }}{% endif %}</span></li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="cc-empty">No other open roles here match this one's area and type.</p>
+    {% endif %}
+    <a class="cc-all" href="{{ ctx.all_url }}">Show all {{ ctx.open_total }} open {{ ctx.firm }} roles →</a>
+  </details>
+  </div>
+</div>
+{% endif %}
