@@ -891,6 +891,7 @@ def main():
                         education=job.get("education"),
                         start_date=job.get("start_date"),
                         min_yoe=job.get("min_yoe"),
+                        ai_tech=job.get("ai_tech"),
                         **provenance,
                     )
 

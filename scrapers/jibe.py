@@ -52,6 +52,7 @@ def scrape(config: dict) -> list[dict]:
                 "url": urljoin(base_url, f"jobs/{job_id}"),
                 "location": data.get("full_location") or data.get("short_location", ""),
                 "posted": data.get("posted_date", "")[:10],
+                "_excluded": _excluded(data, config.get("exclude_values")),
             }
 
         if "totalCount" not in payload:
@@ -67,5 +68,20 @@ def scrape(config: dict) -> list[dict]:
             break
         page += 1
 
+    # Pagination and completeness count every posting; exclusion applies after.
     assert_complete(len(jobs), total, "Jibe")
-    return list(jobs.values())
+    return [j for j in jobs.values() if not j.pop("_excluded")]
+
+
+def _excluded(data: dict, exclude: dict | None) -> bool:
+    """`exclude_values` = {field: [values]}, e.g. {"tags2": ["Technology"]}:
+    drop a posting when, for some field, every value it lists is excluded. A
+    posting with no value for the field passes, as does a value the firm adds
+    later. Client-side because Jibe's own filters take one value per field."""
+    for field, values in (exclude or {}).items():
+        raw = data.get(field) or []
+        listed = {v.get("name") if isinstance(v, dict) else v
+                  for v in (raw if isinstance(raw, list) else [raw])}
+        if listed and listed <= set(values):
+            return True
+    return False

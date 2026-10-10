@@ -14,7 +14,14 @@ BASE = "https://boards-api.greenhouse.io/v1/boards/{slug}/jobs"
 HEADERS = {"User-Agent": "Mozilla/5.0 (compatible; job-scraper/1.0)"}
 
 
-def scrape(slug: str, eu: bool = False, url_template: str = "") -> list[dict]:
+def scrape(slug: str, eu: bool = False, url_template: str = "",
+           departments: list[str] | None = None,
+           exclude_departments: list[str] | None = None) -> list[dict]:
+    # `departments` keeps a job listed under any of these department names;
+    # `exclude_departments` drops a job only when EVERY department it lists is
+    # excluded. A job with no department passes both, and a department the
+    # firm adds later passes the exclude form, so prefer exclusion on boards
+    # whose finance roles spread over several departments.
     # `url_template` overrides the API's `absolute_url` with
     # template.format(id=...) — for boards whose absolute_url points at a firm
     # site path that no longer exists (the firm redesigned; Greenhouse still
@@ -33,7 +40,13 @@ def scrape(slug: str, eu: bool = False, url_template: str = "") -> list[dict]:
     r.raise_for_status()
     data = r.json()
     jobs = []
+    keep, drop = set(departments or []), set(exclude_departments or [])
     for j in data.get("jobs", []):
+        names = {d.get("name") for d in j.get("departments") or []}
+        if keep and names and not names & keep:
+            continue
+        if drop and names and names <= drop:
+            continue
         jobs.append({
             "id": f"gh_{j['id']}",
             "title": j.get("title", ""),

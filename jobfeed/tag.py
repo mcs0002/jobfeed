@@ -390,6 +390,69 @@ def _enforce_corporate_title(job: dict) -> None:
         job["seniority"] = "manager"
 
 
+# AI & Tech guard (2026-10-10). On a blind dev set of 80 live roles the model
+# found 18 of 19 finance-business tech roles but also said yes to 16 generic
+# IT or non-tech roles (firewall, Active Directory, SAP, storage, IT support,
+# consultancy delivery, a marketing intern), in both output formats and with
+# the exclusions spelled out in the rubric. Like the manager guard, the model's
+# yes must then survive checkable evidence; an AI/ML title at a financial firm
+# is always yes. Sector strings are targets.json categories.
+_AI_TECH_NON_FINANCE_SECTORS = ("Consulting & Advisory",)
+_AI_TECH_COMMODITY_SECTORS = ("Energy Utilities w/ Trading", "Physical Commodity Merchants")
+_AI_TECH_TITLE_RE = re.compile(
+    r"\b(?:ai|ml|llm|genai|machine learning|artificial intelligence|data scien\w*|data engineer\w*"
+    r"|data analyst|analytics|quant\w*|engineer\w*|engineering|developer|development|software|systems?"
+    r"|platform|technolog\w*|tech|fpga|hardware|electronic|algo\w*|automation|digital|product"
+    r"|programmer|researcher|ki|künstliche intelligenz)\b", re.I)
+_AI_TECH_GENERIC_IT_RE = re.compile(
+    r"firewall|active directory|\bstorage\b|desktop|service support|technology support|tech support"
+    r"|\bit support|helpdesk|help desk|servicenow|salesforce|dynamics 365|\bsap\b|\boracle\b|workday"
+    r"|test automation|\bqa\b|cyber|\bnetwork|infrastructure|identity|end.?user|\bmacd\b|\bsoc\b", re.I)
+_AI_TECH_FINANCE_ROLE_RE = re.compile(
+    r"finance (?:&|and) business management|finance management|finance manager|fp&a|budget"
+    r"|\bcontroller\b|cost analyst|tax\b", re.I)
+_AI_TECH_TRADING_CONTEXT_RE = re.compile(
+    r"trad\w*|risk|quant\w*|pricing|market|\bai\b|\bml\b|machine learning|data scien\w*|algo\w*", re.I)
+
+
+# Quant research, trading and strategy roles are investment roles, not
+# technology: on 2026-10-10 405 live "Quantitative Researcher / Trader /
+# Strategist" titles carried ai_tech=1 because "quant" passed the title check,
+# so the AI & Tech tab duplicated the Quant tab. Cleared unless the title also
+# names a technology function (quant developer, ML researcher stay).
+_QUANT_INVESTMENT_RE = re.compile(
+    r"\bquant\w*\b.*\b(?:research\w*|trad\w*|strateg\w*|analys\w*|analytics|portfolio)\b"
+    r"|\b(?:research\w*|trad\w*|strateg\w*)\b.*\bquant\w*\b", re.I)
+_TECH_FUNCTION_RE = re.compile(
+    r"develop\w*|engineer\w*|\bml\b|machine learning|deep learning|\bai\b|\bllm|data scien\w*"
+    r"|software|programm\w*|technolog\w*|\bc\+\+|python|\bit\b", re.I)
+
+
+def _enforce_ai_tech(job: dict) -> None:
+    """Reconcile the model's AI & Tech flag with checkable evidence."""
+    if job.get("ai_tech") is None:
+        return
+    from jobfeed.db import ai_title
+    title = job.get("title") or ""
+    sector = job.get("category") or ""
+    if sector in _AI_TECH_NON_FINANCE_SECTORS or _AI_TECH_FINANCE_ROLE_RE.search(title):
+        job["ai_tech"] = 0
+        return
+    if ai_title(title):
+        job["ai_tech"] = 1
+        return
+    if not job["ai_tech"]:
+        return
+    if _QUANT_INVESTMENT_RE.search(title) and not _TECH_FUNCTION_RE.search(title):
+        job["ai_tech"] = 0
+        return
+    if (not _AI_TECH_TITLE_RE.search(title) or _AI_TECH_GENERIC_IT_RE.search(title)
+            or _AI_TECH_FINANCE_ROLE_RE.search(title)):
+        job["ai_tech"] = 0
+    elif sector in _AI_TECH_COMMODITY_SECTORS and not _AI_TECH_TRADING_CONTEXT_RE.search(title):
+        job["ai_tech"] = 0
+
+
 _OUTPUT_MARKER = "INPUT: numbered job blocks separated by ===."
 
 _SYSTEM = """You tag finance job postings with structured labels for a filtering UI. For each role you get its Sector (the kind of firm), Company, Title, Location, and a short Description excerpt. Every firm here is one the user already WANTS — so do NOT judge fit. Your job is to (a) separate genuine front-office / investment roles from back-office & non-finance noise, and (b) label the front-office ones precisely. Be decisive; never invent labels.
@@ -422,6 +485,7 @@ CRITICAL — bias toward INCLUSION within finance. Every firm is wanted, so if a
 - NON-MARKETS SALES: B2B / retail / product / account-management / business-development sales of physical goods, energy/power supply, software, or payments — very common at energy utilities, commodity merchants, and fintech. These are 'other'. DESK=sales is INSTITUTIONAL MARKETS SALES ONLY (selling financial products to investor clients).
 - Apprenticeship / Ausbildung / dual-study vocational tracks (pre-degree; set TYPE=job, area usually 'other'). But a genuine internship / summer analyst / working-student / graduate role is NOT automatically 'other' — give it the SAME finance area as the equivalent full-time role, judged by function (a markets internship = markets, an IBD summer analyst = ibd, a quant PhD intern = quant); use 'other' only when its underlying function is back-office / tech / non-finance.
 (Consulting / transaction-advisory / deal-advisory roles now have their OWN area = consulting — do NOT put them in 'other'.)
+- BRANCH & RETAIL BANKING (the user does not want it): branch, personal, premier or priority bankers; retail financial advisors and planners serving the mass or affluent market from a branch, contact centre or advisor network; branch-based small-business / SME banking; insurance agency or tied-agent sales. These are 'other'. Wealth means private banking and wealth management for HIGH-NET-WORTH individuals and families at a private bank, wealth manager or family office.
 - NON-JOB postings: talent communities / pools / networks, recruiting or "discovery" events, "register your interest" / "expression of interest" / interest forms, fellowships, and generic candidate pipelines are NOT real openings → area=other, TYPE=job (never graduate-programme).
 
 Use the SECTOR as the strongest hint:
@@ -439,6 +503,8 @@ TYPE — one of: job, internship, graduate-programme. internship = any student/p
 LOCATION — normalize: CITY (English; repeat country if only country given; empty if remote/unknown), COUNTRY (canonical English short name, NEVER an abbreviation or localized form: "United States" not "US/USA", "United Kingdom" not "UK/England", "United Arab Emirates" not "UAE", "Germany" not "Deutschland"; if a role spans several countries give only the primary one, never a list), REGION (one of Europe/Americas/APAC/MEA, else empty; HK/Singapore/Tokyo/Shanghai/Sydney/Mumbai/Kazakhstan/Uzbekistan/Central Asia=APAC; London/Frankfurt/Paris/Zurich=Europe; New York/Toronto/São Paulo=Americas; Dubai/Riyadh/Doha/Johannesburg/Africa/Middle East=MEA).
 WORKMODE — onsite | hybrid | remote (default onsite when a city is named and nothing says otherwise).
 
+AITECH — yes | no. Independent of AREA. yes when the role's core work is building or applying technology INSIDE a finance business: AI / machine learning / LLM / data science; quantitative or trading technology (trading systems, electronic or algorithmic trading, pricing and risk engines, market data); software or data engineering for a trading, investment, risk, banking-product or payments business; AI strategy or governance at a financial firm. A role can be AITECH=yes in any AREA: a quant developer is AREA=quant, AITECH=yes; a trading-systems engineer is AREA=other, AITECH=yes. no for generic corporate IT (helpdesk, end-user support, networks, infrastructure operations, ERP / HR / CRM system implementation, cybersecurity operations, IT audit) and for every non-technical role.
+
 The next four fields come FROM THE DESCRIPTION EXCERPT (Sector/Company/Title/Location can't tell you these). Read the requirements/profile section — which the excerpt splices in under [REQUIREMENTS] when present. If the excerpt is "(none)", output `-` for all four.
 LANG_REQ — languages REQUIRED for the role BEYOND English, as comma-separated lowercase ISO codes from EXACTLY this set: de fr it es nl da sv no fi pt pl zh ja ko ar ru tr el cs hu ro. Only HARD requirements count: "fluent German required", "native-level French", "Dutch and French mandatory", "must speak Italian". A language described as "a plus / nice to have / preferred / advantageous / an asset / desirable" does NOT count — output nothing for it. English is the baseline — NEVER emit `en`. If the posting is written ENTIRELY in a non-English language (e.g. the whole excerpt is German or French prose), that language IS required — emit its code even without an explicit statement; a `PostingLanguage:` line in the payload is a detected hint of exactly this case — include that code. Empty (`-`) = English-only or no language stated.
 MIN_YOE — the minimum years of full-time PROFESSIONAL experience the role explicitly requires, as an integer. A range → the LOWER bound ("3-5 years of experience" → 3, "0-3 years" → 0). "minimum 5 years" / "at least 5 years" / "5+ years" → 5. Internship / working-student / new-grad / graduate-programme / entry-level → 0. If no explicit experience requirement is stated → 0 (never guess from seniority). Cap at 30.
@@ -447,19 +513,20 @@ START_DATE — the normalized start date when stated: `YYYY-MM` if a month or se
 
 INPUT: numbered job blocks separated by ===.
 OUTPUT: one line per job, SAME order, EXACTLY this and nothing else (no header, no commentary, no code fences):
-INDEX|AREA|DESK|SENIORITY|TYPE|CITY|COUNTRY|REGION|WORKMODE|LANG_REQ|MIN_YOE|EDUCATION|START_DATE
-CRITICAL: every line has EXACTLY 13 fields (12 pipes). For ANY field that is empty/not-applicable, output a single hyphen `-` — NEVER leave it blank and NEVER collapse two empty fields into one. The number of `|` per line is always 12. MIN_YOE is always a number (0 when none).
+INDEX|AREA|DESK|SENIORITY|TYPE|CITY|COUNTRY|REGION|WORKMODE|LANG_REQ|MIN_YOE|EDUCATION|START_DATE|AITECH
+CRITICAL: every line has EXACTLY 14 fields (13 pipes). For ANY field that is empty/not-applicable, output a single hyphen `-` — NEVER leave it blank and NEVER collapse two empty fields into one. The number of `|` per line is always 13. MIN_YOE is always a number (0 when none). AITECH is always yes or no.
 
 Examples:
-0|markets|trading|graduate|graduate-programme|London|United Kingdom|Europe|onsite|-|0|bachelor|2026-09
-1|other|-|analyst|job|Essen|Germany|Europe|onsite|de|0|-|-
-2|quant|-|analyst|job|Hong Kong|Hong Kong|APAC|hybrid|-|3|phd|asap
-3|ibd|-|analyst|job|Frankfurt|Germany|Europe|onsite|de|0|bachelor|-
-4|asset-management|-|associate|job|Geneva|Switzerland|Europe|onsite|fr|5|master|-
-5|markets|trading|analyst|job|Geneva|Switzerland|Europe|onsite|-|3|-|2026
-6|ibd|-|analyst|job|Frankfurt|Germany|Europe|onsite|-|0|master|2026-06
-7|accounting|-|graduate|job|Dublin|Ireland|Europe|hybrid|-|0|bachelor|-
-(Row 6's `2026-06` came from a stated "summer 2026" start; row 0's `2026-09` from a "September 2026" intake.)
+0|markets|trading|graduate|graduate-programme|London|United Kingdom|Europe|onsite|-|0|bachelor|2026-09|no
+1|other|-|analyst|job|Essen|Germany|Europe|onsite|de|0|-|-|no
+2|quant|-|analyst|job|Hong Kong|Hong Kong|APAC|hybrid|-|3|phd|asap|yes
+3|ibd|-|analyst|job|Frankfurt|Germany|Europe|onsite|de|0|bachelor|-|no
+4|asset-management|-|associate|job|Geneva|Switzerland|Europe|onsite|fr|5|master|-|no
+5|markets|trading|analyst|job|Geneva|Switzerland|Europe|onsite|-|3|-|2026|no
+6|ibd|-|analyst|job|Frankfurt|Germany|Europe|onsite|-|0|master|2026-06|no
+7|accounting|-|graduate|job|Dublin|Ireland|Europe|hybrid|-|0|bachelor|-|no
+8|other|-|analyst|job|London|United Kingdom|Europe|hybrid|-|0|bachelor|-|yes
+(Row 6's `2026-06` came from a stated "summer 2026" start; row 0's `2026-09` from a "September 2026" intake. Row 8 is an electronic-trading software engineer: not a finance AREA, but AITECH=yes.)
 """
 
 # Content-derived rather than manually bumped: a prompt/rubric edit creates a
@@ -475,7 +542,7 @@ _RUBRIC_PREFIX = _SYSTEM.split(_OUTPUT_MARKER)[0]
 
 _FIELD_ORDER = ("index", "area", "desk", "seniority", "type", "city", "country",
                 "region", "work_mode", "lang_req", "min_yoe", "education",
-                "start_date")
+                "start_date", "ai_tech")
 
 # The seen_jobs columns the eval scripts score a tagging run on. scripts/
 # tag_gold.py (accuracy against the versioned gold set) and scripts/tag_ab.py
@@ -485,25 +552,25 @@ SCORED_FIELDS = ("area", "desk", "seniority", "job_type", "loc_country", "work_m
 
 _OUTPUT_JSON_ROWS = """INPUT: numbered job blocks separated by ===.
 OUTPUT: JSON only, matching the supplied schema. `rows` holds ONE inner array per input job, in the SAME order as the input, one for EVERY job including the ones you are unsure about.
-Each inner array is EXACTLY 13 strings in this order:
-INDEX, AREA, DESK, SENIORITY, TYPE, CITY, COUNTRY, REGION, WORKMODE, LANG_REQ, MIN_YOE, EDUCATION, START_DATE
-Output "-" for any field that is empty or not applicable. MIN_YOE is always a numeric string ("0" when none).
+Each inner array is EXACTLY 14 strings in this order:
+INDEX, AREA, DESK, SENIORITY, TYPE, CITY, COUNTRY, REGION, WORKMODE, LANG_REQ, MIN_YOE, EDUCATION, START_DATE, AITECH
+Output "-" for any field that is empty or not applicable. MIN_YOE is always a numeric string ("0" when none). AITECH is always "yes" or "no".
 
 Examples of single inner arrays:
-["0","markets","trading","graduate","graduate-programme","London","United Kingdom","Europe","onsite","-","0","bachelor","2026-09"]
-["1","other","-","analyst","job","Essen","Germany","Europe","onsite","de","0","-","-"]
-["2","quant","-","analyst","job","Hong Kong","Hong Kong","APAC","hybrid","-","3","phd","asap"]
-["3","asset-management","-","associate","job","Geneva","Switzerland","Europe","onsite","fr","5","master","-"]
+["0","markets","trading","graduate","graduate-programme","London","United Kingdom","Europe","onsite","-","0","bachelor","2026-09","no"]
+["1","other","-","analyst","job","Essen","Germany","Europe","onsite","de","0","-","-","no"]
+["2","quant","-","analyst","job","Hong Kong","Hong Kong","APAC","hybrid","-","3","phd","asap","yes"]
+["3","asset-management","-","associate","job","Geneva","Switzerland","Europe","onsite","fr","5","master","-","no"]
 (Row 0's `2026-09` came from a stated "September 2026" intake.)
 """
 
 _OUTPUT_JSON_OBJ = """INPUT: numbered job blocks separated by ===.
 OUTPUT: JSON only, matching the supplied schema. `rows` holds ONE object per input job, in the SAME order as the input, one for EVERY job including the ones you are unsure about.
-Each object has exactly these keys: index, area, desk, seniority, type, city, country, region, work_mode, lang_req, min_yoe, education, start_date.
+Each object has exactly these keys: index, area, desk, seniority, type, city, country, region, work_mode, lang_req, min_yoe, education, start_date, ai_tech.
 `index` is the job's INDEX as a string. `min_yoe` is an integer (0 when none). Every other value is a string; output "-" for any field that is empty or not applicable.
 
 Example object:
-{"index":"0","area":"markets","desk":"trading","seniority":"graduate","type":"graduate-programme","city":"London","country":"United Kingdom","region":"Europe","work_mode":"onsite","lang_req":"-","min_yoe":0,"education":"bachelor","start_date":"2026-09"}
+{"index":"0","area":"markets","desk":"trading","seniority":"graduate","type":"graduate-programme","city":"London","country":"United Kingdom","region":"Europe","work_mode":"onsite","lang_req":"-","min_yoe":0,"education":"bachelor","start_date":"2026-09","ai_tech":"no"}
 (That `2026-09` came from a stated "September 2026" intake.)
 """
 
@@ -547,6 +614,7 @@ def _json_schema(fmt: str, count: int) -> dict:
             "min_yoe": {"type": "integer"},
             "education": {"type": "string", "enum": _EDUCATION_VALUES},
             "start_date": {"type": "string"},
+            "ai_tech": {"type": "string", "enum": ["yes", "no"]},
         }
         item = {"type": "object", "properties": props,
                 "required": list(_FIELD_ORDER),
@@ -554,7 +622,7 @@ def _json_schema(fmt: str, count: int) -> dict:
                 "propertyOrdering": list(_FIELD_ORDER)}
     else:
         item = {"type": "array", "items": {"type": "string"},
-                "minItems": 13, "maxItems": 13}
+                "minItems": len(_FIELD_ORDER), "maxItems": len(_FIELD_ORDER)}
     return {
         "type": "object",
         "properties": {"rows": {"type": "array", "items": item,
@@ -585,8 +653,8 @@ def _json_to_pipe(out_text: str, expected_count: int) -> str:
         # minutes of the 2026-09-23 re-tag).
         vals = [(" ".join(str(v if v is not None else "").split()) or "-")
                 .replace("|", "/") for v in vals]
-        if len(vals) != 13:
-            raise ValueError(f"row {i} has {len(vals)} fields, expected 13")
+        if len(vals) != len(_FIELD_ORDER):
+            raise ValueError(f"row {i} has {len(vals)} fields, expected {len(_FIELD_ORDER)}")
         if not vals[0].strip().isdigit() or int(vals[0]) != i:
             raise ValueError(f"row {i} returned invalid index {vals[0]!r}")
         lines.append("|".join(vals))
@@ -706,6 +774,7 @@ def _blank_tags(job: dict) -> None:
     job["lang_req"] = None
     job["education"] = None
     job["start_date"] = None
+    job["ai_tech"] = None
     # min_yoe stays absent on a blank tag — jobfeed/main.py/backfill fall back to the
     # regex value; we don't zero it here.
 
@@ -908,12 +977,17 @@ def parse_response(text: str, expected_count: int) -> dict[int, dict]:
         # blanks and drops a field). Normalize it back to "".
         fields = [("" if f.strip() == "-" else f.strip())
                   for f in m.group(2).split("|")]
-        # 12 fields now: the original 8 + lang_req|min_yoe|education|start_date.
-        if len(fields) != 12:
+        # 13 fields: the original 8 + lang_req|min_yoe|education|start_date +
+        # ai_tech (2026-10-10). A 12-field line (pre-ai_tech prompt) still
+        # parses, with ai_tech unknown (None), so a stale reply never blanks
+        # a batch; anything else is rejected.
+        if len(fields) == 12:
+            fields.append("")
+        if len(fields) != 13:
             continue
         (area, desk, seniority, job_type,
          city, country, region, work_mode,
-         lang_req, min_yoe, education, start_date) = fields
+         lang_req, min_yoe, education, start_date, ai_tech) = fields
         (area, desk, seniority, job_type, region, work_mode) = _coerce(
             area.lower(), desk.lower(), seniority.lower(), job_type.lower(),
             region, work_mode.lower(),
@@ -936,6 +1010,8 @@ def parse_response(text: str, expected_count: int) -> dict[int, dict]:
             "education": education if education in EDUCATION_LEVELS else "",
             "start_date": _coerce_start_date(start_date),
             "min_yoe": _coerce_min_yoe(min_yoe),
+            # AI & Tech flag (independent of area): 1/0, None when not given.
+            "ai_tech": {"yes": 1, "no": 0}.get(ai_tech.strip().lower()),
         }
     return results
 
@@ -1446,6 +1522,7 @@ def tag_jobs(jobs: list[dict]) -> list[dict]:
             _enforce_internship(j)
             _enforce_manager(j)
             _enforce_corporate_title(j)
+            _enforce_ai_tech(j)
         health["failure_reasons"].append(reason)
         _record_run(health)
         return jobs
@@ -1488,6 +1565,7 @@ def tag_jobs(jobs: list[dict]) -> list[dict]:
         _enforce_internship(j)
         _enforce_manager(j)
         _enforce_corporate_title(j)
+        _enforce_ai_tech(j)
         j.pop("_desc_lang", None)  # payload-time scratch, not a tag column
     health["jobs_tagged"] = sum(1 for j in jobs if not _is_untagged(j))
     _record_run(health)

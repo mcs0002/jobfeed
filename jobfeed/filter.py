@@ -73,22 +73,27 @@ SENIOR_TITLE_DROPS = {
 }
 
 
-# Back-office operations / control / settlement. Includes "trade support"
-# and "middle office" — both are post-trade, NOT front-office markets,
-# regardless of whether "Markets" or "Global Markets" appears in the team
-# name.
+# Back-office operations / settlement / financial crime. "Middle office",
+# "trade support" and "trading services" left this list on 2026-10-10: the
+# tagger rubric files trade support, product control and business management
+# as middle-office, an area Browse keeps and filters, so dropping them here
+# destroyed roles the site is built to show (Citadel Securities, Millennium,
+# Nomura structured credit). Also removed then, as matching bugs: "cdd " hit
+# the French fixed-term contract ("Finance Analyst - CDD") and "ta operations"
+# hit "data operations"; "customer due diligence" and "transfer agency" cover
+# what they meant.
 BACK_OFFICE_DROPS = {
     "kyc", "aml ", "anti-money laundering",
     "transaction monitoring", "sanctions screening",
     "financial crime", "fraud analyst", "fraud investigator",
-    "know your customer", "customer due diligence", "cdd ",
+    "know your customer", "customer due diligence",
     "fund accounting", "fund administration", "fund admin",
     "fund servicing", "asset servicing", "securities servicing",
     "settlements", "settlement analyst", "reconciliation",
     "securities operations",
-    "custody", "transfer agency", "ta operations",
-    "trade support", "trade operations", "trade services",
-    "trading services", "transactions specialist", "middle office",
+    "custody", "transfer agency",
+    "trade operations", "trade services",
+    "transactions specialist",
     "operations analyst", "ops analyst", "back office",
     "regulatory reporting", "surveillance",
     "control room",
@@ -147,7 +152,31 @@ RETAIL_DROPS = {
     "versicherungsfachmann", "versicherungsfachfrau",
     "angestellter vermittler", "außendienst", "aussendienst",
     "vorsorgeberater", "vertriebsassistenz", "büroassistenz",
+    # Branch/contact-centre service (CIBC); corpus dry-run 2026-10-10.
+    "client service representative", "financial service representative",
 }
+
+
+# Branch and retail wealth advice (his call, 2026-10-10: no branch banking,
+# wealth or SME). A regex, not RETAIL_DROPS terms, because multi-word terms
+# match as plain substrings and "financial advisor" would hit "Financial
+# Advisory" (valuation and transaction consulting at Deloitte and Kroll).
+# Corpus dry-run the same day: ~1,000 active hits, all wealth, 'other' or
+# small-business banking. Rejected then: Polish "doradca" (also ING's junior
+# strategic-client financing advisors), "client associate" (Neuberger
+# institutional, Nordea leveraged finance), "client service associate" (JPMC
+# markets client service), bare "financial planning" (FP&A analysts).
+_RETAIL_WEALTH_RE = re.compile(
+    r"\bfinancial solutions advis|\bfinancial advis(?:or|er)s?\b"
+    r"|\bfinancial planner\b|\bfinancial planning (?:advis|consult)"
+    r"|\bmerrill (?:advisor|wealth|financial|edge)"
+    r"|\b(?:premier|priority) (?:relationship|banker|sales|client)\b|\bejecutivo premier"
+    r"|\brelationship manager[ ,-]+priority"
+    r"|kundenberater"
+    r"|conseill(?:er|ère)\W*(?:en )?(?:clientèle|gestion de patrimoine|banque)"
+    r"|consulente investimenti|adviseur bank|banki tanácsadó|bankéř"
+    r"|^\s*investment advis(?:or|er)\b",
+    re.IGNORECASE)
 
 
 # Pure engineering / IT / infrastructure. "Data engineer" / "ML engineer"
@@ -171,7 +200,25 @@ TECH_DROPS = {
     "datenbankadministrator", "database administrator",
     "qa engineer", "qa analyst", "test engineer", "qa automation",
     "web developer", "product owner", "application owner",
+    # Corpus dry-run 2026-10-10 over every stored row: these hit only 'other'
+    # (the few 'consulting' hits were ERP/CRM implementation roles). Bare
+    # "java" was rejected: quant developer titles list it.
+    "full stack", "engineering manager", "java developer", "java engineer",
+    "servicenow", "salesforce", "identity & access", "identity and access",
+    "scrum master",
 }
+
+
+# Technology that builds a markets business passes the tech drop so the
+# AI & Tech tab (tagged ai_tech, 2026-10-10) can show it: Goldman "Software
+# Engineer, Global Banking & Markets, Electronic Trading", HSBC eTrading,
+# Jefferies credit eTrading. These are stored as area 'other' (hidden from
+# All) and the tagger's ai_tech flag routes them to the tab. Sized on the
+# 2026-10-10 drop sample: 124 of 1,412 tech drops per sweep.
+_FINANCE_TECH_RE = re.compile(
+    r"trad(?:ing|er)|\bquant|front.?office|electronic|algorithmic|\balgo\b"
+    r"|market.?making|pricing|derivatives|fixed income|equities|e-?trading"
+    r"|low.?latency|fpga", re.IGNORECASE)
 
 
 # Support / non-finance functions.
@@ -188,6 +235,7 @@ NON_FINANCE_DROPS = {
     "brand manager",
     # Legal / audit / tax
     "legal counsel", "paralegal", "legal analyst",
+    "general counsel", "associate counsel",
     "internal audit", "audit analyst", "audit associate", "audit manager",
     "auditor interno", "compliance auditor",
     "tax analyst", "tax accountant",
@@ -267,6 +315,13 @@ PRE_DEGREE_DROPS = {
     # DE — "Schulpraktikum" is a separate spelling from "Schülerpraktikum"
     # above and is what Provinzial/ERGO actually post.
     "schulpraktikum",
+    # Single-word terms match at the word's END, so "auszubildende" misses
+    # "Auszubildender" and "schülerpraktikum" misses "Schülerpraktikant(in)".
+    # A dual-study bachelor is pre-degree too ("Duales Studium BWL Bank");
+    # "Duales Masterstudium" does not contain the phrase. Corpus dry-run
+    # 2026-10-10: 234 active hits, all 'other' but 4 pre-degree programmes.
+    "auszubildender", "schülerpraktikant", "schülerpraktikantin",
+    "duales studium", "dualen studium",
     # CH/AT vocational tracks (Axpo, Die Mobiliar, Vaudoise — the DACH insurer
     # expansion of 2026-08-03 pulled these in by the hundred). "EFZ" is the
     # Swiss federal VET certificate and is <=3 chars, so it word-boundary
@@ -306,10 +361,10 @@ _SENIOR_TITLE_EXEMPT_RE = re.compile(
 
 # Portfolio / investment operations sit beside the portfolio managers and are
 # tagged middle-office downstream, so they pass the back-office drop that their
-# generic words ("operations analyst") would otherwise trigger: VanEck's "Junior
-# Portfolio Operations Analyst" was dropped at scrape while its "Portfolio
-# Administration Summer Intern" was stored and tagged middle-office (his call,
-# 2026-10-09).
+# generic words ("operations analyst") would otherwise trigger: an asset
+# manager's "Junior Portfolio Operations Analyst" was dropped at scrape while
+# its "Portfolio Administration Summer Intern" was stored and tagged
+# middle-office (his call, 2026-10-09).
 _BACK_OFFICE_EXEMPT_RE = re.compile(
     r"\b(?:portfolio|investment)\s+operations?\b", re.IGNORECASE)
 
@@ -318,10 +373,29 @@ _BACK_OFFICE_EXEMPT_RE = re.compile(
 # "2027 Internship - Chief of Staff WMCH - Zurich" were dropped on "coo",
 # "chief" and "staff" (UBS, 2026-09-29). A programme marker in the title wins.
 _ENTRY_PROGRAMME_RE = re.compile(
-    r"\b(?:graduate|intern(?:ship)?s?|trainee(?:ship)?|summer analyst|off[- ]cycle"
+    r"\b(?:graduate|intern(?:ship)?s?|trainee(?:ship)?|summer(?:\s+\d{4})?\s+analyst|off[- ]cycle"
     r"|werkstudent\w*|praktik\w*|stagiaire|stage|alternan\w*|co-?op)\b",
     re.IGNORECASE,
 )
+
+
+# A board's posting prefix, not the role: Piper Sandler titles campus roles
+# "Campus Recruiting - 2027 Investment Banking Summer Analyst", which the
+# "recruiting" HR drop removed (2026-10-10). Only the dashed prefix is
+# stripped; "Campus Recruiting Analyst" (an HR role) still drops.
+_POSTING_PREFIX_RE = re.compile(
+    r"^\s*(?:\d{4}\s+)?campus recruiting\s*[-–—|:]\s*", re.IGNORECASE)
+
+# Seniority words that are not the rung in these spellings (2026-10-10):
+# "Staff" is the ENTRY rung in accounting and consulting ("Staff Accountant",
+# "Consulting Staff", EY "Staff 1"), and "MD" after a comma, before
+# "Market/Area" or in "NY or MD" is Maryland. Removed before the senior check.
+_NOT_SENIOR_RE = re.compile(
+    r"\bstaff\s+(?:accountant|auditor|consultant|\d)\b|\bconsulting\s+staff\b"
+    r"|(?:\b[a-z]{2}|baltimore|bethesda|annapolis|rockville|owings mills|towson"
+    r"|silver spring|gaithersburg|frederick|columbia),\s*md\b"
+    r"|\bmd\s+(?:market|area|region)\b|\bor\s+md\b",
+    re.IGNORECASE)
 
 
 # Dual-rung postings ("Analyst/Associate", "Analyst or Associate", etc.)
@@ -541,7 +615,7 @@ def is_relevant(job: dict, category: str = "", strict: bool | None = None,
     + internships for the aggressive scrape mode."""
     if strict is None:
         strict = STRICT_FUNCTION_FILTER
-    title = (job.get("title") or "").lower()
+    title = _POSTING_PREFIX_RE.sub("", (job.get("title") or "").lower())
     location = (job.get("location") or "").lower()
 
     # --- Hard gates (always applied) ---
@@ -568,7 +642,8 @@ def is_relevant(job: dict, category: str = "", strict: bool | None = None,
     # Seniority hard gate (always on). "associate" is handled separately below
     # because its rung is firm-dependent.
     dual_rung = bool(_DUAL_RUNG_RE.search(title))
-    if (_hits(title, SENIOR_TITLE_DROPS) and not _SENIOR_TITLE_EXEMPT_RE.search(title)
+    senior_title = _NOT_SENIOR_RE.sub(" ", title)
+    if (_hits(senior_title, SENIOR_TITLE_DROPS) and not _SENIOR_TITLE_EXEMPT_RE.search(title)
             and not _ENTRY_PROGRAMME_RE.search(title)):
         return False
 
@@ -589,13 +664,16 @@ def is_relevant(job: dict, category: str = "", strict: bool | None = None,
         return False
     if _hits(title, RETAIL_DROPS):
         return False
+    if _RETAIL_WEALTH_RE.search(title):
+        return False
     # AI-titled roles pass the tech drop so the AI tab (2026-09-29) can show
     # them: "ai engineer" and "data engineer" had silently removed UBS's
     # "2027 Graduate Talent Program - AI Engineer - Zurich" and "AI & Data
     # Engineer - Zurich" while the London one, spelled out as "Artificial
     # Intelligence Engineer", got through. Matched on the original casing, since
     # ai_title's acronyms are case-sensitive. Plain software/IT titles still drop.
-    if _hits(title, TECH_DROPS) and not ai_title(job.get("title")):
+    if (_hits(title, TECH_DROPS) and not ai_title(job.get("title"))
+            and not _FINANCE_TECH_RE.search(title)):
         return False
     if _hits(title, NON_FINANCE_DROPS):
         return False

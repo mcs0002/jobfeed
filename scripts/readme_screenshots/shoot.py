@@ -64,8 +64,6 @@ def shots(db: str) -> list:
                                      **({"sel": apac} if apac else {})}, "dark"),
         ("applications", "/applications", {}, "light"),
         ("application-stats", "/stats/applications", {}, "light"),
-        ("limits", "/limits", {}, "light"),
-        ("grad-schemes", "/campus", {"q": "trading"}, "light"),
         ("technical-stats", "/stats/technical", {}, "light"),
     ]
 

@@ -7,11 +7,61 @@
   "ats": "oracle_hcm",
   "oracle_hcm": {
    "base_url": "https://jpmc.fa.oraclecloud.com",
-   "site": "CX_1001"
+   "site": "CX_1001",
+   "exclude_values": {
+    "JobFamily": [
+     "Associate Bankers",
+     "Software Engineering",
+     "Originations",
+     "Technology Support",
+     "Technical Program Delivery",
+     "Fraud",
+     "Marketing Strategy",
+     "Counsel",
+     "Events Management",
+     "Administrative Assistant",
+     "Communications",
+     "Cybersecurity Operations",
+     "Security & Life Safety",
+     "Global Services",
+     "Infrastructure Engineering",
+     "Collections",
+     "Investigations",
+     "Community Development",
+     "Underwriting",
+     "Architecture",
+     "User Experience Design",
+     "Technology Risk & Services",
+     "Auditing",
+     "Compensation",
+     "Agility",
+     "Real Estate Management / Maint",
+     "Security Engineering",
+     "Assoc Relationship Banker",
+     "Corporate Responsibility",
+     "Learning",
+     "Benefits & Employee Services",
+     "Cybersecurity",
+     "HR Operations Servicing",
+     "Home Lending Operations",
+     "Branch Managers",
+     "Branch Operations Lead",
+     "Branch Field Management",
+     "Data Engineering",
+     "Recruiting",
+     "HR Business Partner",
+     "Foundation & Corp Philanthropy",
+     "Mktg Planning and Development",
+     "Workforce Analytics",
+     "Testing"
+    ]
+   }
   },
   "verified": true,
   "heavy": true,
-  "alumni": true
+  "alumni": true,
+  "scoped_at": "2026-10-10",
+  "notes": "Scoped 2026-10-10: client-side exclude_values on Oracle JobFamily (44 families with no finance-tagged role: Chase branch and consumer families such as Associate Bankers, Assoc Relationship Banker, Branch Managers, Originations (home lending), Collections, Fraud, Underwriting, plus software/infrastructure/security engineering, HR, legal, marketing, admin); 7331 -> 4236 postings, 789 stored 'other' rows retire, 0 finance lost. The title 'Associate Banker' is also a commercial-banking rung (EBRD, HSBC coverage), so the family field is used, not a title term."
  },
  {
   "name": "Goldman Sachs",
@@ -41,10 +91,33 @@
   "workday": {
    "tenant": "ms",
    "version": "wd5",
-   "board": "External"
+   "board": "External",
+   "scopes": [
+    {
+     "exclude_facets": {
+      "jobFamilyGroup": [
+       "80f682041e5f100164f3ff09aa910000",
+       "e38d1cf2ff5a10014d19aa66ad230000",
+       "c775545e643010014d19582ead2b0000",
+       "9065a9a95b1a10014d20d69599ed0000",
+       "e490e8f3da91100b79cf79706ad60000",
+       "f9d5f1e19903100b794a932b2c5d0000",
+       "b46569570f4b10014d292e3ae0a00000",
+       "b46569570f4b10014d294e44a67c0000",
+       "9065a9a95b1a10014d20ed7ecb490000",
+       "96af745083d401edc987e2cf7856010d",
+       "96af745083d4016ae83caccf7856fd0c",
+       "5a72a211d621102b112d1e8d90eddf7e",
+       "c27a3333b0261087a15611d5f74b7d3f"
+      ]
+     }
+    }
+   ]
   },
   "verified": true,
-  "career_url": "https://morganstanley.wd1.myworkdayjobs.com/Experienced_Jobs"
+  "career_url": "https://morganstanley.wd1.myworkdayjobs.com/Experienced_Jobs",
+  "scoped_at": "2026-10-10",
+  "notes": "Scoped 2026-10-10: whole board minus Legal & Compliance, Software, Product, Security & Risk (tech), Internal Audit, HR, Infrastructure, Tech-Wide, Workplace, Engineering, Application Development, Communications/Marketing; 1307 -> 982, all 339 finance kept. Risk Management stays in."
  },
  {
   "name": "Citigroup",
@@ -100,10 +173,29 @@
   "workday": {
    "tenant": "barclays",
    "version": "wd3",
-   "board": "External_Career_Site_Barclays"
+   "board": "External_Career_Site_Barclays",
+   "scopes": [
+    {
+     "exclude_facets": {
+      "jobFamilyGroup": [
+       "112c054282011001e9162cfccdc10000",
+       "1ab48a98eb7c1001e8e0a8c79c020000",
+       "1ab48a98eb7c1001e8e0ae2eea0a0000",
+       "1ab48a98eb7c1001e8e0dcfc0fd60000",
+       "112c054282011001e915eca739750000",
+       "1ab48a98eb7c1001e8e0e1c8f92e0000",
+       "1ab48a98eb7c1001e8e0ec97468d0000",
+       "112c054282011001e916114dbeec0000",
+       "1ab48a98eb7c1001e8e117e5bec20000"
+      ]
+     }
+    }
+   ]
   },
   "verified": true,
-  "alumni": true
+  "alumni": true,
+  "scoped_at": "2026-10-10",
+  "notes": "Scoped 2026-10-10: whole board minus Technology, Change, Compliance, Legal, HR, Marketing, Procurement, Real Estate & Physical Security, Third Party Colleagues; 766 -> 408, all 113 finance kept."
  },
  {
   "name": "Deutsche Bank",
@@ -117,7 +209,15 @@
   "beesite": {
    "tenant": "deutschebank",
    "endpoint": "search"
-  }
+  },
+  "noise_terms": [
+   "bankberatung",
+   "verkauf",
+   "kundenservice",
+   "kassenverantwortung",
+   "architect"
+  ],
+  "notes": "2026-10-10: added noise_terms bankberatung, verkauf, kundenservice, kassenverantwortung, architect after a dry-run over every stored row of this source (no finance-tagged hit)."
  },
  {
   "name": "BNP Paribas",
@@ -128,7 +228,27 @@
   "verified": true,
   "heavy": true,
   "career_url": "https://group.bnpparibas/en/careers/all-job-offers",
-  "alumni": true
+  "alumni": true,
+  "exclude_entities": [
+   "French Retail Banking",
+   "Hello bank!",
+   "BNP Paribas Fortis",
+   "BNP Paribas Bank Polska",
+   "TEB",
+   "BGL BNP Paribas",
+   "BNL",
+   "BNP Paribas Personal Finance",
+   "BNP Paribas Personal Investors",
+   "Arval",
+   "BNP Paribas Leasing Solutions",
+   "BNP Paribas Factor",
+   "BNP Paribas Real Estate",
+   "BNP Paribas India Solutions",
+   "Nickel",
+   "Alpha Credit Group"
+  ],
+  "scoped_at": "2026-10-10",
+  "notes": "2026-10-10 (his call: no branch banking): exclude_entities drops the retail banks (French Retail, Fortis, Bank Polska, TEB, BGL, BNL, Hello bank!, Nickel), consumer credit and leasing (Personal Finance, Personal Investors, Arval, Leasing Solutions, Factor, Alpha Credit), Real Estate and the India back office, read from each card's logo alt and applied after the full sweep, so unassigned offers and new entities stay. Entity mapping that day: these hold ~660 stored 'other' rows; lost beyond branch wealth/SME: ~2 markets and ~10 risk roles at TEB/Fortis, ~35 accounting. CIB, AM, Group, Cardif, Wealth Management and Portzamparc stay."
  },
  {
   "name": "Société Générale",
@@ -137,7 +257,12 @@
   "category": "Global Investment Banks",
   "ats": "societegenerale",
   "verified": true,
-  "alumni": true
+  "alumni": true,
+  "noise_terms": [
+   "java",
+   "programmer"
+  ],
+  "notes": "2026-10-10: added noise_terms java, programmer after a dry-run over every stored row of this source (no finance-tagged hit)."
  },
  {
   "name": "UBS",
@@ -151,7 +276,13 @@
    "location_field": "formtext23"
   },
   "verified": true,
-  "career_url": "https://jobs.ubs.com/TGnewUI/Search/Home/Home?partnerid=25008&siteid=5012"
+  "career_url": "https://jobs.ubs.com/TGnewUI/Search/Home/Home?partnerid=25008&siteid=5012",
+  "noise_terms": [
+   "gresc",
+   "hrsd",
+   "engineer"
+  ],
+  "notes": "2026-10-10: added noise_terms gresc, hrsd, engineer after a dry-run over every stored row of this source (no finance-tagged hit)."
  },
  {
   "name": "HSBC",
@@ -161,9 +292,20 @@
   "ats": "eightfold",
   "eightfold": {
    "base_url": "https://hsbc.eightfold.ai",
-   "domain": "hsbc.com"
+   "domain": "hsbc.com",
+   "exclude_values": {
+    "business_unit": [
+     "GCIO",
+     "People, Governance and Communi",
+     "Legal",
+     "Internal Audit",
+     "UK Business"
+    ]
+   }
   },
-  "verified": true
+  "verified": true,
+  "scoped_at": "2026-10-10",
+  "notes": "Scoped 2026-10-10: client-side exclude_values business_unit GCIO (technology), People/Governance/Communications, Legal, Internal Audit, UK Business; 1423 -> 1108, all 333 finance kept. Intl Wealth & Premier Banking (107 other) stays in: it holds 175 finance-tagged roles."
  },
  {
   "name": "Nomura",
@@ -221,7 +363,11 @@
   "ats": "avature",
   "search_url": "https://recruitment.macquarie.com/en_US/careers/SearchJobs/",
   "verified": true,
-  "notes": "Single Avature board (recruitment.macquarie.com) covers the WHOLE group including Macquarie Asset Management (~21 AM-tagged of ~533). The standalone 'Macquarie Asset Management' target was deleted 2026-06-29 (Tier X — covered by parent; no separate iCIMS board exists)."
+  "notes": "Single Avature board (recruitment.macquarie.com) covers the WHOLE group including Macquarie Asset Management (~21 AM-tagged of ~533). The standalone 'Macquarie Asset Management' target was deleted 2026-06-29 (Tier X — covered by parent; no separate iCIMS board exists). 2026-10-10: added noise_terms lawyer, architect after a dry-run over every stored row of this source (no finance-tagged hit).",
+  "noise_terms": [
+   "lawyer",
+   "architect"
+  ]
  },
  {
   "name": "Crédit Agricole CIB",
@@ -233,7 +379,15 @@
    "board_url": "https://jobs.ca-cib.com/job/list-of-jobs.aspx",
    "locale": 2057
   },
-  "verified": true
+  "verified": true,
+  "noise_terms": [
+   "développeur",
+   "developpeur",
+   "architecte",
+   "juriste",
+   "java"
+  ],
+  "notes": "2026-10-10: added noise_terms développeur, developpeur, architecte, juriste, java after a dry-run over every stored row of this source (no finance-tagged hit)."
  },
  {
   "name": "Natixis CIB",
@@ -273,8 +427,17 @@
    "location_selector": ".vacancy-item__meta"
   },
   "verified": true,
-  "notes": "Negative full-board (ING is finance-native). Previously carried a 'Business & Wholesale Banking Specialism' facet that collapsed the 793-role board to 2; removed 2026-06-28 so filter.py + the tagger sort the full board.",
-  "alumni": true
+  "notes": "Negative full-board (ING is finance-native). Previously carried a 'Business & Wholesale Banking Specialism' facet that collapsed the 793-role board to 2; removed 2026-06-28 so filter.py + the tagger sort the full board. 2026-10-10: added noise_terms java, architect, copilot, recruitment, marketing, legal, events after a dry-run over every stored row of this source (no finance-tagged hit).",
+  "alumni": true,
+  "noise_terms": [
+   "java",
+   "architect",
+   "copilot",
+   "recruitment",
+   "marketing",
+   "legal",
+   "events"
+  ]
  },
  {
   "name": "UniCredit CIB",
@@ -286,7 +449,11 @@
   "page_size": 100,
   "verified": true,
   "heavy": true,
-  "notes": "Avature crawl hangs on a blocking socket (~223s, unkillable by signal) — runs under the heavy subprocess executor (SIGKILL-able, 1200s cap). Re-enabled 2026-06-28; was the one June-20 hang-batch firm left disabled. HypoVereinsbank (HVB) roles also post to this same board — no separate HVB entry needed."
+  "notes": "Avature crawl hangs on a blocking socket (~223s, unkillable by signal) — runs under the heavy subprocess executor (SIGKILL-able, 1200s cap). Re-enabled 2026-06-28; was the one June-20 hang-batch firm left disabled. HypoVereinsbank (HVB) roles also post to this same board — no separate HVB entry needed. 2026-10-10: added noise_terms lakossági, marketing after a dry-run over every stored row of this source (no finance-tagged hit).",
+  "noise_terms": [
+   "lakossági",
+   "marketing"
+  ]
  },
  {
   "name": "Intesa Sanpaolo IMI CIB",
@@ -318,10 +485,46 @@
   "workday": {
    "tenant": "santander",
    "version": "wd3",
-   "board": "SantanderCareers"
+   "board": "SantanderCareers",
+   "scopes": [
+    {
+     "exclude_facets": {
+      "jobFamilyGroup": [
+       "135a3ebce3810166e65b0db919012550",
+       "047662461dfb01bf0a10a10a1a01d241",
+       "ab9adf92110e016ca5531bab1a01054a",
+       "6cefe723149d01c62f2314f71901554b",
+       "0f6b4bbb4b0201f342132eec1901e041",
+       "d7316cd475c301dd1391931d1a016a4c",
+       "6cefe723149d01b7cf3faef619014f4b",
+       "135a3ebce38101c45b3e18b919012750",
+       "a87fd96c875201fc35ef411a1a016f58",
+       "135a3ebce38101c2d53d2ab919012950",
+       "047662461dfb01dbdde3d80a1a01d441",
+       "6cefe723149d018194e0ebf61901514b",
+       "c26ab0efcb8401a3203fec0a7836151e",
+       "c26ab0efcb8401fb8b56e70a7836071e",
+       "c0da3a6a153701658e8ba5981a018361",
+       "51a9528e737401137101862f1a01a045",
+       "ab9adf92110e01fc49a445aa1a01f749"
+      ]
+     }
+    },
+    {
+     "applied_facets": {
+      "jobFamilyGroup": [
+       "51a9528e737401137101862f1a01a045",
+       "ab9adf92110e01fc49a445aa1a01f749"
+      ]
+     },
+     "search_text": "Summer"
+    }
+   ]
   },
   "verified": true,
-  "alumni": true
+  "alumni": true,
+  "scoped_at": "2026-10-10",
+  "notes": "Scoped 2026-10-10: whole board minus noise-only Job Families (systems/infrastructure, tech risk & cyber, admin, legal, service delivery, properties, IT PM, architecture, marketing, incidents, HR, procurement); 1042 -> 949, all 327 finance kept. Retail 'Customer S&S: F2F' (251 other) stays in: its 170 finance-tagged rows are branch wealth and SME banking plus 3 IBD, so excluding it is a preference call, not noise removal. 2026-10-10 (his call: no branch banking): also excludes Customer S&S: F2F and Remote (branch), with a rescue scope searching 'Summer' inside F2F that keeps the 2027 Investment Banking Summer Associate programmes; 949 -> 453."
  },
  {
   "name": "Santander Early Talent",
@@ -342,9 +545,47 @@
   "workday": {
    "tenant": "bbva",
    "version": "wd3",
-   "board": "BBVA"
+   "board": "BBVA",
+   "scopes": [
+    {
+     "exclude_facets": {
+      "AreaBBVA": [
+       "4e7e381f49d210181652f46109810002",
+       "4e7e381f49d210181652f32dfea00000",
+       "4e7e381f49d210181652f46109810001",
+       "4e7e381f49d210181652f32dfea00002"
+      ]
+     }
+    },
+    {
+     "applied_facets": {
+      "AreaBBVA": [
+       "4e7e381f49d210181652f32dfea00002"
+      ]
+     },
+     "search_text": "Portfolio"
+    },
+    {
+     "applied_facets": {
+      "AreaBBVA": [
+       "4e7e381f49d210181652f32dfea00002"
+      ]
+     },
+     "search_text": "Economics"
+    },
+    {
+     "applied_facets": {
+      "AreaBBVA": [
+       "4e7e381f49d210181652f32dfea00002"
+      ]
+     },
+     "search_text": "Internship"
+    }
+   ]
   },
-  "verified": true
+  "verified": true,
+  "scoped_at": "2026-10-10",
+  "notes": "Scoped 2026-10-10: whole board minus Legal Services, Talent & Culture, Internal Audit; 609 -> 597, all 176 finance kept. Retail Client Solutions (179 other) stays in: it also holds a Portfolio Manager and economics roles. 2026-10-10 (his call: no branch banking): also excludes Retail Client Solutions, with rescue searches Portfolio, Economics, Internship inside it (keeps the Portfolio Manager and Behavioral Economics analyst); 597 -> 318. Branch-zone controllers and one actuarial analyst go with it."
  },
  {
   "name": "CaixaBank",
@@ -379,7 +620,13 @@
    "locale": "en_GB"
   },
   "verified": true,
-  "alumni": true
+  "alumni": true,
+  "noise_terms": [
+   "ambassadors",
+   "ambassador",
+   "engineer"
+  ],
+  "notes": "2026-10-10: added noise_terms ambassadors, ambassador, engineer after a dry-run over every stored row of this source (no finance-tagged hit)."
  },
  {
   "name": "RBC Capital Markets",
@@ -389,10 +636,26 @@
   "workday": {
    "tenant": "rbc",
    "version": "wd3",
-   "board": "RBCGLOBAL1"
+   "board": "RBCGLOBAL1",
+   "scopes": [
+    {
+     "exclude_facets": {
+      "Category": [
+       "7911130ac48001186496552dce380000",
+       "7911130ac4800118649656fd57bf0001",
+       "7911130ac480011864965493391d0002",
+       "7911130ac4800118649653f8b5ec0000",
+       "7911130ac48001186496505a55e70001",
+       "7911130ac480011864965833370e0000",
+       "7911130ac48001186496596934870000"
+      ]
+     }
+    }
+   ]
   },
   "verified": true,
-  "notes": "Widened markets-only -> full board (~1518). heavy:true — this tenant is slow (~49s, over the 30s light-pool timeout). Was search_text='Capital Markets' (434)."
+  "notes": "Widened markets-only -> full board (~1518). heavy:true — this tenant is slow (~49s, over the 30s light-pool timeout). Was search_text='Capital Markets' (434). Scoped 2026-10-10: whole board minus Technology, Governance and Compliance, Product Management Group, Administrative Services, HR, Marketing, Legal; 830 -> 676, all 269 finance kept.",
+  "scoped_at": "2026-10-10"
  },
  {
   "name": "TD Securities",
@@ -403,9 +666,32 @@
   "workday": {
    "tenant": "td",
    "version": "wd3",
-   "board": "TD_Bank_Careers"
+   "board": "TD_Bank_Careers",
+   "scopes": [
+    {
+     "exclude_facets": {
+      "jobFamilyGroup": [
+       "de769652963501f2001247b507040dac",
+       "de76965296350124bb7c0cb50704e7ab",
+       "de76965296350107017a3ab5070405ac",
+       "de76965296350161bd361fb50704f3ab",
+       "de769652963501ac04031cb50704f1ab",
+       "de7696529635014f38bef0b40704d5ab",
+       "de7696529635014387912bb50704fbab",
+       "de769652963501da958534b5070401ac",
+       "de76965296350103461d22b50704f5ab",
+       "de769652963501c3bbdf28b50704f9ab",
+       "de769652963501883f2bfdb40704ddab",
+       "de769652963501507c6225b50704f7ab",
+       "de7696529635010030cb40b5070409ac"
+      ]
+     }
+    }
+   ]
   },
-  "verified": true
+  "verified": true,
+  "scoped_at": "2026-10-10",
+  "notes": "Scoped 2026-10-10: whole board minus Technology Solutions, Enterprise Enabling Functions, TD Insurance, Legal, HR, Administration, Product Management, Sales & Customer Distribution Support, Marketing, Procurement, Communications; 1683 -> 1464, all 284 finance kept. Personal & Commercial Banking (290 other, 32 SME-banking finance) stays in pending his call. 2026-10-10 (his call: no branch banking): also excludes Personal & Commercial Banking and TD Wealth (branch wealth, small business); 1464 -> 357. Lost beyond branch roles: two accountants and one wealth-controls manager."
  },
  {
   "name": "Jefferies",
@@ -435,8 +721,13 @@
   "ats": "successfactors",
   "base_url": "https://careers.nordea.com",
   "verified": true,
-  "notes": "Covers Nordea Asset Management — NAM roles share this SuccessFactors tenant (no separate NAM source).",
-  "alumni": true
+  "notes": "Covers Nordea Asset Management — NAM roles share this SuccessFactors tenant (no separate NAM source). 2026-10-10: added noise_terms daily, työharjoittelija, architect after a dry-run over every stored row of this source (no finance-tagged hit).",
+  "alumni": true,
+  "noise_terms": [
+   "daily",
+   "työharjoittelija",
+   "architect"
+  ]
  },
  {
   "name": "DNB Markets",
@@ -553,7 +844,14 @@
    "company_id": "sig"
   },
   "verified": true,
-  "alumni": true
+  "alumni": true,
+  "noise_terms": [
+   "fpga",
+   "storage",
+   "network engineer",
+   "systems administrator"
+  ],
+  "notes": "2026-10-10: added noise_terms fpga, storage, network engineer, systems administrator after a dry-run over every stored row of this source (no finance-tagged hit)."
  },
  {
   "name": "Akuna Capital",
@@ -651,15 +949,11 @@
   "grad_scheme": true,
   "grad_scheme_url": "https://www.chicagotrading.com/campus",
   "category": "Prop Trading & Market Makers",
-  "ats": "generic",
-  "url": "https://www.chicagotrading.com/search.php",
-  "selectors": {
-   "container": "a.job",
-   "title": "h3",
-   "link": ":self",
-   "location": ".job-meta span:last-child"
-  },
-  "verified": true
+  "ats": "greenhouse",
+  "slug": "chicagotrading",
+  "verified": true,
+  "url_template": "https://www.chicagotrading.com/job/?gh_jid={id}",
+  "notes": "Moved 2026-10-10 from generic search.php (404 after its last good scan on 2026-10-02) to its Greenhouse board. Old gen_ ids hashed the dead posting.php URLs, so live roles re-entered once as gh_ ids."
  },
  {
   "name": "Da Vinci Derivatives",
@@ -742,7 +1036,14 @@
   "grad_scheme_url": "https://www.deshaw.com/careers/internships",
   "category": "Systematic HFs & Quant AMs",
   "ats": "deshaw",
-  "verified": true
+  "verified": true,
+  "noise_terms": [
+   "administrator",
+   "thought leadership",
+   "human resources",
+   "legal"
+  ],
+  "notes": "2026-10-10: added noise_terms administrator, thought leadership, human resources, legal after a dry-run over every stored row of this source (no finance-tagged hit)."
  },
  {
   "name": "AQR Capital Management",
@@ -931,7 +1232,12 @@
    "location_selector": ".section3__job-location .section3__job-info"
   },
   "verified": true,
-  "alumni": true
+  "alumni": true,
+  "noise_terms": [
+   "java",
+   "software engineer"
+  ],
+  "notes": "2026-10-10: added noise_terms java, software engineer after a dry-run over every stored row of this source (no finance-tagged hit)."
  },
  {
   "name": "PIMCO",
@@ -955,9 +1261,25 @@
   "workday": {
    "tenant": "vanguard",
    "version": "wd5",
-   "board": "vanguard_external"
+   "board": "vanguard_external",
+   "scopes": [
+    {
+     "exclude_facets": {
+      "jobFamilyGroup": [
+       "ab11cd13cf5301dd13c78a2c49011dab",
+       "7a8f22a8872301f9e7060cf57301b413",
+       "0878914bb11a018c9158018e1301d8d9",
+       "0878914bb11a018ad1da9301c5006978",
+       "a719b33b951b015d8e4b6005f501846b",
+       "6704bf885e940187ef92f4aabd446c60"
+      ]
+     }
+    }
+   ]
   },
-  "verified": true
+  "verified": true,
+  "scoped_at": "2026-10-10",
+  "notes": "Scoped 2026-10-10: every Job Category except IT, Marketing & Communications, Legal & Compliance, People Strategy, Business and Administrative Support (exclude_facets); 348 -> 199, all 35 finance kept. Risk, Controls & Governance stays in."
  },
  {
   "name": "Fidelity International",
@@ -992,7 +1314,14 @@
    "locale": 2057
   },
   "verified": true,
-  "career_url": "https://jobs.amundi.com/homepage.aspx?LCID=2057"
+  "career_url": "https://jobs.amundi.com/homepage.aspx?LCID=2057",
+  "noise_terms": [
+   "marketing",
+   "communication",
+   "developer",
+   "digital"
+  ],
+  "notes": "2026-10-10: added noise_terms marketing, communication, developer, digital after a dry-run over every stored row of this source (no finance-tagged hit)."
  },
  {
   "name": "DWS Group",
@@ -1084,7 +1413,12 @@
     }
    ]
   },
-  "verified": true
+  "verified": true,
+  "noise_terms": [
+   "investmentfondsberatung",
+   "kundenservice"
+  ],
+  "notes": "2026-10-10: added noise_terms investmentfondsberatung, kundenservice after a dry-run over every stored row of this source (no finance-tagged hit)."
  },
  {
   "name": "MEAG (Munich Re AM)",
@@ -1102,7 +1436,15 @@
   "category": "Traditional Asset Managers",
   "ats": "successfactors",
   "base_url": "https://karriere.deka.de",
-  "verified": true
+  "verified": true,
+  "noise_terms": [
+   "application",
+   "architekt",
+   "cloud",
+   "kundenservice",
+   "full stack"
+  ],
+  "notes": "2026-10-10: added noise_terms application, architekt, cloud, kundenservice, full stack after a dry-run over every stored row of this source (no finance-tagged hit)."
  },
  {
   "name": "Trafigura",
@@ -1214,8 +1556,20 @@
    "maintenance engineer",
    "driver",
    "operative",
-   "elektroniker"
-  ]
+   "elektroniker",
+   "technician",
+   "maintenance",
+   "operator",
+   "quality",
+   "warehouse",
+   "shift",
+   "lab",
+   "production",
+   "supervisor",
+   "planner",
+   "mechanic"
+  ],
+  "notes": "2026-10-10: added noise_terms technician, maintenance, operator, quality, warehouse, shift, lab, production, supervisor, planner, mechanic after a dry-run over every stored row of this source (no finance-tagged hit)."
  },
  {
   "name": "Bunge",
@@ -1289,8 +1643,15 @@
   "verified": true,
   "noise_terms": [
    "elektrotechnik",
-   "kohle"
-  ]
+   "kohle",
+   "kraftwerksmeister",
+   "safety",
+   "engineer",
+   "kraftwerk",
+   "instandhaltung",
+   "elektro"
+  ],
+  "notes": "2026-10-10: added noise_terms kraftwerksmeister, safety, engineer, kraftwerk, instandhaltung, elektro after a dry-run over every stored row of this source (no finance-tagged hit)."
  },
  {
   "name": "Statkraft",
@@ -1299,7 +1660,23 @@
   "category": "Energy Utilities w/ Trading",
   "ats": "smartrecruiters",
   "slug": "Statkraft1",
-  "verified": true
+  "verified": true,
+  "noise_terms": [
+   "técnico",
+   "wind",
+   "o&m",
+   "solar",
+   "eólica",
+   "eolien",
+   "solaire",
+   "manutenção",
+   "construction",
+   "engineer",
+   "field",
+   "hydro",
+   "technician"
+  ],
+  "notes": "2026-10-10: added noise_terms técnico, wind, o&m, solar, eólica, eolien, solaire, manutenção, construction, engineer, field, hydro, technician after a dry-run over every stored row of this source (no finance-tagged hit)."
  },
  {
   "name": "Axpo Group",
@@ -1336,8 +1713,24 @@
    "ingenieur",
    "erneuerbare",
    "servicetechniker",
-   "fachkraft"
-  ]
+   "fachkraft",
+   "offshore",
+   "projektentwicklung",
+   "bauingenieurwesen",
+   "windenergie",
+   "batteriesysteme",
+   "elektroniker",
+   "wasserversorgung",
+   "newsscreening",
+   "personalentwicklung",
+   "einkauf",
+   "minijob",
+   "wechselprozesse",
+   "netze",
+   "netzbetrieb",
+   "bauleiter"
+  ],
+  "notes": "2026-10-10: added noise_terms offshore, projektentwicklung, bauingenieurwesen, windenergie, batteriesysteme, elektroniker, wasserversorgung, newsscreening, personalentwicklung, einkauf, minijob, wechselprozesse, netze, netzbetrieb, bauleiter after a dry-run over every stored row of this source (no finance-tagged hit)."
  },
  {
   "name": "Vattenfall Energy Trading",
@@ -1361,9 +1754,25 @@
   "workday": {
    "tenant": "shell",
    "version": "wd3",
-   "board": "ShellCareers"
+   "board": "ShellCareers",
+   "scopes": [
+    {
+     "applied_facets": {
+      "jobFamilyGroup": [
+       "a87fe1bd64b801f9f8867a3fa72c240c",
+       "a87fe1bd64b801fab612843fa72c4a0c",
+       "a87fe1bd64b801c27afe843fa72c4e0c",
+       "a0a6acc35cc71001e1c171023a2b0000",
+       "a87fe1bd64b801248e77793fa72c200c",
+       "a87fe1bd64b80145f3f2773fa72c1a0c"
+      ]
+     }
+    }
+   ]
   },
-  "verified": true
+  "verified": true,
+  "scoped_at": "2026-10-10",
+  "notes": "Scoped 2026-10-10: Job Category Finance, Trading Jobs, Ungraded TBE (graduate programme), Compliance, Downstream Supply Chain, Commercial and Retail; 137 -> 47, all 17 finance kept. A 'trading' search was rejected: Shell boilerplate mentions trading and it added 36 non-finance rows."
  },
  {
   "name": "BP Supply & Trading",
@@ -1373,16 +1782,25 @@
    "tenant": "bpinternational",
    "version": "wd3",
    "board": "bpCareers",
-   "applied_facets": {
-    "jobFamilyGroup": [
-     "8dcc06b8afc401e47a89dcd9dc3c1006",
-     "8dcc06b8afc4017d72a4ded9dc3c1806"
-    ]
-   }
+   "scopes": [
+    {
+     "applied_facets": {
+      "jobFamilyGroup": [
+       "8dcc06b8afc401e47a89dcd9dc3c1006",
+       "8dcc06b8afc4017d72a4ded9dc3c1806"
+      ]
+     }
+    },
+    {
+     "search_text": "trading"
+    }
+   ]
   },
   "verified": true,
   "career_url": "https://careers.bp.com/listing",
-  "scope_note": "Finance-island: whole-bp tenant (~404). jobFamilyGroup=Supply & Trading + Shipping isolates S&T (~16); zero Castrol/retail/upstream noise."
+  "scope_note": "Finance-island: whole-bp tenant (~404). jobFamilyGroup=Supply & Trading + Shipping isolates S&T (~16); zero Castrol/retail/upstream noise.",
+  "scoped_at": "2026-10-10",
+  "notes": "Widened 2026-10-10: the two job-family facets alone missed trading-floor finance, risk and graduate roles (Refined Product Trading controllership, market risk, Supply, trading & shipping graduates); a second scope searches 'trading' (11 -> 88 rows before hard gates)."
  },
  {
   "name": "BP Supply & Trading (Early Careers)",
@@ -1487,7 +1905,13 @@
   "category": "Energy Utilities w/ Trading",
   "ats": "successfactors",
   "base_url": "https://careers.omv.com",
-  "verified": true
+  "verified": true,
+  "noise_terms": [
+   "engineering",
+   "technician",
+   "mechatroniker"
+  ],
+  "notes": "2026-10-10: added noise_terms engineering, technician, mechatroniker after a dry-run over every stored row of this source (no finance-tagged hit)."
  },
  {
   "name": "Centrica Energy Marketing",
@@ -1498,12 +1922,23 @@
   "workday": {
    "tenant": "centrica",
    "version": "wd3",
-   "board": "centrica"
+   "board": "centrica",
+   "scopes": [
+    {
+     "exclude_facets": {
+      "jobFamilyGroup": [
+       "4b0727c36aef10dad8bde75c61fde290"
+      ]
+     }
+    }
+   ]
   },
   "verified": true,
   "noise_terms": [
    "repair engineer"
-  ]
+  ],
+  "scoped_at": "2026-10-10",
+  "notes": "Scoped 2026-10-10: every Job Category except Technical Engineering Group (exclude_facets); 43 -> 30, all finance kept."
  },
  {
   "name": "World Bank Group",
@@ -1637,8 +2072,11 @@
   },
   "verified": true,
   "noise_terms": [
-   "automation engineer"
-  ]
+   "automation engineer",
+   "engineer",
+   "architect"
+  ],
+  "notes": "2026-10-10: added noise_terms engineer, architect after a dry-run over every stored row of this source (no finance-tagged hit)."
  },
  {
   "name": "Tradeweb",
@@ -1658,9 +2096,20 @@
   "workday": {
    "tenant": "lseg",
    "version": "wd3",
-   "board": "Careers"
+   "board": "Careers",
+   "scopes": [
+    {
+     "exclude_facets": {
+      "CF_Lookup_Business_Unit_Level_02__Job_Posting_Anchor__Extended": [
+       "9c1f71183c10016d116d72382401ff75"
+      ]
+     }
+    }
+   ]
   },
-  "verified": true
+  "verified": true,
+  "scoped_at": "2026-10-10",
+  "notes": "Scoped 2026-10-10: every Division except Engineering (exclude_facets, read live); 670 -> 353, 35 of 36 finance kept."
  },
  {
   "name": "Euronext",
@@ -1668,7 +2117,14 @@
   "grad_scheme_url": "https://www.euronext.com/en/about/careers/early-careers-euronext",
   "category": "Market Infrastructure & Fintech",
   "ats": "euronext",
-  "verified": true
+  "verified": true,
+  "noise_terms": [
+   "iefp",
+   "engineer",
+   "developer",
+   "architect"
+  ],
+  "notes": "2026-10-10: added noise_terms iefp, engineer, developer, architect after a dry-run over every stored row of this source (no finance-tagged hit)."
  },
  {
   "name": "Deutsche Börse / Eurex",
@@ -1677,7 +2133,14 @@
   "category": "Market Infrastructure & Fintech",
   "ats": "deutscheboerse",
   "verified": true,
-  "notes": "Covers Clearstream — Clearstream legal-entity roles appear on this group careers board (no separate Clearstream source)."
+  "notes": "Covers Clearstream — Clearstream legal-entity roles appear on this group careers board (no separate Clearstream source). 2026-10-10: added noise_terms architect, cloud, middleware, administrator, engineer after a dry-run over every stored row of this source (no finance-tagged hit).",
+  "noise_terms": [
+   "architect",
+   "cloud",
+   "middleware",
+   "administrator",
+   "engineer"
+  ]
  },
  {
   "name": "CME Group",
@@ -1702,9 +2165,16 @@
    "base_url": "https://careers.ice.com",
    "company_id": "ice",
    "page_size": 100,
-   "domain": "ice.jibeapply.com"
+   "domain": "ice.jibeapply.com",
+   "exclude_values": {
+    "tags2": [
+     "Technology"
+    ]
+   }
   },
-  "verified": true
+  "verified": true,
+  "scoped_at": "2026-10-10",
+  "notes": "Scoped 2026-10-10: client-side exclude_values tags2=Technology (111 roles, no finance); 303 -> 192, all finance kept. Operations stays in: it mixes exchange ops noise with the trading-operations analysts."
  },
  {
   "name": "Adyen",
@@ -1719,7 +2189,30 @@
    "enterprise business",
    "implementation engineer",
    "technical support"
-  ]
+  ],
+  "exclude_departments": [
+   "Development",
+   "Account Management",
+   "Product Management",
+   "Infrastructure",
+   "Commercial Business Development",
+   "People",
+   "Merchant Operations",
+   "Sales",
+   "Professional Services",
+   "Legal",
+   "Marketing",
+   "Support",
+   "Partnerships",
+   "Payments Partnership",
+   "Security",
+   "UX",
+   "Office Management",
+   "Supply Chain",
+   "Procurement"
+  ],
+  "scoped_at": "2026-10-10",
+  "notes": "Scoped 2026-10-10 by Greenhouse department exclusion (engineering, sales, account management, product, people and support departments out; Finance, Compliance, Regulatory, Data Analytics, Strategy & Execution, Internal Control and any new department in); 238 -> 32, all finance kept."
  },
  {
   "name": "Coinbase Institutional",
@@ -1728,7 +2221,30 @@
   "category": "Market Infrastructure & Fintech",
   "ats": "greenhouse",
   "slug": "coinbase",
-  "verified": true
+  "verified": true,
+  "exclude_departments": [
+   "Customer Experience",
+   "Engineering - Backend",
+   "Engineering",
+   "Product",
+   "Marketing & Communications",
+   "Enterprise Applications",
+   "Security & Privacy",
+   "Machine Learning",
+   "Engineering - Infrastructure",
+   "Engineering - Frontend",
+   "IT",
+   "Engineering - Security",
+   "Engineering - Managers",
+   "Engineering - Mobile",
+   "HR & Recruiting",
+   "Data Engineering",
+   "Engineering - Data",
+   "Design",
+   "Program Management"
+  ],
+  "scoped_at": "2026-10-10",
+  "notes": "Scoped 2026-10-10 by Greenhouse department exclusion (all Engineering departments, Product, Customer Experience, Marketing, IT, Security, ML, HR, Design out); 222 -> 86, all 29 finance kept incl. internships and Institutional Sales, Trading, and Prime Services."
  },
  {
   "name": "Commerzbank AG",
@@ -1744,11 +2260,14 @@
   "career_url": "https://jobs.commerzbank.com/index.php?ac=search_result",
   "alumni": true,
   "verified": true,
-  "notes": "Milch&Zucker global-jobboard over the modern BeeSite REST API (api-jobs.commerzbank.com/search/, gjbAddress in gjb_scripts.js). The public index.php page is only the old PHP shell; the REST contract is identical to Deutsche Bank / KfW, scraped by beesite.py as-is. ~310 roles.",
+  "notes": "Milch&Zucker global-jobboard over the modern BeeSite REST API (api-jobs.commerzbank.com/search/, gjbAddress in gjb_scripts.js). The public index.php page is only the old PHP shell; the REST contract is identical to Deutsche Bank / KfW, scraped by beesite.py as-is. ~310 roles. 2026-10-10: added noise_terms filiale, unternehmerkundengeschäft, engineer after a dry-run over every stored row of this source (no finance-tagged hit).",
   "noise_terms": [
    "schülerpraktikant schülerpraktikantin",
    "flexhub",
-   "prozessmanagement"
+   "prozessmanagement",
+   "filiale",
+   "unternehmerkundengeschäft",
+   "engineer"
   ]
  },
  {
@@ -1812,7 +2331,11 @@
   "slug": "seb",
   "api_base": "https://api.eu.lever.co",
   "verified": true,
-  "notes": "SEB is on Lever's EU region — api.eu.lever.co, not the global host."
+  "notes": "SEB is on Lever's EU region — api.eu.lever.co, not the global host. 2026-10-10: added noise_terms developer, architect after a dry-run over every stored row of this source (no finance-tagged hit).",
+  "noise_terms": [
+   "developer",
+   "architect"
+  ]
  },
  {
   "name": "Louis Dreyfus Company",
@@ -2049,10 +2572,26 @@
   "workday": {
    "tenant": "invesco",
    "version": "wd1",
-   "board": "IVZ"
+   "board": "IVZ",
+   "scopes": [
+    {
+     "exclude_facets": {
+      "jobFamilyGroup": [
+       "97a56ab3ad0b1018c668298bbb010001",
+       "97a56ab3ad0b1018c668241fbc1b0002",
+       "97a56ab3ad0b1018c668268744100003",
+       "97a56ab3ad0b1018c66822eb4ba10000",
+       "97a56ab3ad0b1018c66828f12b630002",
+       "97a56ab3ad0b1018c66821b60caf0000"
+      ]
+     }
+    }
+   ]
   },
   "verified": true,
-  "career_url": "https://invesco.wd1.myworkdayjobs.com/IVZ"
+  "career_url": "https://invesco.wd1.myworkdayjobs.com/IVZ",
+  "scoped_at": "2026-10-10",
+  "notes": "Scoped 2026-10-10: every Job Category except Technology, HR, Marketing, Client Services, Sales Support, Administrative Services (exclude_facets); 236 -> 121, all 26 finance kept."
  },
  {
   "name": "abrdn",
@@ -2078,11 +2617,30 @@
   "workday": {
    "tenant": "mgpru",
    "version": "wd3",
-   "board": "mandgprudential"
+   "board": "mandgprudential",
+   "scopes": [
+    {
+     "exclude_facets": {
+      "jobFamilyGroup": [
+       "4df04f23c2441000ed7edb315c000000",
+       "4754e8be5c2a01c372c75b0ce74fc3ab",
+       "4754e8be5c2a01ab4e97630ce74fe9ab",
+       "bb0250a79a71100109195e8f0a4c0000",
+       "38a225f554551000a8cc6cdc01330000",
+       "a676922361f81000a933c033ebf60000"
+      ]
+     }
+    },
+    {
+     "search_text": "Internship"
+    }
+   ]
   },
   "verified": true,
   "career_url": "https://mgpru.wd3.myworkdayjobs.com/mandgprudential",
-  "alumni": true
+  "alumni": true,
+  "scoped_at": "2026-10-10",
+  "notes": "Scoped 2026-10-10: every Job Category except Enterprise Technology, IT, Legal, Corporate Affairs and two Poland support categories, plus a search scope 'Internship' (a Real Estate internship carried no category, which any category scope drops); 109 -> 77, all finance kept."
  },
  {
   "name": "Baillie Gifford",
@@ -2106,10 +2664,19 @@
    "tenant": "statestreet",
    "version": "wd1",
    "board": "Global",
-   "search_text": "Global Advisors"
+   "scopes": [
+    {
+     "search_text": "Global Advisors"
+    },
+    {
+     "search_text": "SSIM"
+    }
+   ]
   },
   "verified": true,
-  "career_url": "https://statestreet.wd1.myworkdayjobs.com/Global"
+  "career_url": "https://statestreet.wd1.myworkdayjobs.com/Global",
+  "scoped_at": "2026-10-10",
+  "notes": "Widened 2026-10-10: SSGA rebranded State Street Investment Management, so 'SSIM' is searched alongside 'Global Advisors'. The bare token 'SSGA' was rejected: it also matched State Street Markets units (Agency Lending, Prime Services)."
  },
  {
   "name": "Insight Investment",
@@ -2130,10 +2697,50 @@
   "workday": {
    "tenant": "nasdaq",
    "version": "wd1",
-   "board": "Global_External_Site"
+   "board": "Global_External_Site",
+   "scopes": [
+    {
+     "exclude_facets": {
+      "jobFamily": [
+       "88704065592e01f356584f2a0c39a330",
+       "88704065592e01da409f312a0c398d30",
+       "88704065592e01c304de432a0c399b30",
+       "88704065592e0101dd04d1290c394930",
+       "4f6ba20012c2016a658d454eae00dc6f",
+       "8e1fa6db68231001a79a20ef81300000",
+       "88704065592e0122b814392a0c399330",
+       "6358e02a30c610014577ab8f2c170000",
+       "3efe25de345e1001a79adb97a0160000",
+       "8e1fa6db68231001a79a823443b80000",
+       "88704065592e0101bea9762a0c39bf30",
+       "88704065592e01fbcb8d132a0c397730",
+       "88704065592e018d97a5ef290c395d30",
+       "8082d709810c1001459500f5aaf70000",
+       "8e1fa6db68231001a79a47f61a7e0000",
+       "88704065592e01012232602a0c39af30",
+       "88704065592e01481eb6212a0c398130",
+       "88704065592e01f2b5aee4290c395530",
+       "3f972d5a763f1001456baf951db40000",
+       "e4bb921d66e51001456b72821f780000",
+       "8082d709810c10014594f925c2270000",
+       "11bb415d894e01b98b5cb79e36019e5e",
+       "953eb42402cf01d48a4b7cf5cb7cc09a",
+       "88704065592e01b076ce0c2a0c397330",
+       "88704065592e0118fdbc042a0c396d30",
+       "3f972d5a763f1001456bc66464480000",
+       "88704065592e01c5c30cb4290c393730",
+       "88704065592e01f433e11e2a0c397f30",
+       "3efe25de345e1001a79ab62bd3440000",
+       "88704065592e013ecbb9462a0c399d30"
+      ]
+     }
+    }
+   ]
   },
   "verified": true,
-  "career_url": "https://nasdaq.wd1.myworkdayjobs.com/Global_External_Site"
+  "career_url": "https://nasdaq.wd1.myworkdayjobs.com/Global_External_Site",
+  "scoped_at": "2026-10-10",
+  "notes": "Scoped 2026-10-10: every Job Family except 30 tech, support, sales and admin families (exclude_facets); 175 -> 45, all finance kept."
  },
  {
   "name": "Cboe Global Markets",
@@ -2144,10 +2751,21 @@
   "workday": {
    "tenant": "cboe",
    "version": "wd1",
-   "board": "External_Career_CBOE"
+   "board": "External_Career_CBOE",
+   "scopes": [
+    {
+     "exclude_facets": {
+      "jobFamilyGroup": [
+       "dfa3890fb329100161c1f65c64ac0000"
+      ]
+     }
+    }
+   ]
   },
   "verified": true,
-  "career_url": "https://cboe.wd1.myworkdayjobs.com/External_Career_CBOE"
+  "career_url": "https://cboe.wd1.myworkdayjobs.com/External_Career_CBOE",
+  "scoped_at": "2026-10-10",
+  "notes": "Scoped 2026-10-10: every Job Category except Technology Solutions & Engineering (exclude_facets); 113 -> 63, all finance kept."
  },
  {
   "name": "TP ICAP",
@@ -2171,7 +2789,13 @@
   "ats": "successfactors",
   "base_url": "https://jobs.six-group.com",
   "verified": true,
-  "career_url": "https://jobs.six-group.com/viewalljobs/?locale=en_US"
+  "career_url": "https://jobs.six-group.com/viewalljobs/?locale=en_US",
+  "noise_terms": [
+   "developer",
+   "architect",
+   "events"
+  ],
+  "notes": "2026-10-10: added noise_terms developer, architect, events after a dry-run over every stored row of this source (no finance-tagged hit)."
  },
  {
   "name": "BGC Group",
@@ -2196,7 +2820,16 @@
   "career_url": "https://bloomberg.avature.net/careers/SearchJobs",
   "search_url": "https://bloomberg.avature.net/careers/SearchJobs",
   "page_size": 50,
-  "notes": "Classic Avature board, server-rendered (~425, all divisions incl. heavy SWE). GET works via avature.py, no form-POST needed. Negative filter + Haiku area tags isolate markets/IBD. The separate Workday board is only the Bloomberg Industry Group affiliate."
+  "notes": "Classic Avature board, server-rendered (~425, all divisions incl. heavy SWE). GET works via avature.py, no form-POST needed. Negative filter + Haiku area tags isolate markets/IBD. The separate Workday board is only the Bloomberg Industry Group affiliate. 2026-10-10: added noise_terms producer, editor, news, counsel, engineer, journalist, speakers after a dry-run over every stored row of this source (no finance-tagged hit).",
+  "noise_terms": [
+   "producer",
+   "editor",
+   "news",
+   "counsel",
+   "engineer",
+   "journalist",
+   "speakers"
+  ]
  },
  {
   "name": "Wintermute",
@@ -2315,7 +2948,14 @@
   "ats": "successfactors",
   "base_url": "https://careers.cofcointernational.com",
   "verified": true,
-  "career_url": "https://careers.cofcointernational.com/"
+  "career_url": "https://careers.cofcointernational.com/",
+  "noise_terms": [
+   "manutenção",
+   "transportes",
+   "mantenimiento",
+   "operador"
+  ],
+  "notes": "2026-10-10: added noise_terms manutenção, transportes, mantenimiento, operador after a dry-run over every stored row of this source (no finance-tagged hit)."
  },
  {
   "name": "BMO Capital Markets",
@@ -2342,11 +2982,36 @@
   "workday": {
    "tenant": "cibc",
    "version": "wd3",
-   "board": "search"
+   "board": "search",
+   "scopes": [
+    {
+     "exclude_facets": {
+      "jobFamilyGroup": [
+       "4bbe6c74e8a70126f29430a881012510",
+       "4bbe6c74e8a701a4a5e02fa881012310",
+       "4bbe6c74e8a701d43e2426a881011710",
+       "4bbe6c74e8a70106567733a881012b10",
+       "4bbe6c74e8a701a148b532a881012910",
+       "4bbe6c74e8a701d63deb2da881011d10",
+       "affbe1c623ee10019e7a248dabd30000",
+       "4bbe6c74e8a7011d49ad22a881011310"
+      ]
+     }
+    },
+    {
+     "applied_facets": {
+      "jobFamilyGroup": [
+       "4bbe6c74e8a7011d49ad22a881011310"
+      ]
+     },
+     "search_text": "Capital"
+    }
+   ]
   },
   "verified": true,
   "career_url": "https://cibc.wd3.myworkdayjobs.com/search",
-  "notes": "Widened markets-only -> full board (~555, 4s). Was search_text='Global Markets' (55)."
+  "notes": "Widened markets-only -> full board (~555, 4s). Was search_text='Global Markets' (55). Scoped 2026-10-10: whole board minus IT, HR, Administrative Services, Marketing, Legal, Corporate Services, Agile; 553 -> 484, all 162 finance kept. Client Relationships (173 other, mostly branch wealth) stays in: it holds 8 IBD-tagged roles. 2026-10-10 (his call: no branch banking): also excludes Client Relationships (branch financial advisors, business banking), with a rescue scope searching 'Capital' inside it that keeps the Global Investment Banking, DCM and Leveraged Finance analysts filed there; 484 -> 138.",
+  "scoped_at": "2026-10-10"
  },
  {
   "name": "Danske Bank",
@@ -2359,7 +3024,11 @@
    "site": "CX_1001"
   },
   "verified": true,
-  "career_url": "https://danskebank.com/careers/apply"
+  "career_url": "https://danskebank.com/careers/apply",
+  "noise_terms": [
+   "engineer"
+  ],
+  "notes": "2026-10-10: added noise_terms engineer after a dry-run over every stored row of this source (no finance-tagged hit)."
  },
  {
   "name": "Erste Group Bank",
@@ -2373,7 +3042,11 @@
    "config_page": "https://www.erstegroup.com/en/career/positions-offered",
    "detail_base": "https://www.erstegroup.com/en/career/positions-offered/job-detail"
   },
-  "notes": "Custom SAP BTP app (NOT SuccessFactors). List URL + Basic-auth creds read from the page's data-cid=joblist gem-json each run (rotation-safe). ~151 roles, mostly Sparkasse AT retail — tagger sorts relevance."
+  "notes": "Custom SAP BTP app (NOT SuccessFactors). List URL + Basic-auth creds read from the page's data-cid=joblist gem-json each run (rotation-safe). ~151 roles, mostly Sparkasse AT retail — tagger sorts relevance. 2026-10-10: added noise_terms sparkasse, initiativbewerbung after a dry-run over every stored row of this source (no finance-tagged hit).",
+  "noise_terms": [
+   "sparkasse",
+   "initiativbewerbung"
+  ]
  },
  {
   "name": "Scotiabank Global Banking and Markets",
@@ -2420,11 +3093,20 @@
    "tenant": "pwc",
    "version": "wd3",
    "board": "Global_Experienced_Careers",
-   "search_text": "Deals"
+   "scopes": [
+    {
+     "search_text": "Deals"
+    },
+    {
+     "search_text": "Valuations"
+    }
+   ]
   },
   "verified": true,
   "career_url": "https://pwc.wd3.myworkdayjobs.com/Global_Experienced_Careers",
-  "scope_note": "Huge multi-service-line board (audit/tax/advisory). search_text='Deals' first-pass scope to the M&A/transaction-services side; refine empirically. Campus board: Global_Campus_Careers."
+  "scope_note": "Huge multi-service-line board (audit/tax/advisory). search_text='Deals' first-pass scope to the M&A/transaction-services side; refine empirically. Campus board: Global_Campus_Careers.",
+  "scoped_at": "2026-10-10",
+  "notes": "Widened 2026-10-10: 'Deals' missed offices that title transaction advisory as Corporate Finance (Milan); a second scope searches 'Valuations' (+23 roles, mostly Corporate Finance associates)."
  },
  {
   "name": "Strategy&",
@@ -2620,7 +3302,21 @@
   "slug": "RolandBerger",
   "verified": true,
   "career_url": "https://careers.smartrecruiters.com/RolandBerger",
-  "notes": "SmartRecruiters API confirmed (~200 postings)."
+  "notes": "SmartRecruiters API confirmed (~200 postings). 2026-10-10: added noise_terms club, workshop, networking, fair, cruise, bonding, firmenkontaktmesse, competition, course, food, ressources humaines, apprentissage after a dry-run over every stored row of this source (no finance-tagged hit).",
+  "noise_terms": [
+   "club",
+   "workshop",
+   "networking",
+   "fair",
+   "cruise",
+   "bonding",
+   "firmenkontaktmesse",
+   "competition",
+   "course",
+   "food",
+   "ressources humaines",
+   "apprentissage"
+  ]
  },
  {
   "name": "Altman Solon",
@@ -2664,7 +3360,16 @@
   },
   "verified": true,
   "career_url": "https://careers.kroll.com/en/listing-page",
-  "notes": "Oracle HCM CE; ~311 reqs, nearly all finance/advisory (Transaction Advisory, M&A, Transfer Pricing)."
+  "notes": "Oracle HCM CE; ~311 reqs, nearly all finance/advisory (Transaction Advisory, M&A, Transfer Pricing). 2026-10-10: added noise_terms cyber, trustee, agency, incident, developer, clearance, security after a dry-run over every stored row of this source (no finance-tagged hit).",
+  "noise_terms": [
+   "cyber",
+   "trustee",
+   "agency",
+   "incident",
+   "developer",
+   "clearance",
+   "security"
+  ]
  },
  {
   "name": "Grant Thornton",
@@ -2713,7 +3418,14 @@
   "ats": "mckinsey",
   "career_url": "https://www.mckinsey.com/careers/search-jobs",
   "verified": true,
-  "notes": "Cracked 2026-07-06: the Avature portalpack WAF was the wrong surface — the real board is the www.mckinsey.com Next.js search, whose gateway API (gateway.mckinsey.com/apigw-x0cceuow60) has no bot gate and returns all ~590 postings with descriptions in one GET. Handler re-derives the gateway id from __NEXT_DATA__ if it rotates."
+  "notes": "Cracked 2026-07-06: the Avature portalpack WAF was the wrong surface — the real board is the www.mckinsey.com Next.js search, whose gateway API (gateway.mckinsey.com/apigw-x0cceuow60) has no bot gate and returns all ~590 postings with descriptions in one GET. Handler re-derives the gateway id from __NEXT_DATA__ if it rotates. 2026-10-10: added noise_terms assistant, administrator, helpdesk, studio, receptionist after a dry-run over every stored row of this source (no finance-tagged hit).",
+  "noise_terms": [
+   "assistant",
+   "administrator",
+   "helpdesk",
+   "studio",
+   "receptionist"
+  ]
  },
  {
   "name": "BCG",
@@ -2730,7 +3442,19 @@
    "lang": "en_global",
    "country": "global"
   },
-  "notes": "Phenom /widgets refineSearch works directly (~878 firm-wide); store broad, tagger sorts relevance."
+  "notes": "Phenom /widgets refineSearch works directly (~878 firm-wide); store broad, tagger sorts relevance. 2026-10-10: added noise_terms engineer, reception, events, staffing, concierge, designer, software, agentic, talent, marketing after a dry-run over every stored row of this source (no finance-tagged hit).",
+  "noise_terms": [
+   "engineer",
+   "reception",
+   "events",
+   "staffing",
+   "concierge",
+   "designer",
+   "software",
+   "agentic",
+   "talent",
+   "marketing"
+  ]
  },
  {
   "name": "Bain & Company",
@@ -2742,7 +3466,13 @@
   "career_url": "https://careers.bain.com/jobs",
   "search_url": "https://careers.bain.com/jobs/SearchJobs/",
   "page_size": 10,
-  "notes": "Self-hosted Avature (portal id 24, 'FolderDetail' variant). avature.py sends both job*/folder* paging params + handles FolderDetail links and the subtitle location. (Bain Capital is a separate firm on Workday.)"
+  "notes": "Self-hosted Avature (portal id 24, 'FolderDetail' variant). avature.py sends both job*/folder* paging params + handles FolderDetail links and the subtitle location. (Bain Capital is a separate firm on Workday.) 2026-10-10: added noise_terms assistant, designer, creative, martech after a dry-run over every stored row of this source (no finance-tagged hit).",
+  "noise_terms": [
+   "assistant",
+   "designer",
+   "creative",
+   "martech"
+  ]
  },
  {
   "name": "Deloitte",
@@ -2756,7 +3486,20 @@
   "search_url": "https://apply.deloitte.com/en_US/careers/SearchJobs/",
   "page_size": 50,
   "follow_until_empty": true,
-  "notes": "Global Avature board (apply.deloitte.com, ~878, all member-firm entities incl. Corporate Finance LLC / M&A). follow_until_empty:true is REQUIRED — the listing says 'N jobs' which the avature total regex (items/results) doesn't match, so paging walks until empty. heavy:true — that sequential walk takes ~147s (>60s COMPANY_TIMEOUT). US Phenom/jobs2 board is dead; this is the only live one."
+  "notes": "Global Avature board (apply.deloitte.com, ~878, all member-firm entities incl. Corporate Finance LLC / M&A). follow_until_empty:true is REQUIRED — the listing says 'N jobs' which the avature total regex (items/results) doesn't match, so paging walks until empty. heavy:true — that sequential walk takes ~147s (>60s COMPANY_TIMEOUT). US Phenom/jobs2 board is dead; this is the only live one. 2026-10-10: noise_terms for tech-implementation and US-government cleared roles (SAP, Oracle, Workday, ServiceNow, Salesforce, Palantir, Databricks, Docebo, clearance, developer). Dry-run over every stored Deloitte row: 107 of 490 active 'other' retire; the 67 all-time 'consulting'-tagged hits were all ERP/HCM implementation or cleared government roles, a tagger mislabel. The board has only an Entry/Experienced facet; member entity sits in the card text.",
+  "noise_terms": [
+   "polygraph",
+   "palantir",
+   "databricks",
+   "servicenow",
+   "salesforce",
+   "workday",
+   "oracle",
+   "sap",
+   "docebo",
+   "clearance",
+   "developer"
+  ]
  },
  {
   "name": "KPMG (US)",
@@ -2770,7 +3513,17 @@
    "base_url": "https://www.kpmguscareers.com",
    "page_size": 12
   },
-  "notes": "US board only (~762; Advisory/Deal Advisory/Valuation/FS Tax). Custom WordPress get-jobs.php JSON (cards embedded as HTML). KPMG UK (Umbraco), DE (Magnolia) and member-firm classic-SF boards are separate and not wired."
+  "notes": "US board only (~762; Advisory/Deal Advisory/Valuation/FS Tax). Custom WordPress get-jobs.php JSON (cards embedded as HTML). KPMG UK (Umbraco), DE (Magnolia) and member-firm classic-SF boards are separate and not wired. 2026-10-10: added noise_terms engineer, deskside, servicenow, identity, administrative, events, counsel, marketing after a dry-run over every stored row of this source (no finance-tagged hit).",
+  "noise_terms": [
+   "engineer",
+   "deskside",
+   "servicenow",
+   "identity",
+   "administrative",
+   "events",
+   "counsel",
+   "marketing"
+  ]
  },
  {
   "name": "Kearney",
@@ -2918,7 +3671,10 @@
    "base_url": "https://career5.successfactors.eu",
    "company": "PartnersGroup"
   },
-  "notes": "Classic SF server-rendered listing (career_ns=job_listing_summary); ~98 roles. New successfactors_classic handler."
+  "notes": "Classic SF server-rendered listing (career_ns=job_listing_summary); ~98 roles. New successfactors_classic handler. 2026-10-10: added noise_terms engineer after a dry-run over every stored row of this source (no finance-tagged hit).",
+  "noise_terms": [
+   "engineer"
+  ]
  },
  {
   "name": "Waterland Private Equity",
@@ -3352,7 +4108,13 @@
   "ats": "successfactors",
   "base_url": "https://jobs.janushenderson.com",
   "verified": true,
-  "career_url": "https://jobs.janushenderson.com"
+  "career_url": "https://jobs.janushenderson.com",
+  "noise_terms": [
+   "assistant",
+   "engineer",
+   "marketing"
+  ],
+  "notes": "2026-10-10: added noise_terms assistant, engineer, marketing after a dry-run over every stored row of this source (no finance-tagged hit)."
  },
  {
   "name": "Columbia Threadneedle Investments",
@@ -3364,11 +4126,24 @@
    "tenant": "ameriprise",
    "version": "wd5",
    "board": "Ameriprise",
-   "search_text": "Columbia Threadneedle"
+   "scopes": [
+    {
+     "exclude_facets": {
+      "jobFamilyGroup": [
+       "8b69735a219101dafdec4a75d6162821",
+       "8b69735a219101c91f474775d6161e21",
+       "8b69735a21910177fba6fb8dd6163321",
+       "8b69735a21910190fc984375d6161221",
+       "8b69735a219101419dde4775d6162021"
+      ]
+     }
+    }
+   ]
   },
   "verified": true,
   "career_url": "https://ameriprise.wd5.myworkdayjobs.com/Ameriprise",
-  "notes": "Shares Ameriprise Financial Workday board. search_text='Columbia Threadneedle' scopes to CT roles only."
+  "notes": "Shares Ameriprise Financial Workday board. search_text='Columbia Threadneedle' scopes to CT roles only. Rescoped 2026-10-10: the 'Columbia Threadneedle' search matched Ameriprise boilerplate (164 of 233 roles) yet missed research analysts. Now every Ameriprise Job Category except Technology, Legal Affairs, Client Service, Communications and Marketing (exclude_facets); all 23 finance kept, 17 other dropped. Ameriprise wealth roles are stored under this name.",
+  "scoped_at": "2026-10-10"
  },
  {
   "name": "Pictet Asset Management",
@@ -3393,10 +4168,25 @@
   "workday": {
    "tenant": "lombardodier",
    "version": "wd3",
-   "board": "Lombard_Odier_Careers"
+   "board": "Lombard_Odier_Careers",
+   "scopes": [
+    {
+     "exclude_facets": {
+      "jobFamily": [
+       "0bb0274c842a017b2b83d2c75f005105",
+       "0bb0274c842a0133b074c7c75f004d05",
+       "0bb0274c842a016b4ed6c1c85f007b05",
+       "0bb0274c842a01325fbdd7c75f005305",
+       "0bb0274c842a01995bbd60c75f002b05"
+      ]
+     }
+    }
+   ]
   },
   "verified": true,
-  "career_url": "https://lombardodier.wd3.myworkdayjobs.com/Lombard_Odier_Careers"
+  "career_url": "https://lombardodier.wd3.myworkdayjobs.com/Lombard_Odier_Careers",
+  "scoped_at": "2026-10-10",
+  "notes": "Scoped 2026-10-10: every Job Function except IT Operations, IT Development, Technology Infrastructure, IT Security, Assistants (exclude_facets); 70 -> 51, all finance kept. Interns stay in."
  },
  {
   "name": "Sumitomo Corporation EMEA",
@@ -3473,14 +4263,32 @@
   "workday": {
    "tenant": "iberdrola",
    "version": "wd3",
-   "board": "Iberdrola"
+   "board": "Iberdrola",
+   "scopes": [
+    {
+     "applied_facets": {
+      "jobFamilyGroup": [
+       "b899da1d48bb100813803661def00000",
+       "b899da1d48bb100813804f14467c0000",
+       "b899da1d48bb10081380672844bc0000"
+      ]
+     }
+    },
+    {
+     "search_text": "trading"
+    },
+    {
+     "search_text": "trader"
+    }
+   ]
   },
   "verified": true,
   "career_url": "https://iberdrola.wd3.myworkdayjobs.com/Iberdrola",
-  "notes": "Large multi-national utility with subsidiaries (ScottishPower, Avangrid, Neoenergia). International Rotational Graduate Programme runs annually. Negative filter + Haiku will separate trading/finance roles.",
+  "notes": "Large multi-national utility with subsidiaries (ScottishPower, Avangrid, Neoenergia). International Rotational Graduate Programme runs annually. Negative filter + Haiku will separate trading/finance roles. Scoped 2026-10-10: Area Finance + Tax + Graduates, plus single-word searches trading/trader (the Avangrid real-time trader roles sit outside Finance); 190 -> 12 rows, 89 of 94 other dropped.",
   "noise_terms": [
    "wind turbine"
-  ]
+  ],
+  "scoped_at": "2026-10-10"
  },
  {
   "name": "Bank of England",
@@ -3599,7 +4407,11 @@
   "search_url": "https://careers.munichre.com/en/search_jobs?acm=ALL&alrpm=ALL&ascf=%5B%7B%22key%22%3A%22custom_fields.BrandTheme%22%2C%22value%22%3A%22Munich+Re%22%7D%5D",
   "verified": true,
   "career_url": "https://careers.munichre.com/en/munichre",
-  "notes": "Radancy — same board as MEAG (careers.munichre.com); BrandTheme='Munich Re' scopes to ~213 Munich Re roles. MEAG covered separately under BrandTheme='MEAG'."
+  "notes": "Radancy — same board as MEAG (careers.munichre.com); BrandTheme='Munich Re' scopes to ~213 Munich Re roles. MEAG covered separately under BrandTheme='MEAG'. 2026-10-10: added noise_terms architect, ausbildungsintegriertes after a dry-run over every stored row of this source (no finance-tagged hit).",
+  "noise_terms": [
+   "architect",
+   "ausbildungsintegriertes"
+  ]
  },
  {
   "name": "BayernLB",
@@ -3645,26 +4457,35 @@
    "company": "C0000159900P"
   },
   "verified": true,
-  "career_url": "https://jobs.heraeus.com"
+  "career_url": "https://jobs.heraeus.com",
+  "noise_terms": [
+   "chemikant",
+   "chemielaborant",
+   "lagerlogistik",
+   "quality",
+   "engineer",
+   "manufacturing",
+   "fachkraft",
+   "industriekaufleute",
+   "r&d",
+   "ehs",
+   "b.eng.",
+   "process",
+   "laborant",
+   "produktion",
+   "instandhaltung"
+  ],
+  "notes": "2026-10-10: added noise_terms chemikant, chemielaborant, lagerlogistik, quality, engineer, manufacturing, fachkraft, industriekaufleute, r&d, ehs, b.eng., process, laborant, produktion, instandhaltung after a dry-run over every stored row of this source (no finance-tagged hit)."
  },
  {
   "name": "MKS PAMP",
   "category": "Physical Commodity Merchants",
-  "ats": "workday",
-  "workday": {
-   "tenant": "mksinst",
-   "version": "wd1",
-   "board": "MKSCareersEMEA"
-  },
+  "ats": "teamtailor",
+  "base_url": "https://mkspampgroup.teamtailor.com",
   "verified": true,
-  "career_url": "https://mksinst.wd1.myworkdayjobs.com/MKSCareersEMEA",
-  "noise_terms": [
-   "quality inspector",
-   "izdelovalec preparatov",
-   "production tech",
-   "usineur",
-   "finishing"
-  ]
+  "career_url": "https://mkspampgroup.teamtailor.com",
+  "scoped_at": "2026-10-10",
+  "notes": "Rewired 2026-10-10: the previous Workday tenant mksinst/MKSCareersEMEA is MKS Instruments (US semiconductor and optics equipment, Atotech plating), not the Geneva precious-metals group; every stored role was from the wrong firm. mkspamp.com/careers links its Teamtailor board (18 roles at rewire, whole board)."
  },
  {
   "name": "Alpiq",
@@ -3843,7 +4664,21 @@
   "workday": {
    "tenant": "repsol",
    "version": "wd3",
-   "board": "Repsol"
+   "board": "Repsol",
+   "scopes": [
+    {
+     "applied_facets": {
+      "jobFamilyGroup": [
+       "66e5a69305ee10013c2ce6dc69530000",
+       "66e5a69305ee10013c931fb62ecd0000",
+       "66e5a69305ee10013c52bfc2bcda0000"
+      ]
+     }
+    },
+    {
+     "search_text": "trading"
+    }
+   ]
   },
   "category": "Energy Utilities w/ Trading",
   "verified": true,
@@ -3897,8 +4732,9 @@
    "transformación digital"
   ],
   "scope_note": "Full board with source-specific technical, operational and support noise removed by title; finance/research and broad early-career intakes remain. Probed 2026-09-29.",
-  "notes": "Coverage sweep 2026-09-29; live handler and description path probed.",
-  "career_url": "https://repsol.wd3.myworkdayjobs.com/Repsol"
+  "notes": "Coverage sweep 2026-09-29; live handler and description path probed. Scoped 2026-10-10: Job Category Finance, Financial and Commodities Trading, Internship, plus search trading; 74 -> 31, all finance kept.",
+  "career_url": "https://repsol.wd3.myworkdayjobs.com/Repsol",
+  "scoped_at": "2026-10-10"
  },
  {
   "name": "EDP",
@@ -3928,10 +4764,12 @@
    "grandes clientes",
    "diversidade",
    "technical specialist in processes",
-   "software development"
+   "software development",
+   "técnico",
+   "tecnico"
   ],
   "scope_note": "Full board with source-specific technical, operational and support noise removed by title; finance/research and broad early-career intakes remain. Probed 2026-09-29.",
-  "notes": "Coverage sweep 2026-09-29; live handler and description path probed.",
+  "notes": "Coverage sweep 2026-09-29; live handler and description path probed. 2026-10-10: added noise_terms técnico, tecnico after a dry-run over every stored row of this source (no finance-tagged hit).",
   "career_url": "https://jobs.edp.com"
  },
  {
@@ -4152,12 +4990,28 @@
   "workday": {
    "tenant": "tiaa",
    "version": "wd1",
-   "board": "Search"
+   "board": "Search",
+   "scopes": [
+    {
+     "exclude_facets": {
+      "jobFamilyGroup": [
+       "0959caecc75501f111166b3ac400290d",
+       "0959caecc7550129925a713ac4003b0d",
+       "0959caecc755014c684a663ac4001b0d",
+       "0959caecc755016ec2cf623ac400110d",
+       "0959caecc75501f1c1c1763ac400470d",
+       "b9100c9eb53a015f3d6111557e01266e",
+       "0959caecc7550187ad696a3ac400270d"
+      ]
+     }
+    }
+   ]
   },
   "verified": true,
   "career_url": "https://tiaa.wd1.myworkdayjobs.com/Search",
   "scope_note": "Shared TIAA parent board (~147 total, US-retirement-heavy); Workday searchText too fuzzy to scope Nuveen — full board per RBC/Erste doctrine, tagger sorts relevance.",
-  "notes": "147 roles at wiring."
+  "notes": "147 roles at wiring. Scoped 2026-10-10: every Category except IT, Marketing, Data Analytics & Reporting, Client/Customer Service, Product Development, Legal, HR (exclude_facets); 188 -> 120, all 66 finance kept.",
+  "scoped_at": "2026-10-10"
  },
  {
   "name": "Newton Investment Management",
@@ -4213,11 +5067,27 @@
   "workday": {
    "tenant": "mfs",
    "version": "wd1",
-   "board": "MFS-Careers"
+   "board": "MFS-Careers",
+   "scopes": [
+    {
+     "exclude_facets": {
+      "jobFamilyGroup": [
+       "280e3a78598510010e598f21183c0000",
+       "280e3a78598510010e59970be8380000",
+       "280e3a78598510010e591fdfc78d0000",
+       "280e3a78598510010e5a131b4bee0000",
+       "0acd2c6d32811001ed21b431b7780000",
+       "280e3a78598510010e59c6caa3630000",
+       "280e3a78598510010e59132c4b3e0000"
+      ]
+     }
+    }
+   ]
   },
   "verified": true,
   "career_url": "https://mfs.wd1.myworkdayjobs.com/MFS-Careers",
-  "notes": "36 roles at wiring; London office."
+  "notes": "36 roles at wiring; London office. Scoped 2026-10-10: every Job Category except Marketing, HR, Application Development, Service Center, AI/ML, IT & Physical Security, Administration (exclude_facets); 70 -> 52, all finance kept.",
+  "scoped_at": "2026-10-10"
  },
  {
   "name": "Dimensional Fund Advisors",
@@ -4652,7 +5522,15 @@
   "verified": true,
   "career_url": "https://www.careers.zurich.com/search/",
   "scope_note": "Group board is 814 roles; scoped with q=investment (61 at wiring). Full-text q, so some underwriting noise — tagger sorts.",
-  "notes": ""
+  "notes": "2026-10-10: added noise_terms assistance, travel, claims, coordinator, developer, network after a dry-run over every stored row of this source (no finance-tagged hit).",
+  "noise_terms": [
+   "assistance",
+   "travel",
+   "claims",
+   "coordinator",
+   "developer",
+   "network"
+  ]
  },
  {
   "name": "Swiss Re Asset Management",
@@ -4678,7 +5556,12 @@
   "search_url": "https://careers.baloise.com/en_US/careers/SearchJobs",
   "verified": true,
   "career_url": "https://careers.baloise.com/en_US/careers/SearchJobs",
-  "notes": "Avature board covers merged Helvetia Baloise group (49 at wiring); AM roles among them. baloise.com root 406s to curl but Avature host is open."
+  "notes": "Avature board covers merged Helvetia Baloise group (49 at wiring); AM roles among them. baloise.com root 406s to curl but Avature host is open. 2026-10-10: added noise_terms gestionnaire, kmo, account manager after a dry-run over every stored row of this source (no finance-tagged hit).",
+  "noise_terms": [
+   "gestionnaire",
+   "kmo",
+   "account manager"
+  ]
  },
  {
   "name": "GIC",
@@ -4951,7 +5834,13 @@
    "base": "https://www.werkenbijachmea.nl/vacatures",
    "prefix": "achmea"
   },
-  "notes": "werkenbijachmea server-rendered cards, offset ?o=N pagination. Group board; AM roles a small slice (filter sorts)."
+  "notes": "werkenbijachmea server-rendered cards, offset ?o=N pagination. Group board; AM roles a small slice (filter sorts). 2026-10-10: added noise_terms letselschadebehandelaar, letsel, jurist, medior after a dry-run over every stored row of this source (no finance-tagged hit).",
+  "noise_terms": [
+   "letselschadebehandelaar",
+   "letsel",
+   "jurist",
+   "medior"
+  ]
  },
  {
   "name": "ATP",
@@ -5079,7 +5968,23 @@
    "link": ":self",
    "page_param": "page"
   },
-  "notes": "Altays whole-group board covers AM and Corporates & Markets. Pagination enabled 2026-09-29: 236 listings rather than the first 10. Existing source identity retained to avoid duplicate jobs."
+  "notes": "Altays whole-group board covers AM and Corporates & Markets. Pagination enabled 2026-09-29: 236 listings rather than the first 10. Existing source identity retained to avoid duplicate jobs. 2026-10-10: added noise_terms développeur, sécurité, crm, web, sql, administrateur, administrator, ai-engineer, software, machine learning, eventmanagement, marketing, softwareentwicklung, développement after a dry-run over every stored row of this source (no finance-tagged hit).",
+  "noise_terms": [
+   "développeur",
+   "sécurité",
+   "crm",
+   "web",
+   "sql",
+   "administrateur",
+   "administrator",
+   "ai-engineer",
+   "software",
+   "machine learning",
+   "eventmanagement",
+   "marketing",
+   "softwareentwicklung",
+   "développement"
+  ]
  },
  {
   "name": "KfW",
@@ -5455,11 +6360,19 @@
    "tenant": "pwc",
    "version": "wd3",
    "board": "Global_Campus_Careers",
-   "search_text": "Deals"
+   "scopes": [
+    {
+     "search_text": "Deals"
+    },
+    {
+     "search_text": "Valuations"
+    }
+   ]
   },
   "verified": true,
   "scope_note": "Finance-island: search_text=Deals isolates transaction/M&A slice (unscoped board ~1344 all service lines).",
-  "notes": "Separate PwC campus Workday board, sibling of Global_Experienced_Careers. Verified via handler 2026-07-04."
+  "notes": "Separate PwC campus Workday board, sibling of Global_Experienced_Careers. Verified via handler 2026-07-04. Widened 2026-10-10 with a second 'Valuations' scope, as on the experienced board (+3 roles).",
+  "scoped_at": "2026-10-10"
  },
  {
   "name": "BDO (Campus)",
@@ -5696,10 +6609,18 @@
    "tenant": "athene",
    "version": "wd5",
    "board": "apollononpubliccareersite",
-   "search_text": "Summer Analyst"
+   "scopes": [
+    {
+     "search_text": "Summer"
+    },
+    {
+     "search_text": "Internship"
+    }
+   ]
   },
   "verified": true,
-  "notes": "Apollo campus reqs live only on the non-public Workday board (athene/apollononpubliccareersite), absent from the public Apollo_Careers board. Scoped with search_text='Summer Analyst' to isolate the 6 Summer/Sophomore Analyst campus reqs and exclude ~110 hidden lateral roles. Verified via handler 2026-07-05."
+  "notes": "Apollo campus reqs live only on the non-public Workday board (athene/apollononpubliccareersite), absent from the public Apollo_Careers board. Scoped with search_text='Summer Analyst' to isolate the 6 Summer/Sophomore Analyst campus reqs and exclude ~110 hidden lateral roles. Verified via handler 2026-07-05. Widened 2026-10-10 to single-word searches Summer + Internship: the 'Summer Analyst' query missed the 6-month LoA internships and Summer Associate roles.",
+  "scoped_at": "2026-10-10"
  },
  {
   "name": "Lincoln International",
@@ -6058,10 +6979,12 @@
    "product support",
    "contract specialist",
    "sustainability controllership",
-   "sourcing"
+   "sourcing",
+   "sourcer",
+   "talent"
   ],
   "scope_note": "Full board with source-specific technical, operational and support noise removed by title; finance/research and broad early-career intakes remain. Probed 2026-09-29.",
-  "notes": "Coverage sweep 2026-09-29; live handler and description path probed.",
+  "notes": "Coverage sweep 2026-09-29; live handler and description path probed. 2026-10-10: added noise_terms sourcer, talent after a dry-run over every stored row of this source (no finance-tagged hit).",
   "career_url": "https://careers.moodys.com/en/search-jobs"
  },
  {
@@ -6515,10 +7438,13 @@
   "search_url": "https://careers.munichre.com/en/search_jobs?acm=ALL&alrpm=ALL&ascf=%5B%7B%22key%22%3A%22custom_fields.BrandTheme%22%2C%22value%22%3A%22ERGO%22%7D%5D",
   "career_url": "https://www.ergo.com/de/karriere",
   "verified": true,
-  "notes": "Same Radancy board as Munich Re/MEAG, BrandTheme='ERGO' (~94 roles, mostly dual-study/Vertrieb — drop buckets + tagger sort; investment bulk sits in MEAG, covered). Wired 2026-08-03.",
+  "notes": "Same Radancy board as Munich Re/MEAG, BrandTheme='ERGO' (~94 roles, mostly dual-study/Vertrieb — drop buckets + tagger sort; investment bulk sits in MEAG, covered). Wired 2026-08-03. 2026-10-10: added noise_terms wirtschaftsinformatik, endienst, innendienst after a dry-run over every stored row of this source (no finance-tagged hit).",
   "noise_terms": [
    "innendienst zum",
-   "weiterbildung"
+   "weiterbildung",
+   "wirtschaftsinformatik",
+   "endienst",
+   "innendienst"
   ]
  },
  {
@@ -6527,12 +7453,19 @@
   "ats": "nuernberger",
   "verified": true,
   "career_url": "https://www.nuernberger.com/karriere/stellenangebote/",
-  "notes": "Open Elasticsearch job index (search/prod-nv-com-nv-jobs/_search, no auth). Job data in _source.content[0]; descriptions inline. Departments incl. Asset Management + Finanzen und Kapitalanlage; (Junior) Investment Manager live at wiring. Wired 2026-08-03.",
+  "notes": "Open Elasticsearch job index (search/prod-nv-com-nv-jobs/_search, no auth). Job data in _source.content[0]; descriptions inline. Departments incl. Asset Management + Finanzen und Kapitalanlage; (Junior) Investment Manager live at wiring. Wired 2026-08-03. 2026-10-10: added noise_terms vermittler, agentur, selbstständiger, finanzanlagen, außendienst, firmenkundenberater, apotheken after a dry-run over every stored row of this source (no finance-tagged hit).",
   "noise_terms": [
    "angestellter",
    "innendienst raum",
    "vertriebsweg",
-   "anwendungsentwickler"
+   "anwendungsentwickler",
+   "vermittler",
+   "agentur",
+   "selbstständiger",
+   "finanzanlagen",
+   "außendienst",
+   "firmenkundenberater",
+   "apotheken"
   ]
  },
  {
@@ -6572,7 +7505,7 @@
   "ats": "provinzial",
   "verified": true,
   "career_url": "https://karriere-provinzial.de/stellenmarkt",
-  "notes": "Static results.json (~1.2k rows); handler keeps type=Konzern (~190) — the Agentur bulk is self-employed sales. Provinzial AM/ProREM roles post here. Detail pages TYPO3 server-rendered (HTTP enrich). Wired 2026-08-03.",
+  "notes": "Static results.json (~1.2k rows); handler keeps type=Konzern (~190) — the Agentur bulk is self-employed sales. Provinzial AM/ProREM roles post here. Detail pages TYPO3 server-rendered (HTTP enrich). Wired 2026-08-03. 2026-10-10: added noise_terms schadenregulierer, direktionsbevollmächtigter, makleranbindung, bipro, wahlstation, releasemanagement, softwareentwicklung, informatik, schadenmanagement, kfz after a dry-run over every stored row of this source (no finance-tagged hit).",
   "noise_terms": [
    "schulpraktikum",
    "schnupperpraktikum",
@@ -6583,7 +7516,17 @@
    "prozesse automatisierung",
    "rechtsreferendariat",
    "beauftragter gruppenunternehmen",
-   "dienstleistermanagement"
+   "dienstleistermanagement",
+   "schadenregulierer",
+   "direktionsbevollmächtigter",
+   "makleranbindung",
+   "bipro",
+   "wahlstation",
+   "releasemanagement",
+   "softwareentwicklung",
+   "informatik",
+   "schadenmanagement",
+   "kfz"
   ]
  },
  {
@@ -6595,12 +7538,20 @@
    "base_url": "https://karriere.continentale.de"
   },
   "career_url": "https://karriere.continentale.de/",
-  "notes": "d.vinci portal, jobPublication/list.json (106 at wiring). Kapitalanlage dept (ka-*) incl. indirect real assets. New reusable dvinci handler. Wired 2026-08-03.",
+  "notes": "d.vinci portal, jobPublication/list.json (106 at wiring). Kapitalanlage dept (ka-*) incl. indirect real assets. New reusable dvinci handler. Wired 2026-08-03. 2026-10-10: added noise_terms sachbearbeiter, servicecenter, kundenbetreuer, vertriebspartnerbetreuung, it-prozessmanager, aushilfe, schaden, studentische aushilfe after a dry-run over every stored row of this source (no finance-tagged hit).",
   "noise_terms": [
    "schülerpraktikant",
    "technische",
    "vertragsservice",
-   "leistungsservice"
+   "leistungsservice",
+   "sachbearbeiter",
+   "servicecenter",
+   "kundenbetreuer",
+   "vertriebspartnerbetreuung",
+   "it-prozessmanager",
+   "aushilfe",
+   "schaden",
+   "studentische aushilfe"
   ]
  },
  {
@@ -6609,10 +7560,13 @@
   "ats": "alh",
   "verified": true,
   "career_url": "https://www.alh.de/deine-karriere/freie-stellen",
-  "notes": "Alte Leipziger-Hallesche, Oberursel (Frankfurt area) — 45 of 67 roles local. In-house job-search/v1 API (25/page fixed). Apply links are a P&I SPA -> listing-only (NONE desc strategy), German titles carry the signal. Real Kapitalanlage dept, none posted at wiring. Wired 2026-08-03.",
+  "notes": "Alte Leipziger-Hallesche, Oberursel (Frankfurt area) — 45 of 67 roles local. In-house job-search/v1 API (25/page fixed). Apply links are a P&I SPA -> listing-only (NONE desc strategy), German titles carry the signal. Real Kapitalanlage dept, none posted at wiring. Wired 2026-08-03. 2026-10-10: added noise_terms bwl, b.sc., b.a. after a dry-run over every stored row of this source (no finance-tagged hit).",
   "noise_terms": [
    "sachversicherung",
-   "wirtschaftsinformatik"
+   "wirtschaftsinformatik",
+   "bwl",
+   "b.sc.",
+   "b.a."
   ]
  },
  {
@@ -6663,11 +7617,15 @@
    "link": ".matchValue.title a",
    "location": ".ProjectGeoLocationCity"
   },
-  "notes": "softgarden tenant. The vaudoise.ch list page is JS-loaded, but the tenant's /vacancies/feed endpoint server-renders all ~60 jobs (matchElement cards, relative ../../job/{id} links). Vaudoise AM posts rarely — low-yield watchlist. Wired 2026-08-03.",
+  "notes": "softgarden tenant. The vaudoise.ch list page is JS-loaded, but the tenant's /vacancies/feed endpoint server-renders all ~60 jobs (matchElement cards, relative ../../job/{id} links). Vaudoise AM posts rarely — low-yield watchlist. Wired 2026-08-03. 2026-10-10: added noise_terms kundensupport, cfc, apprenti, heg after a dry-run over every stored row of this source (no finance-tagged hit).",
   "noise_terms": [
    "Vacancy",
    "prestations",
-   "brokerbetreuer"
+   "brokerbetreuer",
+   "kundensupport",
+   "cfc",
+   "apprenti",
+   "heg"
   ]
  },
  {
@@ -6699,7 +7657,16 @@
   },
   "career_url": "https://jobs.axa.com",
   "verified": true,
-  "notes": "Same Jibe board as AXA Group, tags3='AXA Switzerland' (~157 roles, full country entity incl. Winterthur head office — drop buckets + tagger sort the claims/sales bulk). Wired 2026-08-03."
+  "notes": "Same Jibe board as AXA Group, tags3='AXA Switzerland' (~157 roles, full country entity incl. Winterthur head office — drop buckets + tagger sort the claims/sales bulk). Wired 2026-08-03. 2026-10-10: noise_terms for tied-agency sales (Generalagentur, Hauptagentur, Agence Générale, Geschäftsstelle Vorsorge, consulente assicurativo, conseiller-ère en prévoyance); 31 of the 32 finance-tagged rows were these agency roles tagged wealth. tags2 here is contract type, not function, so no facet can do it.",
+  "noise_terms": [
+   "agence générale",
+   "conseiller-ère en prévoyance",
+   "consulente assicurativo",
+   "generalagentur",
+   "geschäfsstelle vorsorge",
+   "geschäftsstelle vorsorge",
+   "hauptagentur"
+  ]
  },
  {
   "name": "Breega",
@@ -6725,11 +7692,24 @@
   "workday": {
    "tenant": "spgi",
    "version": "wd5",
-   "board": "SPGI_Careers"
+   "board": "SPGI_Careers",
+   "scopes": [
+    {
+     "exclude_facets": {
+      "jobFamilyGroup": [
+       "13f9469a2d3510519478eef523d49d51",
+       "13f9469a2d3510519478fa95ea849d57",
+       "13f9469a2d3510519478f67c189c9d55",
+       "d0d0bd8c50561001447b302beaa90000"
+      ]
+     }
+    }
+   ]
   },
   "verified": true,
   "career_url": "https://spgi.wd5.myworkdayjobs.com/SPGI_Careers",
-  "notes": "Ratings CREDit graduate programme and analytical internships (London, Americas), market risk, commodity analysts. ~290 roles, ~100 pass the filter. Triaged 2026-09-23 from the 2026-09-16 JobTeaser coverage diff."
+  "notes": "Ratings CREDit graduate programme and analytical internships (London, Americas), market risk, commodity analysts. ~290 roles, ~100 pass the filter. Triaged 2026-09-23 from the 2026-09-16 JobTeaser coverage diff. Scoped 2026-10-10: every Job Function except IT, Product Management & Development, Marketing, Customer Success & Support (exclude_facets); 269 -> 164, all 25 finance kept.",
+  "scoped_at": "2026-10-10"
  },
  {
   "name": "Monex Europe",

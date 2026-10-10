@@ -102,8 +102,16 @@ class ParseResponseTests(unittest.TestCase):
             "loc_country": "United Kingdom", "loc_region": "Europe",
             "work_mode": "onsite",
             "lang_req": "", "education": "bachelor", "start_date": "2026-09",
-            "min_yoe": 0,
+            "min_yoe": 0, "ai_tech": None,
         })
+
+    def test_ai_tech_flag_parses_and_legacy_line_leaves_it_unknown(self):
+        new = parse_response(
+            "0|other|-|analyst|job|London|United Kingdom|Europe|onsite|-|0|-|-|yes\n", 1)
+        self.assertEqual(new[0]["ai_tech"], 1)
+        legacy = parse_response(
+            "0|other|-|analyst|job|London|United Kingdom|Europe|onsite|-|0|-|-\n", 1)
+        self.assertIsNone(legacy[0]["ai_tech"])
 
     def test_ibd_desk_blank(self):
         out = parse_response(
@@ -732,7 +740,7 @@ class ApiTransportTests(unittest.TestCase):
         jobs = self._jobs(3)
         posted = {}
         rows = [[str(i), "markets", "trading", "analyst", "job", "London",
-                 "United Kingdom", "Europe", "onsite", "-", "0", "-", "-"]
+                 "United Kingdom", "Europe", "onsite", "-", "0", "-", "-", "no"]
                 for i in range(3)]
 
         class R:
@@ -765,7 +773,7 @@ class ApiTransportTests(unittest.TestCase):
     def test_structured_rows_tolerate_newlines_inside_fields(self):
         row = ["0", "economics", "-\n", "analyst", "graduate-programme",
                "Washington, DC", "United States", "Americas", "onsite", "-\n",
-               "0", "master", " -"]
+               "0", "master", " -", "no\n"]
         pipe = tag._json_to_pipe(json.dumps({"rows": [row]}), 1)
         self.assertEqual(pipe.count("\n"), 0)
         out = tag.parse_response(pipe, expected_count=1)
@@ -773,7 +781,7 @@ class ApiTransportTests(unittest.TestCase):
         self.assertEqual(out[0]["loc_city"], "Washington, DC")
 
     def test_structured_rows_reject_wrong_count_shape_or_index(self):
-        valid = [str(i) for i in range(13)]
+        valid = [str(i) for i in range(14)]
         valid[0] = "0"
         with self.assertRaises(ValueError):
             tag._json_to_pipe(json.dumps({"rows": []}), 1)
@@ -784,7 +792,7 @@ class ApiTransportTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             tag._json_to_pipe(json.dumps({"rows": [invalid_index]}), 1)
         self.assertEqual(len(tag._json_to_pipe(
-            json.dumps({"rows": [valid]}), 1).split("|")), 13)
+            json.dumps({"rows": [valid]}), 1).split("|")), 14)
 
     def test_structured_prompt_changes_rubric_provenance(self):
         pipe_cfg = dict(self.CFG)
@@ -1179,3 +1187,44 @@ class WaveConcurrencyTests(unittest.TestCase):
             tag.tag_jobs(jobs)
         self.assertEqual(state["peak"], 1)
         self.assertEqual(state["calls"], 3)
+
+
+class AiTechGuardTests(unittest.TestCase):
+    def _job(self, title, sector, flag):
+        return {"title": title, "category": sector, "ai_tech": flag}
+
+    def test_generic_it_and_consultancies_are_cleared(self):
+        for title, sector in (("Active Directory Engineer", "European & Regional Banks"),
+                              ("SAP BTP Engineer", "European & Regional Banks"),
+                              ("AI Engineer", "Consulting & Advisory"),
+                              ("Finance & Business Management - Public Cloud & AI Infrastructure",
+                               "Global Investment Banks"),
+                              ("2027 Internship - Marketing Events", "Global Investment Banks")):
+            job = self._job(title, sector, 1)
+            tag._enforce_ai_tech(job)
+            self.assertEqual(job["ai_tech"], 0, title)
+
+    def test_finance_tech_survives_and_ai_titles_are_forced(self):
+        job = self._job("Quantitative Developer", "Systematic HFs & Quant AMs", 1)
+        tag._enforce_ai_tech(job)
+        self.assertEqual(job["ai_tech"], 1)
+        job = self._job("Machine Learning Performance Engineer", "Prop Trading & Market Makers", 0)
+        tag._enforce_ai_tech(job)
+        self.assertEqual(job["ai_tech"], 1)
+
+    def test_unknown_stays_unknown(self):
+        job = self._job("AI Engineer", "Global Investment Banks", None)
+        tag._enforce_ai_tech(job)
+        self.assertIsNone(job["ai_tech"])
+
+    def test_quant_research_and_trading_are_not_ai_tech(self):
+        for title, want in (("Quantitative Researcher - Graduate: 2027", 0),
+                            ("Quantitative Trader (New Grad)", 0),
+                            ("Equity Volatility Quantitative Researcher", 0),
+                            ("Quantitative Developer, Python - Trading Teams EMEA", 1),
+                            ("Quantitative Researcher - Machine Learning", 1),
+                            ("C++ Quant Developer - Options", 1)):
+            job = self._job(title, "Prop Trading & Market Makers", 1)
+            tag._enforce_ai_tech(job)
+            self.assertEqual(job["ai_tech"], want, title)
+

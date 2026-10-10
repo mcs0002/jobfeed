@@ -105,6 +105,15 @@ class CompanyContextDBTests(unittest.TestCase):
         self.assertFalse(got & {"cur", "dead", "ibd", "intern", "other", "senior",
                                 "app1", "app2", "q1", "ign", "cs"})
 
+    def test_inbox_picker_lists_every_acted_on_role(self):
+        # A cap of 60 sorted by company hid every firm past the 60th role.
+        for i in range(70):
+            _row(self.db, f"a{i}", f"Alpha {i:02d}", "Analyst", status="applied")
+        _row(self.db, "zed", "Zulu Partners", "Analyst", status="oa")
+        ids = {r["id"] for r in self.db.open_application_roles()}
+        self.assertIn("zed", ids)
+        self.assertNotIn("ign", ids)
+
     def test_untagged_role_has_nothing_to_match_on(self):
         self.assertEqual(self.db.relevant_company_roles(
             self.aliases, {"id": "x", "area": ""}), [])

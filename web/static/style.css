@@ -66,6 +66,7 @@
   --scope-full-bg: #eef2f7; --scope-full-fg: #475569;
   --scope-facet-bg: #e8f5e9; --scope-facet-fg: #2e7d32;
   --scope-search-bg: #fff4e5; --scope-search-fg: #b45309;
+  --scope-exclude-bg: #e6f4f1; --scope-exclude-fg: #0f766e;
   --scope-manual-bg: #fbe9e7; --scope-manual-fg: #c62828;
 
   /* Stats bar-segment palette (muted/dusty — hues stay distinct but toned
@@ -131,6 +132,7 @@
   --scope-full-bg: #31353c; --scope-full-fg: #aab4c4;
   --scope-facet-bg: #24382a; --scope-facet-fg: #8ad096;
   --scope-search-bg: #42341c; --scope-search-fg: #e8bd75;
+  --scope-exclude-bg: #1d3a36; --scope-exclude-fg: #7fd3c6;
   --scope-manual-bg: #422522; --scope-manual-fg: #e89a90;
 
   --seg-markets: #7aa9d8; --seg-quant: #a294e8; --seg-research: #5cc2b5;
@@ -1152,10 +1154,15 @@ main.page { padding: 22px 18px 28px; max-width: 1100px; margin: 0 auto; }
 .scope.full { background: var(--scope-full-bg); color: var(--scope-full-fg); }
 .scope.facet { background: var(--scope-facet-bg); color: var(--scope-facet-fg); }
 .scope.search { background: var(--scope-search-bg); color: var(--scope-search-fg); }
+.scope.exclude { background: var(--scope-exclude-bg); color: var(--scope-exclude-fg); }
 .scope.manual { background: var(--scope-manual-bg); color: var(--scope-manual-fg); }
 .heavy {
   flex: none; display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 10.5px;
   background: var(--heavy-bg); color: var(--heavy-fg); white-space: nowrap; cursor: help;
+}
+.noiseterm {
+  flex: none; display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 10.5px;
+  background: var(--scope-full-bg); color: var(--muted); white-space: nowrap; cursor: help;
 }
 .srcnomatch { color: var(--muted); font-size: 14px; padding: 24px 0; text-align: center; }
 
@@ -1980,6 +1987,12 @@ a.btn-open.dead:visited { color: var(--muted); }
 .chart-row { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 12px; margin-bottom: 18px; }
 .chart-row.even { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 @media (max-width: 859px) { .chart-row, .chart-row.even { grid-template-columns: minmax(0, 1fr); } }
+/* Technical stats: charts stacked left, noisiest sources right (2026-10-10).
+   align-items:start keeps each column at its own height. */
+.stats-split { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); gap: 12px; margin-bottom: 18px; align-items: start; }
+.stats-charts { display: grid; gap: 12px; }
+.stats-split .telemetry-row { grid-template-columns: minmax(0, 1.6fr) auto auto; }
+@media (max-width: 859px) { .stats-split { grid-template-columns: minmax(0, 1fr); } }
 
 .chart-wrap { position: relative; }
 .chart { width: 100%; min-height: 180px; }
@@ -2074,3 +2087,9 @@ a.btn-open.dead:visited { color: var(--muted); }
    them into two rows on an ordinary laptop window (2026-09-24). */
 @media (max-width: 700px) { .run-metrics-grid.one-row { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (max-width: 520px) { .run-metrics-grid.one-row { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* "Show 500 more" at the end of a capped Browse list (2026-10-10). */
+.list-more { display: block; margin: 12px 0 24px; padding: 10px; text-align: center;
+  border: 1px solid var(--bd); border-radius: 10px; color: var(--accent); background: var(--surface);
+  text-decoration: none; font-weight: 600; }
+.list-more:hover { background: var(--accent-bg); }

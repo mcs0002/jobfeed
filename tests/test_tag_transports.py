@@ -18,8 +18,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from jobfeed import tag
 
-ROW = "0|markets|trading|graduate|job|London|United Kingdom|Europe|onsite|-|0|master|-"
-ROW1 = "1|ibd|-|analyst|internship|Paris|France|Europe|hybrid|fr|0|-|2027-06"
+ROW = "0|markets|trading|graduate|job|London|United Kingdom|Europe|onsite|-|0|master|-|no"
+ROW1 = "1|ibd|-|analyst|internship|Paris|France|Europe|hybrid|fr|0|-|2027-06|yes"
 
 
 def _jobs(n):
@@ -163,7 +163,7 @@ class StructuredRowTests(unittest.TestCase):
         row[5], row[9], row[12] = "New\nYork", None, "a|b"
         line = tag._json_to_pipe(json.dumps({"rows": [row]}), 1)
         fields = line.split("|")
-        self.assertEqual(len(fields), 13)
+        self.assertEqual(len(fields), 14)
         self.assertEqual((fields[5], fields[9], fields[12]), ("New York", "-", "a/b"))
 
     def test_object_rows_follow_field_order(self):
@@ -177,7 +177,7 @@ class StructuredRowTests(unittest.TestCase):
     def test_malformed_rows_are_rejected(self):
         cases = {
             "count": ({"rows": [ROW.split("|")]}, 2),
-            "fields": ({"rows": [ROW.split("|")[:12]]}, 1),
+            "fields": ({"rows": [ROW.split("|")[:13]]}, 1),
             "index": ({"rows": [ROW1.split("|")]}, 1),
             "not a list": ({"rows": "x"}, 1),
         }
@@ -196,9 +196,9 @@ class StructuredRowTests(unittest.TestCase):
         self.assertIn("-", item["properties"]["desk"]["enum"])
         self.assertFalse(schema["additionalProperties"])
 
-    def test_row_schema_pins_thirteen_fields(self):
+    def test_row_schema_pins_fourteen_fields(self):
         item = tag._json_schema("json_rows", 1)["properties"]["rows"]["items"]
-        self.assertEqual((item["minItems"], item["maxItems"]), (13, 13))
+        self.assertEqual((item["minItems"], item["maxItems"]), (14, 14))
 
 
 if __name__ == "__main__":

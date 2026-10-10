@@ -139,6 +139,28 @@ class RealInboxRegressionTests(unittest.TestCase):
             "subject": "Your 2027 application", "body": "Thank you for applying."}, rows)
         self.assertIsNone(job)
 
+    def test_a_firm_is_matched_by_its_acronym_or_expansion(self):
+        rows = [{"id": "nfm_1", "company": "Northwind Fund Management (NFM)",
+                 "title": "Quant Intern", "url": "", "status": "applied"},
+                {"id": "acme_1", "company": "ACME (Acmeson)",
+                 "title": "Trader Graduate", "url": "", "status": "applied"}]
+        job, _ = mail.match_job({
+            "from": "NFM Careers <careers@nfm.test>",
+            "subject": "Your application", "body": "Thank you for applying to NFM."}, rows)
+        self.assertEqual("nfm_1", job and job["id"])
+        job, _ = mail.match_job({
+            "from": "Acmeson Recruiting <support@assessments.test>",
+            "subject": "Your invite to the 2027 Acmeson Assessment",
+            "body": "You were previously invited to take this assessment."}, rows)
+        self.assertEqual("acme_1", job and job["id"])
+
+    def test_a_source_label_is_never_a_firm_alias(self):
+        from jobfeed.db import company_names
+        self.assertEqual(["KLM"], company_names("KLM (Campus)"))
+        self.assertEqual(["SBX"], company_names("SBX (Students)"))
+        self.assertEqual(["Norrland Asset Management"],
+                         company_names("Norrland Asset Management (Parentco)"))
+
     def test_industry_words_do_not_identify_a_firm(self):
         rows = [{"id": "wd_coral_x", "company": "Coral Trading & Supply",
                  "title": "Coral Graduate Programme 2027", "url": "", "status": "applied"}]

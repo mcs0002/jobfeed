@@ -1,0 +1,15 @@
+{
+ "version": 1,
+ "created": "2026-10-10",
+ "rater": "Claude (blind: labels locked before any model output on that split)",
+ "definition": "ai_tech = AI/ML/data science or trading/quant technology or software/data engineering building a finance business's products, at a financial firm; generic corporate IT, consultancy/audit-firm tech, non-financial employers, finance roles inside tech orgs and non-technical roles = 0",
+ "sample": {
+  "dev": "seed 20261010: 40 tech-looking titles + 40 random live rows",
+  "holdout": "seed 20261011, dev rows excluded: 30 + 30"
+ },
+ "results": {
+  "dev": "used to design the rubric and the _enforce_ai_tech guard; final P 1.00 R 0.95",
+  "holdout": "first blind run P 0.84 R 1.00 (16 positives); one guard ordering bug it exposed was fixed (finance-role check before the AI-title override), after which P 0.89 R 1.00. Not a clean holdout any more: build v2 blind before citing it again"
+ },
+ "gold_v1_effect": "production config, rubric 5745b9f2a1fa -> ff421bcb9699 (+exclusions addendum): area 0.90 -> 0.93, high-confidence area 0.916 -> 0.964, finance precision 0.808 -> 0.872, recall 1.000 -> 0.976 (G023, a branch insurance-sales role, now other by his no-branch-banking call). A longer AITECH wording (249d469bd8a9) scored area 0.87 and was reverted."
+}

@@ -68,6 +68,17 @@ def scrape(config: dict) -> list[dict]:
                 ),
                 "location": position.get("location", ""),
                 "posted": posted,
+                "_fields": {k: position.get(k) for k in ("department", "business_unit")},
             }
 
-    return list(jobs.values())
+    # `exclude_values` = {"business_unit": [...]}: drop postings whose field
+    # value is listed, after the complete fetch; a posting with no value
+    # passes (HSBC's tech unit GCIO, 2026-10-10).
+    exclude = {k: set(v) for k, v in (config.get("exclude_values") or {}).items()}
+    out = []
+    for job in jobs.values():
+        fields = job.pop("_fields")
+        if any(fields.get(k) in vals for k, vals in exclude.items()):
+            continue
+        out.append(job)
+    return out

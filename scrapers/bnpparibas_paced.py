@@ -113,17 +113,36 @@ def _parse_jobs(html: str) -> list[dict]:
         )
         job_key = link.get("href") or f"{title}_{location}"
         job_id = hashlib.md5(job_key.encode()).hexdigest()[:16]
+        logo = card.select_one(".offer-logo img")
         jobs.append({
             "id": f"bnp_{job_id}",
             "title": title,
             "url": url,
             "location": location,
             "posted": "",
+            # The card names its group entity only in the logo's alt text.
+            "_entity": (logo.get("alt") or "").strip() if logo else "",
         })
     return jobs
 
 
-def scrape(progress=None) -> list[dict]:
+def scrape(progress=None, exclude_entities=None) -> list[dict]:
+    """`exclude_entities` drops offers whose card names one of these group
+    entities, after the complete sweep (the completeness band still counts
+    every offer). A subtraction, so an offer with no entity and an entity the
+    group adds later are kept. 2026-10-10, his call (no branch banking): the
+    retail banks, consumer credit, leasing and the India back office."""
+    jobs = _scrape_all(progress)
+    excluded = set(exclude_entities or [])
+    out = []
+    for job in jobs:
+        if job.pop("_entity", "") in excluded:
+            continue
+        out.append(job)
+    return out
+
+
+def _scrape_all(progress=None) -> list[dict]:
     client = _RotatingClient()
     first_page = client.fetch_page(1)
     total = int(first_page.get("total", 0))

@@ -89,7 +89,8 @@ def _rows(db: JobDB, retag_all: bool, since_days: int | None,
           retag_missing_desc_facets: bool = False,
           area: str | None = None,
           title_like: list[str] | None = None,
-          companies: list[str] | None = None) -> list[dict]:
+          companies: list[str] | None = None,
+          live: bool = False) -> list[dict]:
     # Nightly desc-facet re-tag: delegate row selection to the precise DB query
     # (tagged_at set, description present, lang_req still NULL) — bounded so the
     # quota can't blow up. Ignores the other scoping flags by design.
@@ -122,7 +123,7 @@ def _rows(db: JobDB, retag_all: bool, since_days: int | None,
     if companies:
         clauses.append(f"company IN ({','.join('?' * len(companies))})")
         params.extend(companies)
-    if area or title_like or companies:
+    if area or title_like or companies or live:
         clauses.append("delisted_at IS NULL")
     if since_days:
         cutoff = (datetime.now(timezone.utc) - timedelta(days=since_days)).isoformat()
@@ -197,6 +198,9 @@ def main() -> None:
                     help="Re-tag only live rows of this exact source name (repeatable)")
     ap.add_argument("--since-days", type=int, help="Only rows first seen in the last N days")
     ap.add_argument("--limit", type=int, help="Cap the number of rows this run")
+    ap.add_argument("--live", action="store_true",
+                    help="Only rows still on their board (delisted_at IS NULL); with --retag-all "
+                         "this is the rubric-change re-tag (2026-10-10: ~29k of 66k rows)")
     ap.add_argument("--chunk", type=int, default=tag.BATCH_SIZE, help="Rows per Haiku batch")
     ap.add_argument("--workers", type=int, default=4, help="Concurrent Haiku batches")
     ap.add_argument("--patch-desc-lang", action="store_true",
@@ -211,7 +215,7 @@ def main() -> None:
     rows = _rows(db, args.retag_all, args.since_days, args.limit, args.job_type,
                  retag_missing_desc_facets=args.retag_missing_desc_facets,
                  area=args.area, title_like=args.title_like,
-                 companies=args.company)
+                 companies=args.company, live=args.live)
     total = len(rows)
     mode = (f"re-tag job_type={args.job_type}" if args.job_type
             else "re-tag missing desc-facets" if args.retag_missing_desc_facets
@@ -301,6 +305,7 @@ def main() -> None:
                     education=j.get("education"),
                     start_date=j.get("start_date"),
                     min_yoe=j.get("min_yoe"),
+                    ai_tech=j.get("ai_tech"),
                     **provenance,
                 )
             db.end_batch()

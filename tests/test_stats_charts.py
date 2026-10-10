@@ -81,6 +81,16 @@ class ChartQueries(unittest.TestCase):
         self.assertEqual(weeks[2]["finance"] + weeks[2]["other_n"], 1)
         self.assertEqual(self.db.weekly_summary(weeks=3)[2]["total"], 1)
 
+    def test_noise_share_chart_and_other_inflow(self):
+        weeks = self.db.weekly_intake_counts(12)
+        self.assertTrue(all("wealth_n" in w for w in weeks))
+        chart = webapp._noise_week_chart(weeks)
+        self.assertEqual(chart["format"], "pct")
+        self.assertEqual(len(chart["points"]), 12)
+        self.assertTrue(all(0 <= p["v"] <= 100 for p in chart["points"]))
+        rows = self.db.other_inflow(14, 10)
+        self.assertTrue(all(r["other"] <= r["n"] for r in rows))
+
     def test_deadline_board_splits_dated_and_undated(self):
         soon = (datetime.now(timezone.utc) + timedelta(days=5)).date().isoformat()
         far = (datetime.now(timezone.utc) + timedelta(days=90)).date().isoformat()

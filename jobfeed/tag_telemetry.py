@@ -59,10 +59,21 @@ def load(days: int = 14, path: str = RUNS_LOG) -> list[tuple[datetime, dict]]:
     return out
 
 
+# Scripts whose tag runs are the scheduled scan (`python -m jobfeed` logs as
+# __main__.py; older rows as main.py or jobfeed). Re-tags (backfill_tags.py)
+# and evaluations are separate spend, kept out of the scan cost chart.
+SCAN_CALLERS = frozenset({"__main__.py", "main.py", "jobfeed"})
+
+
 def aggregate(days: int = 14, by_run: bool = True,
-              path: str = RUNS_LOG) -> list[dict]:
+              path: str = RUNS_LOG, callers: set | frozenset | None = None,
+              exclude_callers: set | frozenset | None = None) -> list[dict]:
     groups = defaultdict(list)
     for ts, rec in load(days, path):
+        if callers is not None and rec.get("caller") not in callers:
+            continue
+        if exclude_callers is not None and rec.get("caller") in exclude_callers:
+            continue
         key = rec.get("run_id", "?") if by_run else ts.date().isoformat()
         groups[key].append((ts, rec))
     out = []

@@ -339,13 +339,21 @@ class BackOfficeDropsTests(unittest.TestCase):
     def test_drops_kyc_analyst(self):
         self.assertFalse(is_relevant({"title": "KYC Analyst"}, strict=True))
 
-    def test_drops_trade_support(self):
-        self.assertFalse(
-            is_relevant({"title": "Trade Support Analyst — Global Markets"}, strict=True)
-        )
+    def test_middle_office_and_trade_support_are_stored(self):
+        # The tagger files these as middle-office, a Browse area (2026-10-10);
+        # the filter must not destroy them first.
+        for title in ("Trade Support Analyst — Global Markets", "Middle Office Analyst",
+                      "AWM Trading Services Associate"):
+            self.assertTrue(is_relevant({"title": title}), title)
 
-    def test_drops_middle_office(self):
-        self.assertFalse(is_relevant({"title": "Middle Office Analyst"}, strict=True))
+    def test_data_operations_and_french_cdd_are_not_back_office(self):
+        # 'ta operations' matched inside 'data operations'; 'cdd ' (customer
+        # due diligence) matched the French fixed-term contract.
+        for title in ("Portfolio Company Data Operations Associate",
+                      "Growth Funds - Finance Analyst - CDD (H/F)"):
+            self.assertTrue(is_relevant({"title": title}), title)
+        self.assertFalse(is_relevant({"title": "Customer Due Diligence Analyst"}))
+        self.assertFalse(is_relevant({"title": "Transfer Agency Analyst"}))
 
     def test_drops_fund_accounting(self):
         self.assertFalse(is_relevant({"title": "Fund Accounting Analyst"}, strict=True))
@@ -359,7 +367,8 @@ class TechDropsTests(unittest.TestCase):
         self.assertFalse(is_relevant({"title": "Security Assurance Engineer"}, strict=True))
 
     def test_drops_data_engineer(self):
-        self.assertFalse(is_relevant({"title": "Data Engineer — Trading"}, strict=True))
+        # A trading-context data engineer passes since 2026-10-10 (AI & Tech tab).
+        self.assertFalse(is_relevant({"title": "Data Engineer — HR Analytics"}, strict=True))
 
 
 class NonFinanceDropsTests(unittest.TestCase):
@@ -511,6 +520,30 @@ class SeniorTermSubstringCollisionTests(unittest.TestCase):
     def test_staff_engineer_still_drops(self):
         self.assertFalse(is_relevant({"title": "Staff Engineer"}))
 
+    def test_entry_level_staff_titles_survive(self):
+        # 'Staff' is the entry rung in accounting and consulting (2026-10-10).
+        for title in ("Staff Accountant", "Competition Economics Consulting Staff",
+                      "GDS Consulting Staff 1"):
+            self.assertTrue(is_relevant({"title": title}), title)
+
+    def test_maryland_is_not_managing_director(self):
+        for title in ("Investment Analyst (Hybrid- Baltimore, MD)",
+                      "Investments Analyst - Western MD Market",
+                      "Research Associate (NY or MD)"):
+            self.assertTrue(is_relevant({"title": title}), title)
+        self.assertFalse(is_relevant({"title": "VP/MD, Fixed Income Derivative Solutions"}))
+        # After a job noun, ", MD" is still the rung.
+        self.assertFalse(is_relevant({"title": "Fund Formation Attorney, MD"}))
+
+    def test_campus_recruiting_prefix_is_not_an_hr_role(self):
+        self.assertTrue(is_relevant({"title":
+            "Campus Recruiting - 2027 Investment Banking Summer Analyst - Restructuring"}))
+        self.assertFalse(is_relevant({"title": "Campus Recruiting Analyst/Associate"}))
+
+    def test_dated_summer_analyst_is_an_entry_programme(self):
+        self.assertTrue(is_relevant({"title":
+            "Chief People Organization, Summer 2027 Analyst - London"}))
+
     def test_staffing_analyst_does_not_drop_via_staff(self):
         # 'staff' must NOT match inside 'staffing' (prefix collision).
         # (Note: 'staffing' may still be dropped by NON_FINANCE_DROPS if
@@ -561,6 +594,16 @@ class DachInsurerNoiseTests(unittest.TestCase):
         # Distinct spelling from 'Schülerpraktikum', which was already listed.
         self.assertFalse(is_relevant(
             {"title": "Schulpraktikum IT im Zeitraum 05.10.-16.10.2026"}))
+
+    def test_masculine_and_variant_pre_degree_forms_drop(self):
+        for title in ("Auszubildender Industriekaufmann (m/w/d)",
+                      "Schülerpraktikant / Schülerpraktikantin im Bereich Firmenkunden",
+                      "Duales Studium BWL Bank im Bereich Firmenkunden 2027"):
+            self.assertFalse(is_relevant({"title": title}), title)
+
+    def test_dual_master_programme_survives(self):
+        self.assertTrue(is_relevant(
+            {"title": "Duales Masterstudium Finance & Risk Management"}))
 
     def test_efz_is_word_bounded(self):
         # 'efz' is <=3 chars so it matches standalone only and cannot appear
@@ -619,10 +662,11 @@ class DachInsurerNoiseTests(unittest.TestCase):
         # Insurance underwriting shades into actuarial work — left in scope.
         self.assertTrue(is_relevant({"title": "Risikoprüfer Leben (m/w/d)"}))
 
-    def test_kundenberater_firmenkunden_survives(self):
-        """Bare 'kundenberater' is deliberately not a drop term — the corporate
-        banking form of the title is wanted."""
-        self.assertTrue(is_relevant({"title": "Kundenberater Firmenkunden"}))
+    def test_kundenberater_drops_including_firmenkunden(self):
+        """Reversed 2026-10-10 (his call: no branch banking, SME included):
+        'Kundenberater Firmenkunden' is branch SME banking, so the whole
+        Kundenberater family drops. Institutional titles do not use it."""
+        self.assertFalse(is_relevant({"title": "Kundenberater Firmenkunden"}))
 
     def test_institutional_dach_roles_survive(self):
         for title in ("Portfoliomanager (m/w/d) Fixed Income",
@@ -656,3 +700,31 @@ class EntryProgrammeTeamNamesTests(unittest.TestCase):
             self.assertTrue(is_relevant({"title": title, "location": "Tampa"}), title)
         for title in ("Operations Analyst", "Regulatory Reporting Analyst", "Fund Accounting Analyst"):
             self.assertFalse(is_relevant({"title": title, "location": "Tampa"}), title)
+
+
+class RetailWealthTests(unittest.TestCase):
+    def test_branch_wealth_titles_drop(self):
+        for title in ("Financial Solutions Advisor Registration Candidate - Dallas",
+                      "Associate Financial Advisor", "Premier Relationship Manager",
+                      "Merrill Advisor Development Program",
+                      "Kundenberater (d/m/w) Filiale Essen",
+                      "Investment Advisor - RBC Dominion Securities"):
+            self.assertFalse(is_relevant({"title": title}), title)
+
+    def test_advisory_and_fpa_survive(self):
+        for title in ("Financial Advisory Analyst - Valuation",
+                      "Financial Planning Analyst", "Client Service Associate - Cash Equity",
+                      "Institutional Client Associate"):
+            self.assertTrue(is_relevant({"title": title}), title)
+
+
+class FinanceTechTests(unittest.TestCase):
+    def test_markets_technology_passes_tech_drop(self):
+        for title in ("Software Engineer, Global Banking & Markets, Electronic Trading",
+                      "eTrading Full Stack Engineering - Compute", "Data Engineer - Trading"):
+            self.assertTrue(is_relevant({"title": title}), title)
+
+    def test_plain_it_still_drops(self):
+        for title in ("Software Engineer - HR Systems", "DevOps Engineer", "Network Engineer"):
+            self.assertFalse(is_relevant({"title": title}), title)
+

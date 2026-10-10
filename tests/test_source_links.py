@@ -58,6 +58,24 @@ class SourceLinkTests(unittest.TestCase):
         for target in explicit:
             self.assertEqual(_scope_model(target), expected[target["scope_type"]])
 
+    def test_exclusion_scopes_and_full_board_labels(self):
+        cases = [
+            ({"ats": "workday", "workday": {"scopes": [{"exclude_facets": {"f": ["x"]}}]}},
+             ("Excluded categories", "exclude")),
+            ({"ats": "greenhouse", "exclude_departments": ["Engineering"]},
+             ("Excluded categories", "exclude")),
+            ({"ats": "jibe", "jibe": {"exclude_values": {"tags2": ["Technology"]}}},
+             ("Excluded categories", "exclude")),
+            ({"ats": "workday", "workday": {"scopes": [
+                {"applied_facets": {"f": ["fin"]}}, {"search_text": "trading"}]}},
+             ("Positive facet", "facet")),
+            ({"ats": "workday", "workday": {"scopes": [{"search_text": "Deals"}]}},
+             ("Search scope", "search")),
+            ({"ats": "greenhouse", "noise_terms": ["engineer"]}, ("Full board", "full")),
+        ]
+        for target, expected in cases:
+            self.assertEqual(_scope_model(target), expected, target)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -97,6 +97,11 @@ def scrape(config: dict) -> list[dict]:
         resp = session.get(
             API.format(company=company, campaign=campaign), headers=HEADERS, timeout=30)
         if resp.status_code == 404:
+            # "Campaign is not active." = the slug exists but the firm closed
+            # it (Rokos 202526, 2026-10-10): a real, empty board, not a moved
+            # one. Main's clean-zero backstop keeps it out of the delist pass.
+            if "not active" in resp.text.lower():
+                found.append(campaign)
             continue
         resp.raise_for_status()
         found.append(campaign)

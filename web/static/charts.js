@@ -17,6 +17,7 @@
 
   function fmt(v, format, axis) {
     if (format === "usd") return "$" + (axis && v >= 1 ? v.toFixed(0) : v.toFixed(2));
+    if (format === "pct") return Math.round(v) + "%";
     return Math.round(v).toLocaleString("en-US");
   }
 
@@ -47,7 +48,7 @@
     var plotW = W - padL - padR, plotH = H - padT - padB;
     var max = 0;
     pts.forEach(function (p) { if (p.v > max) max = p.v; });
-    var sc = niceScale(max, 3, data.format === "int");
+    var sc = niceScale(max, 3, data.format === "int" || data.format === "pct");
     var y = function (v) { return padT + plotH - (v / sc.max) * plotH; };
     var slot = plotW / pts.length;
     var barW = Math.max(3, Math.min(24, slot * 0.62));

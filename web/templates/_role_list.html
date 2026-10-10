@@ -53,3 +53,6 @@
 </div>
 {% endfor %}
 {% if ns.group is not none %}</div>{% endif %}
+{% if more_url %}
+<a class="list-more" href="{{ more_url }}">Show {{ 500 }} more roles</a>
+{% endif %}

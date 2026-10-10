@@ -50,6 +50,10 @@ SHARED_COLUMNS = [
     # Why the listing went away (aged out vs gone from the board) — a property
     # of the posting's lifecycle, same category as delisted_at above.
     "delisted_by_age",
+    # The delisted earlier posting this one re-lists, matched on company, title
+    # and location only (jobfeed.db._link_repost): posting lifecycle, never his
+    # status. Adding a column is not a schema bump; only a drop is.
+    "repost_of",
     "description_fetched_at",
     # tagging output - the expensive part, and the reason to share at all
     "function",

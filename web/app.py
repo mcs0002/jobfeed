@@ -36,7 +36,7 @@ sys.path.insert(0, ROOT)
 from jobfeed import tag
 from jobfeed.envfile import load_dotenv  # noqa: E402
 from jobfeed.dedup import group_postings
-from jobfeed.tag_telemetry import aggregate as tag_telemetry
+from jobfeed.tag_telemetry import SCAN_CALLERS, aggregate as tag_telemetry
 from applications import runs as antigravity_runs  # noqa: E402
 from applications import autopilot  # noqa: E402
 from jobfeed import campus  # noqa: E402
@@ -480,6 +480,24 @@ app.add_middleware(SessionMiddleware, secret_key=WEB_SECRET,
 # Row cap for the browse/table views. fetch_jobs slices to this; when the
 # filtered set is larger the UI must say so rather than silently showing "500".
 PAGE_LIMIT = 500
+# "Show 500 more" (2026-10-10): `pages=N` widens the fetch to N * PAGE_LIMIT,
+# capped so a URL cannot ask for the whole table in one render.
+MAX_PAGES = 20
+
+
+def _page_limit(request: Request) -> tuple[int, int]:
+    try:
+        pages = int(request.query_params.get("pages", "1"))
+    except ValueError:
+        pages = 1
+    pages = max(1, min(pages, MAX_PAGES))
+    return pages, pages * PAGE_LIMIT
+
+
+def _more_url(request: Request, base_path: str, pages: int) -> str:
+    q = {k: v for k, v in _browse_params(request).items() if k != "pages"}
+    q["pages"] = str(pages + 1)
+    return base_path + "?" + urllib.parse.urlencode(q)
 # Hard ceiling for the /api/jobs `limit` param so a caller can't ask the server
 # to materialise an unbounded result set.
 API_LIMIT_MAX = 2000
@@ -623,6 +641,10 @@ def _filters_from_request(request: Request, *, allow_text_search: bool = True) -
         del kwargs["area"]
         kwargs["ai_only"] = True
     kwargs["hide_other"] = kwargs.get("area") != "other" and not kwargs.get("ai_only")
+    # "All" (no area chosen) also leaves wealth out (his call, 2026-10-10):
+    # branch and retail wealth diluted the feed. The Wealth tab still lists it.
+    kwargs["hide_wealth"] = (not kwargs.get("area") and not kwargs.get("areas")
+                             and not kwargs.get("ai_only"))
     # Negative filter: hide disguised-senior roles (>=3 yrs required in the
     # description). ON by default; show_senior=1 reveals them.
     kwargs["hide_yoe"] = p.get("show_senior", "").strip() not in ("1", "true", "on")
@@ -671,6 +693,7 @@ def _filters_from_request(request: Request, *, allow_text_search: bool = True) -
     if kwargs.get("status") in ACTED_ON_STATUSES or kwargs.get("favorite"):
         kwargs["hide_delisted"] = False
         kwargs["hide_other"] = False
+        kwargs["hide_wealth"] = False
         kwargs["hide_yoe"] = False
         kwargs.pop("hide_associates", None)
         kwargs.pop("exclude_companies", None)
@@ -751,6 +774,11 @@ AREA_GROUPS = {
     # cohort (46 firms) is the part of the source list still growing. Sector
     # browsing stays on the "Firm type" facet — tabs are function, not sector.
     "middle-office": ("middle-office", "risk"),
+    # Tab rework (his call, 2026-10-10): sixteen tabs had grown one at a time.
+    # Research and Econ share a tab (152 + 151 live roles), and Actuarial
+    # (79) joins Accounting. Codes stay distinct; the sub-area shows as a tag.
+    "research": ("research", "economics"),
+    "accounting": ("accounting", "actuarial"),
 }
 
 # Short label for the specific sub-area shown as a small secondary tag when an
@@ -764,6 +792,8 @@ SUBAREA_LABELS = {
     "private-equity": "PE",
     "debt": "debt",
     "risk": "risk",
+    "economics": "econ",
+    "actuarial": "actuarial",
 }
 # Reverse lookup: raw area code -> the group tab it displays under (identity
 # for ungrouped codes), used by _area_label for per-job badges.
@@ -771,16 +801,23 @@ _AREA_TO_GROUP = {member: group for group, members in AREA_GROUPS.items()
                   for member in members}
 
 # Top-level Area tabs (label shown on the tab). "" = All.
+# Order (2026-10-10): his post-scan workflow first (All, then Markets, Quant,
+# AM, Corp Banking), then the rest of the finance map, Wealth (out of All
+# since that day), the AI & Tech flag tab and Other last.
 AREA_TABS = [
     ("", "All"), ("markets", "Markets"), ("quant", "Quant"),
-    ("research", "Research"), ("economics", "Econ"), ("ibd", "IBD"),
-    ("private-markets", "Private Markets"),
-    ("corporate-banking", "Corp Banking"),
     ("asset-management", "AM"),
+    ("corporate-banking", "Corp Banking"),
+    ("ibd", "IBD"),
+    ("private-markets", "Private Markets"),
+    ("research", "Research & Econ"),
+    ("middle-office", "Risk & Middle Office"),
+    ("consulting", "Consulting"),
+    ("accounting", "Accounting & Actuarial"),
     ("wealth", "Wealth"),
-    ("middle-office", "Middle Office"), ("consulting", "Consulting"),
-    ("accounting", "Accounting"), ("actuarial", "Actuarial"),
-    ("ai", "AI"),
+    # AI & Tech is a flag across areas, not an area (most of its roles are
+    # tagged 'other'), so it sits beside Other (his call, 2026-10-10).
+    ("ai", "AI & Tech"),
     ("other", "Other"),
 ]
 # Short, human display label per area code (DCM/AM rather than the raw slug).
@@ -1083,7 +1120,7 @@ def _tabs_for(request: Request, db: JobDB, filters: dict,
     filters (everything except the area/desk being drilled into, hide_other,
     and sort)."""
     count_filters = {k: v for k, v in filters.items()
-                     if k not in ("area", "areas", "desk", "hide_other", "ai_only", "sort")}
+                     if k not in ("area", "areas", "desk", "hide_other", "hide_wealth", "ai_only", "sort")}
     return _build_tabs(request, db.area_counts(**count_filters), base_path)
 
 
@@ -1093,11 +1130,12 @@ def _build_tabs(request: Request, counts: dict, base_path: str = "/") -> list[di
     params = _browse_params(request)
     current = params.get("area", "")
     # 'All' = everything the default view shows: every area except 'other'
+    # and 'wealth' (wealth since 2026-10-10)
     # (untagged '' rows ARE shown, so they're counted here too).
-    all_finance = sum(v for a, v in counts.items() if a not in ("other", AI_COUNT_KEY))
+    all_finance = sum(v for a, v in counts.items() if a not in ("other", "wealth", AI_COUNT_KEY))
     tabs = []
     for area, label in AREA_TABS:
-        p = {k: v for k, v in params.items() if k != "area"}
+        p = {k: v for k, v in params.items() if k not in ("area", "pages")}
         if area:
             p["area"] = area
             n = _group_count(counts, area)
@@ -1343,7 +1381,12 @@ def _browse_context(request: Request, db: JobDB, *, why_preview: bool = False) -
     filters = _filters_from_request(request, allow_text_search=False)
     facets = _facets(db, request, filters)
     _reconcile_location(filters, facets)
-    jobs = _present(db, db.fetch_jobs(limit=PAGE_LIMIT, **filters))
+    pages, limit = _page_limit(request)
+    raw = db.fetch_jobs(limit=limit, **filters)
+    # Truncation is judged on the raw rows: duplicate postings fold into one
+    # card, so 500 rows showed as "484 roles" with 7,308 behind them.
+    truncated = len(raw) >= limit
+    jobs = _present(db, raw)
     if why_preview:
         jobs = [{**job, "browse_reason": _browse_reason(job, request)} for job in jobs]
     tabs = _tabs_for(request, db, filters, browse_path)
@@ -1356,7 +1399,8 @@ def _browse_context(request: Request, db: JobDB, *, why_preview: bool = False) -
         "facets": facets,
         "params": _browse_params(request),
         "count": len(jobs),
-        "truncated": len(jobs) >= PAGE_LIMIT,
+        "truncated": truncated,
+        "more_url": _more_url(request, browse_path, pages) if truncated and pages < MAX_PAGES else "",
         "tabs": tabs,
         "chips": _active_chips(request, browse_path),
         "sel_job": _select_job(db, jobs, request),
@@ -1406,12 +1450,16 @@ def partial_jobs(request: Request, db: JobDB = Depends(get_db), _=Depends(requir
     filters = _filters_from_request(request, allow_text_search=False)
     facets = _facets(db, request, filters)
     _reconcile_location(filters, facets)
-    jobs = _present(db, db.fetch_jobs(limit=PAGE_LIMIT, **filters))
+    pages, limit = _page_limit(request)
+    raw = db.fetch_jobs(limit=limit, **filters)
+    truncated = len(raw) >= limit
+    jobs = _present(db, raw)
     show_unread = not _is_guest(request)
     last_seen = db.get_meta("last_seen_ts", LAST_SEEN_DEFAULT) if show_unread else ""
     return TEMPLATES.TemplateResponse(request, "_jobs_partial.html", {
         "request": request, "jobs": jobs, "count": len(jobs),
-        "truncated": len(jobs) >= PAGE_LIMIT,
+        "truncated": truncated,
+        "more_url": _more_url(request, "/", pages) if truncated and pages < MAX_PAGES else "",
         "tabs": _tabs_for(request, db, filters),
         "chips": _active_chips(request),
         "facets": facets,
@@ -2427,7 +2475,7 @@ def stats(request: Request, db: JobDB = Depends(get_db), _=Depends(require_login
     pipeline_stages = tuple(st for st in PIPELINE_STAGES if st in pipeline)
     # The same default hides as Browse, or "Closing ≤7d: 23" opened a list of
     # 15: the other eight were Deloitte IT roles tagged 'other' (2026-09-17).
-    browse_defaults = dict(hide_delisted=True, hide_other=True, hide_yoe=True,
+    browse_defaults = dict(hide_delisted=True, hide_other=True, hide_wealth=True, hide_yoe=True,
                            hide_associates=True, exclude_companies=hidden, limit=2000)
     closing_7 = len(db.fetch_jobs(closing="7", **browse_defaults, **track_kw))
     # "By status" bars. 'new' is deliberately NOT a bar: it means "not triaged
@@ -2471,8 +2519,14 @@ def stats(request: Request, db: JobDB = Depends(get_db), _=Depends(require_login
         "conversion": _conversion_steps(track_counts),
         "deadlines": _deadline_board(db, hidden, track_kw),
         "intake_chart": _intake_week_chart(db.weekly_intake_counts(8, exclude_companies=hidden)),
+        "noise_chart": _noise_week_chart(db.weekly_intake_counts(12, exclude_companies=hidden)),
+        "noise_sources": db.other_inflow(14, 15, exclude_companies=hidden),
         "roles_chart": _roles_day_chart(db.new_roles_per_day(30, exclude_companies=hidden)),
-        "cost_chart": _cost_day_chart(tag_telemetry(days=30, by_run=False)),
+        # Scan spend only; re-tags and evaluations are one-off (his call,
+        # 2026-10-10) and shown as a separate total in the card's subtitle.
+        "cost_chart": _cost_day_chart(tag_telemetry(days=30, by_run=False, callers=SCAN_CALLERS)),
+        "other_tag_cost": sum(r["cost"] for r in tag_telemetry(
+            days=30, by_run=False, exclude_callers=SCAN_CALLERS)),
         "request": request,
         "weeks": weeks,
         "velocity": velocity,
@@ -2529,6 +2583,24 @@ def _intake_week_chart(weeks: list[dict]) -> dict:
                        "tip": f"Week from {_short_date(start)}: {w['finance']:,} finance"
                               f" · {w['other_n']:,} other"})
     return {"format": "int", "points": points}
+
+
+def _noise_week_chart(weeks: list[dict]) -> dict:
+    """Share of newly stored roles tagged 'other' per rolling week, oldest
+    first; the wealth share rides in the tooltip. The trend shows whether
+    source narrowing holds: a new noisy board shows up as a step."""
+    end = datetime.now(timezone.utc).date() + timedelta(days=1)
+    points = []
+    for w in reversed(weeks):
+        total = w["finance"] + w["other_n"]
+        start = (end - timedelta(weeks=w["week_ago"] + 1)).isoformat()
+        other = 100 * w["other_n"] / total if total else 0
+        wealth = 100 * w.get("wealth_n", 0) / total if total else 0
+        points.append({"x": _short_date(start), "v": round(other, 1),
+                       "tip": f"Week from {_short_date(start)}: {other:.0f}% other"
+                              f" · {wealth:.0f}% wealth · {total:,} new"})
+    latest = points[-1]["v"] if points else 0
+    return {"format": "pct", "latest": latest, "points": points}
 
 
 def _roles_day_chart(days: list[dict]) -> dict:
@@ -2667,23 +2739,39 @@ def _scope_model(t: dict) -> tuple[str, str]:
     wd = t.get("workday") or {}
     sfa = t.get("successfactors_api") or {}
     koch = t.get("koch_avature") or {}
+    wd_scopes = wd.get("scopes") or []
     # Positive division facets — isolate the finance arm of a noisy board.
     if (tb.get("facet_filter_sets") or tb.get("facet_filters")
-            or wd.get("applied_facets") or sfa.get("facet_filters")
+            or wd.get("applied_facets")
+            or any(s.get("applied_facets") for s in wd_scopes)
+            or t.get("departments")
+            or sfa.get("facet_filters")
             or koch.get("filter_params")):
         return ("Positive facet", "facet")
     if ats == "wellsfargo":
         return ("Positive facet", "facet")
+    # The whole board minus categories that hold only noise (2026-10-10):
+    # Workday exclude_facets, Greenhouse exclude_departments, Jibe exclude_values.
+    if (any(s.get("exclude_facets") for s in wd_scopes)
+            or t.get("exclude_departments")
+            or (t.get("jibe") or {}).get("exclude_values")
+            or (t.get("oracle_hcm") or {}).get("exclude_values")
+            or (t.get("eightfold") or {}).get("exclude_values")
+            or t.get("exclude_entities")):
+        return ("Excluded categories", "exclude")
     # Server-side search/keyword scoping (a query string in the board URL too).
     search_url = t.get("search_url", "") or (t.get("attrax") or {}).get("search_url", "")
-    if (wd.get("search_text") or (t.get("oracle_hcm") or {}).get("keyword")
+    if (wd.get("search_text") or any(s.get("search_text") for s in wd_scopes)
+            or (t.get("oracle_hcm") or {}).get("keyword")
             or (t.get("glencore") or {}).get("keyword")
             or t.get("query") or t.get("search_params")
             or "?" in search_url):
         return ("Search scope", "search")
-    # Everything else pulls the whole board and lets jobfeed/filter.py + the tagger
-    # sort it — i.e. negative scope. (Heavy or light is the execution badge.)
-    return ("Full board (negative)", "full")
+    # Everything else pulls the whole board; only the pre-filter (global
+    # rules plus any per-source noise_terms) and the tagger sort it. The old
+    # label "Full board (negative)" named that pre-filter, which every source
+    # passes through, so it said nothing about this one.
+    return ("Full board", "full")
 
 
 def _source_board_url(t: dict) -> str:
@@ -2747,6 +2835,8 @@ def sources(request: Request, db: JobDB = Depends(get_db), _=Depends(require_log
             # Execution axis, separate from scope: heavy = killable
             # subprocess-per-company for big/slow boards.
             "heavy": bool(t.get("heavy")),
+            # Source-specific title drops on top of the global pre-filter.
+            "noise_terms": t.get("noise_terms") or [],
             "verified": t.get("verified", False),
             # A source moved to manual can remain in verify_state until the
             # next scan rewrites it; it is no longer an automated failure.

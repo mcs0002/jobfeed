@@ -39,6 +39,54 @@ def plain_company(name: str) -> str:
     return _PAREN_SUFFIX_RE.sub("", str(name or "")).strip()
 
 
+_PAREN_TEXT_RE = re.compile(r"\(([^)]*)\)\s*$")
+# Parentheticals that describe the source page rather than the firm. Never
+# aliases, whatever their initials: an alias of "Students" would match every
+# mail that says students.
+_SOURCE_LABELS = frozenset({
+    "campus", "students", "student", "university", "graduates", "graduate careers",
+    "early careers", "early talent", "trading academy", "internships", "hf", "uk",
+    "us", "eu", "uk/eu", "emea", "apac", "americas", "international", "konzern",
+    "kag", "investment management",
+})
+
+
+def _is_acronym_of(short: str, full: str) -> bool:
+    """"ABC" for "Alpha Beta Capital". Exact initials only, so a
+    source label such as "(Campus)" or "(EMEA)" never becomes a firm name: a
+    label made an alias would match every mail that says "campus"."""
+    short = short.strip()
+    if not re.fullmatch(r"[A-Z]{2,6}", short):
+        return False
+    words = [w for w in re.findall(r"[A-Za-z][A-Za-z']*", full)
+             if w.lower() not in ("of", "and", "the", "for")]
+    return "".join(w[0] for w in words).upper() == short
+
+
+def company_names(name: str) -> list[str]:
+    """Every name a firm's own mail may use: the bare name, plus the scraper's
+    parenthetical when it is the same firm's acronym or expansion ("Alpha Beta
+    Capital (ABC)", "XYZ (Xenon Yield Partners)") rather than a source
+    label. Parent groups ("(Talanx)", "(Phoenix Group)") stay labels: their mail
+    belongs to other firms too, and a misattributed rejection is the worst
+    outcome the inbox pass can produce."""
+    bare = plain_company(name)
+    names = [bare] if bare else []
+    found = _PAREN_TEXT_RE.search(str(name or ""))
+    paren = found.group(1).strip() if found else ""
+    if not paren or paren.lower() in _SOURCE_LABELS:
+        return names
+    if _is_acronym_of(paren, bare) or _is_acronym_of(bare, paren):
+        names.append(paren)
+    # "ACME (Acmeson)": an acronym firm labelled with the first word of its
+    # expansion, which is how its recruiting mail signs while the acronym
+    # never appears.
+    elif (re.fullmatch(r"[A-Z]{2,6}", bare) and re.fullmatch(r"[A-Z][a-z]{3,}", paren)
+          and paren[0] == bare[0]):
+        names.append(paren)
+    return names
+
+
 def _token_in(token: str, text: str) -> bool:
     """A firm token delimited by non-alphanumerics, so the three-letter names he
     actually applies to work without matching inside a longer word. A length
@@ -309,6 +357,12 @@ EXTRA_COLUMNS = [
     ("lang_req", "TEXT"),                  # comma-sep ISO codes beyond English; ''=English-only
     ("education", "TEXT"),                 # bachelor/master/phd required floor; ''=none stated
     ("start_date", "TEXT"),                # asap / YYYY / YYYY-MM; ''=unstated
+    # AI & Tech flag from the tagger (2026-10-10): 1 = AI / ML / data / quant
+    # or trading technology inside a finance business, 0 = not. Independent of
+    # area (a quant developer is quant AND ai_tech). NULL = not yet judged
+    # under a rubric that asks; the Browse AI & Tech tab falls back to the
+    # title match for those rows.
+    ("ai_tech", "INTEGER"),
     ("tagged_at", "TEXT"),
     ("tag_provider", "TEXT DEFAULT ''"),
     ("tag_model", "TEXT DEFAULT ''"),
@@ -359,7 +413,7 @@ DISPLAY_COLUMNS = [
     "id", "company", "category", "title", "location", "posted", "status",
     "first_seen", "last_seen", "url", "area", "desk", "seniority", "job_type",
     "loc_city", "loc_country", "loc_region", "work_mode", "min_yoe",
-    "lang_req", "education", "start_date",
+    "lang_req", "education", "start_date", "ai_tech",
     "applied_at", "notes", "favorite", "delisted_at", "deadline",
 ]
 
@@ -421,7 +475,12 @@ def _job_filter_sql(f: dict, *, omit: set[str] | None = None,
     if val("areas"):
         clauses.append(f"area IN ({','.join('?' * len(val('areas')))})"); params.extend(val("areas"))
     if val("hide_other"): clauses.append("area != 'other'")
-    if val("ai_only"): clauses.append("ai_title(title) = 1")
+    # Browse's "All" view leaves wealth out (his call, 2026-10-10: branch and
+    # retail wealth diluted the feed); the Wealth tab still lists it.
+    if val("hide_wealth"): clauses.append("(area IS NULL OR area != 'wealth')")
+    # AI & Tech tab: the tagger's ai_tech flag (2026-10-10); rows not yet
+    # judged under that rubric fall back to the old title match.
+    if val("ai_only"): clauses.append(AI_TECH_SQL)
     if val("hide_yoe"):
         clauses.append("(min_yoe IS NULL OR min_yoe < ?) AND seniority != 'manager'"); params.append(YOE_HIDE_THRESHOLD)
     if val("hide_internships"): clauses.append("job_type != 'internship'")
@@ -467,6 +526,9 @@ _LLM_RE = re.compile(r"(?<!JD/)(?<!JD /)(?<!J\.D\./)(?<!J\.D\. /)\bLLMs?\b")
 # Tax and legal titles use LLM for the law degree even without "JD":
 # "Tax - Tax Consultant - Indirect Tax LLM - Summer 2027" (2026-09-29).
 _LEGAL_TITLE_RE = re.compile(r"(?i)\b(?:tax|law|legal|counsel|jurist\w*|lawyer|attorney)\b")
+
+
+AI_TECH_SQL = "(ai_tech = 1 OR (ai_tech IS NULL AND ai_title(title) = 1))"
 
 
 def ai_title(title) -> int:
@@ -1475,9 +1537,10 @@ class JobDB:
         for (company,) in self.conn.execute(
                 "SELECT DISTINCT company FROM seen_jobs WHERE status IN "
                 "('queued','applied','oa','interview','offer')"):
-            parts = plain_company(company).split()
-            if parts and len(parts[0]) >= 3:
-                firms.setdefault(parts[0].lower(), company)
+            for alias in company_names(company):
+                parts = alias.split()
+                if parts and len(parts[0]) >= 3:
+                    firms.setdefault(parts[0].lower(), company)
         out = []
         for row in rows:
             sender = str(row["sender"]).lower()
@@ -1498,14 +1561,17 @@ class JobDB:
                 break
         return out
 
-    def open_application_roles(self, limit: int = 60) -> list[dict]:
+    def open_application_roles(self) -> list[dict]:
         """Every role he has acted on, for filing a message whose firm cannot be
         read off the sender at all. The pool is small by construction, so an
-        unrecognised sender is a pick from a list rather than a dead end."""
+        unrecognised sender is a pick from a list rather than a dead end.
+        Unlimited on purpose: a cap of 60, sorted by company, silently dropped
+        every firm past the 60th acted-on role (an assessment invite on
+        2026-10-09 could not be placed with 83 roles in the pool)."""
         cur = self.conn.execute(
             "SELECT id, company, title, location, status FROM seen_jobs "
             "WHERE status IN ('queued','applied','oa','interview','offer') "
-            "ORDER BY company, last_seen DESC LIMIT ?", (limit,),
+            "ORDER BY company, last_seen DESC",
         )
         names = [c[0] for c in cur.description]
         return [dict(zip(names, row)) for row in cur]
@@ -2386,7 +2452,8 @@ class JobDB:
                  work_mode: str = "",
                  lang_req: str | None = None, education: str | None = None,
                  start_date: str | None = None,
-                 min_yoe: int | None = None, provider: str = "",
+                 min_yoe: int | None = None, ai_tech: int | None = None,
+                 provider: str = "",
                  model: str = "", rubric_version: str = "") -> bool:
         """Persist the structured tags from the Haiku tagging pass (jobfeed/tag.py).
         Returns True if the row exists. Empty area = untagged (filterable as
@@ -2413,6 +2480,11 @@ class JobDB:
         if min_yoe is not None:
             sets.append("min_yoe = ?")
             params.append(int(min_yoe or 0))
+        # ai_tech: written only when the tagger judged it, so a reply from a
+        # pre-ai_tech prompt cannot erase an earlier judgement.
+        if ai_tech is not None:
+            sets.append("ai_tech = ?")
+            params.append(1 if ai_tech else 0)
         params.append(job_id)
         cur = self.conn.execute(
             f"UPDATE seen_jobs SET {', '.join(sets)} WHERE id = ?", params
@@ -2658,7 +2730,7 @@ class JobDB:
         counted (the 'All' view shows them), so the All badge matches the
         view; per-area tabs key off their own code and ignore the '' bucket."""
         clauses, params = _job_filter_sql(
-            locals(), omit={"area", "areas", "desk", "hide_other"},
+            locals(), omit={"area", "areas", "desk", "hide_other", "hide_wealth"},
             initial=["area IS NOT NULL"])
         where = " AND ".join(clauses)
         sql = "SELECT area, count(*) FROM seen_jobs WHERE " + where + " GROUP BY area"
@@ -2666,7 +2738,7 @@ class JobDB:
         # The AI tab's badge: every area, since it is a title match, not an area.
         # Present only when non-zero, so the per-area contract is unchanged.
         ai = self.conn.execute(
-            "SELECT count(*) FROM seen_jobs WHERE " + where + " AND ai_title(title) = 1",
+            "SELECT count(*) FROM seen_jobs WHERE " + where + " AND " + AI_TECH_SQL,
             params).fetchone()[0]
         if ai:
             counts[AI_COUNT_KEY] = ai
@@ -2684,7 +2756,7 @@ class JobDB:
                    work_mode: str | None = None,
                    education: str | None = None, lang_req: str | None = None,
                    start: str | None = None,
-                   hide_other: bool = False, ai_only: bool = False,
+                   hide_other: bool = False, hide_wealth: bool = False, ai_only: bool = False,
                    hide_yoe: bool = False, hide_internships: bool = False,
                    hide_associates: bool = False, hide_delisted: bool = False,
                    closing: str | None = None,
@@ -3083,11 +3155,12 @@ class JobDB:
         exc, exc_p = self._exclude_clause(exclude_companies)
         today = datetime.now(timezone.utc).date()
         end = today + timedelta(days=1)
-        out = [{"week_ago": w, "finance": 0, "other_n": 0} for w in range(weeks)]
-        for day, is_other, n in self.conn.execute(
+        # wealth_n is a subset of finance (the noise-share chart reads it).
+        out = [{"week_ago": w, "finance": 0, "other_n": 0, "wealth_n": 0} for w in range(weeks)]
+        for day, is_other, is_wealth, n in self.conn.execute(
                 "SELECT substr(first_seen, 1, 10), COALESCE(NULLIF(area,''),'other') = 'other',"
-                " COUNT(*) FROM seen_jobs WHERE first_seen >= ? AND first_seen < ?" + exc
-                + " GROUP BY 1, 2",
+                " area = 'wealth', COUNT(*) FROM seen_jobs WHERE first_seen >= ? AND first_seen < ?"
+                + exc + " GROUP BY 1, 2, 3",
                 ((end - timedelta(weeks=weeks)).isoformat(), end.isoformat(), *exc_p)):
             try:
                 w = (today - datetime.fromisoformat(day).date()).days // 7
@@ -3095,7 +3168,23 @@ class JobDB:
                 continue
             if 0 <= w < weeks:
                 out[w]["other_n" if is_other else "finance"] += n
+                if is_wealth:
+                    out[w]["wealth_n"] += n
         return out
+
+    def other_inflow(self, days: int = 14, limit: int = 10,
+                     exclude_companies: list[str] | None = None) -> list[dict]:
+        """Sources by 'other' rows first stored in the last `days`, most first:
+        where the clutter comes from now (narrow those, do not retag)."""
+        from datetime import timedelta
+        exc, exc_p = self._exclude_clause(exclude_companies)
+        since = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
+        rows = self.conn.execute(
+            "SELECT company, COUNT(*), SUM(area = 'other') FROM seen_jobs"
+            " WHERE first_seen >= ? AND area IS NOT NULL AND area != ''" + exc
+            + " GROUP BY company HAVING SUM(area = 'other') > 0"
+            " ORDER BY 3 DESC LIMIT ?", (since, *exc_p, limit)).fetchall()
+        return [{"company": c, "n": n, "other": o} for c, n, o in rows]
 
     def new_roles_per_day(self, days: int = 30,
                           exclude_companies: list[str] | None = None) -> list[dict]:

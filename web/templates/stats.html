@@ -166,22 +166,44 @@
   </div>
 </div>
 
-<div class="chart-row">
-  <section class="panel">
-    <div class="panel-head"><h2>New roles per day</h2><span class="panel-meta">{{ "{:,}".format(roles_chart.total) }} in 30 days</span></div>
-    <div class="chart-wrap">
-      <div class="chart" data-chart='{{ roles_chart|tojson }}' aria-label="New roles stored per day, last 30 days"></div>
-      <div class="ch-tip" hidden></div>
-    </div>
-  </section>
-  <section class="panel">
-    <div class="panel-head"><h2>Tagging cost per day</h2><span class="panel-meta">{% if cost_chart.has_data %}${{ "%.2f"|format(cost_chart.total) }} in 30 days{% if cost_chart.unpriced_days %} · {{ cost_chart.unpriced_days }} day{{ 's' if cost_chart.unpriced_days != 1 }} partly unpriced{% endif %}{% else %}no tag runs recorded{% endif %}</span></div>
-    {% if cost_chart.has_data %}
-    <div class="chart-wrap">
-      <div class="chart" data-chart='{{ cost_chart|tojson }}' aria-label="Tagging cost in US dollars per day, last 30 days"></div>
-      <div class="ch-tip" hidden></div>
-    </div>
-    {% else %}<p class="dp-empty">tag_runs.jsonl has no runs in the last 30 days on this machine.</p>{% endif %}
+{# Three time series stacked on the left, the noisiest-sources list beside
+   them (his layout, 2026-10-10). Side-by-side rows stretched the short noise
+   chart to the list's height and left an empty band under it. #}
+<div class="stats-split">
+  <div class="stats-charts">
+    <section class="panel">
+      <div class="panel-head"><h2>New roles per day</h2><span class="panel-meta">{{ "{:,}".format(roles_chart.total) }} in 30 days</span></div>
+      <div class="chart-wrap">
+        <div class="chart" data-height="160" data-chart='{{ roles_chart|tojson }}' aria-label="New roles stored per day, last 30 days"></div>
+        <div class="ch-tip" hidden></div>
+      </div>
+    </section>
+    <section class="panel">
+      <div class="panel-head"><h2>Noise share per week</h2><span class="panel-meta">new roles tagged other · {{ noise_chart.latest|round|int }}% this week</span></div>
+      <div class="chart-wrap">
+        <div class="chart" data-height="160" data-chart='{{ noise_chart|tojson }}' aria-label="Share of new roles tagged other per week, last 12 weeks"></div>
+        <div class="ch-tip" hidden></div>
+      </div>
+    </section>
+    <section class="panel">
+      <div class="panel-head"><h2>Scan tagging cost per day</h2><span class="panel-meta">{% if cost_chart.has_data %}${{ "%.2f"|format(cost_chart.total) }} in 30 days{% if cost_chart.unpriced_days %} · {{ cost_chart.unpriced_days }} day{{ 's' if cost_chart.unpriced_days != 1 }} partly unpriced{% endif %}{% if other_tag_cost %} · re-tags ${{ "%.2f"|format(other_tag_cost) }} not shown{% endif %}{% else %}no tag runs recorded{% endif %}</span></div>
+      {% if cost_chart.has_data %}
+      <div class="chart-wrap">
+        <div class="chart" data-height="160" data-chart='{{ cost_chart|tojson }}' aria-label="Scan tagging cost in US dollars per day, last 30 days"></div>
+        <div class="ch-tip" hidden></div>
+      </div>
+      {% else %}<p class="dp-empty">tag_runs.jsonl has no scan runs in the last 30 days on this machine.</p>{% endif %}
+    </section>
+  </div>
+  <section class="panel stats-side">
+    <div class="panel-head"><h2>Noisiest sources</h2><span class="panel-meta">other rows stored, last 14 days</span></div>
+    {% if noise_sources %}<div class="telemetry">
+      {% for r in noise_sources %}<div class="telemetry-row">
+        <span><a href="/?firm={{ r.company|urlencode }}&amp;area=other"><b>{{ r.company }}</b></a></span>
+        <span>{{ r.other }} <small>other of {{ r.n }}</small></span>
+        <span>{{ (100 * r.other / r.n)|round|int }}% <small>other</small></span>
+      </div>{% endfor %}
+    </div>{% else %}<p class="dp-empty">No other-tagged roles stored in 14 days.</p>{% endif %}
   </section>
 </div>
 
@@ -198,6 +220,7 @@
 </div>
 {% else %}<p class="dp-empty">No tag runs recorded yet.</p>{% endif %}
 
+{% if evaluation.total %}
 <div class="panel-head section"><h2>Human evaluation</h2><span class="panel-meta">{{ evaluation.total }} labelled · {{ evaluation.corrected }} corrections · {{ evaluation.false_manager }} false-manager · {{ evaluation.false_other }} finance→other misses</span></div>
 {% if evaluation.models %}<div class="telemetry">
   {% for m in evaluation.models %}<div class="telemetry-row">
@@ -206,6 +229,7 @@
     <span>{{ m.false_other }} <small>finance→other</small></span><span>{{ m.corrected }} corrected</span>
   </div>{% endfor %}
 </div>{% endif %}
+{% endif %}
 
 <div class="panel-head section"><h2>Weekly intake</h2><span class="panel-meta">new roles by area and region</span></div>
 <section class="panel wk-panel">
@@ -258,6 +282,7 @@
     <span class="vtotal">8w total</span>
   </div>
   {% for v in velocity %}
+  {% if loop.index == 41 %}<details class="wk-earlier"><summary>{{ velocity|length - 40 }} more firms</summary>{% endif %}
   <div class="velrow{% if v.recent == 0 %} silent{% endif %}">
     <a class="vco" href="/?company={{ v.company|urlencode }}&amp;area=">{{ v.company }}</a>
     <span class="vrecent">{% if v.recent %}{{ v.recent }}{% else %}—{% endif %}</span>
@@ -268,6 +293,7 @@
     </div>
     <span class="vtotal">{{ v.total }}</span>
   </div>
+  {% if loop.last and loop.index > 40 %}</details>{% endif %}
   {% endfor %}
 </div>
 {% else %}

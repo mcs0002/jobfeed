@@ -123,7 +123,9 @@ from . import (
 
 def _greenhouse(company):
     return greenhouse.scrape(company["slug"], eu=company.get("eu", False),
-                             url_template=company.get("url_template", ""))
+                             url_template=company.get("url_template", ""),
+                             departments=company.get("departments"),
+                             exclude_departments=company.get("exclude_departments"))
 
 
 def _bis(company):
@@ -263,7 +265,8 @@ def _bpce(company):
 
 
 def _bnpparibas_paced(company):
-    return bnpparibas_paced.scrape()
+    return bnpparibas_paced.scrape(
+        exclude_entities=company.get("exclude_entities"))
 
 
 def _balyasny(company):

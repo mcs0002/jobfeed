@@ -1311,6 +1311,28 @@ class JibeTests(unittest.TestCase):
         self.assertEqual(jobs[0]["posted"], "2026-06-01")
 
     @patch("scrapers.jibe.make_session")
+    def test_exclude_values_filters_after_complete_pagination(self, make_session):
+        get = make_session.return_value.get
+        get.side_effect = [
+            FakeResponse({"totalCount": 3, "jobs": [
+                {"data": {"req_id": "1", "title": "Engineer", "tags2": ["Technology"]}},
+                {"data": {"req_id": "2", "title": "Risk Analyst", "tags2": ["Risk Management"]}},
+            ]}),
+            FakeResponse({"totalCount": 3, "jobs": [
+                {"data": {"req_id": "3", "title": "Unfiled"}},
+            ]}),
+        ]
+
+        jobs = jibe.scrape({
+            "base_url": "https://careers.example.com",
+            "company_id": "example",
+            "exclude_values": {"tags2": ["Technology"]},
+        })
+
+        self.assertEqual([j["title"] for j in jobs], ["Risk Analyst", "Unfiled"])
+        self.assertNotIn("_excluded", jobs[0])
+
+    @patch("scrapers.jibe.make_session")
     def test_supports_custom_page_size_and_domain(self, make_session):
         get = make_session.return_value.get
         get.return_value = FakeResponse({"totalCount": 0, "jobs": []})
@@ -1431,6 +1453,20 @@ class EightfoldTests(unittest.TestCase):
         self.assertEqual(jobs[1]["url"], "https://jobs.example/careers/job/101")
         self.assertEqual(get.call_count, 2)
 
+    @patch("scrapers.eightfold.make_session")
+    def test_exclude_values_drops_listed_business_units(self, make_session):
+        make_session.return_value.get.return_value = FakeResponse({"count": 3, "positions": [
+            {"id": 1, "name": "Engineer", "business_unit": "GCIO"},
+            {"id": 2, "name": "Credit Analyst", "business_unit": "Corp & Inst Banking"},
+            {"id": 3, "name": "Unfiled Analyst"},
+        ]})
+
+        jobs = eightfold.scrape({"base_url": "https://jobs.example", "domain": "example.com",
+                                 "exclude_values": {"business_unit": ["GCIO"]}})
+
+        self.assertEqual([j["id"] for j in jobs],
+                         ["eightfold_example.com_2", "eightfold_example.com_3"])
+
 
 class OracleHCMTests(unittest.TestCase):
     @patch("scrapers.oracle_hcm.make_session")
@@ -1469,6 +1505,25 @@ class OracleHCMTests(unittest.TestCase):
             "CandidateExperience/en/sites/CX_1/job/200",
         )
         self.assertEqual(get.call_count, 2)
+
+    @patch("scrapers.oracle_hcm.make_session")
+    def test_exclude_values_drops_listed_job_families_after_full_fetch(self, make_session):
+        make_session.return_value.get.return_value = FakeResponse({"items": [{
+            "TotalJobsCount": 3,
+            "requisitionList": [
+                {"Id": "1", "Title": "Associate Banker", "JobFamily": "Associate Bankers"},
+                {"Id": "2", "Title": "Associate Banker - Startup Banking", "JobFamily": "Relationship Manager"},
+                {"Id": "3", "Title": "Unfiled Analyst"},
+            ],
+        }]})
+
+        jobs = oracle_hcm.scrape({
+            "base_url": "https://example.oraclecloud.com", "site": "CX_1",
+            "exclude_values": {"JobFamily": ["Associate Bankers"]},
+        })
+
+        self.assertEqual([j["id"] for j in jobs], ["oracle_CX_1_2", "oracle_CX_1_3"])
+        self.assertNotIn("_fields", jobs[0])
 
 
 class BeesiteCompletenessTests(unittest.TestCase):

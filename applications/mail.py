@@ -27,7 +27,7 @@ import sys
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
-from jobfeed.db import APPLICATION_MAIL_ORDER, JobDB, mail_rank, plain_company
+from jobfeed.db import APPLICATION_MAIL_ORDER, JobDB, company_names, mail_rank, plain_company
 
 ROOT = Path(__file__).resolve().parent.parent
 # jobfeed/notify.py's subject prefix. Kept literal rather than imported: notify pulls in
@@ -159,6 +159,17 @@ def _tokens(value: str) -> list[str]:
     # source label ("(HF)", "(Campus)"), so it has to come off before matching.
     bare = plain_company(value)
     return [w for w in _WORD_RE.findall(bare.lower()) if w not in _STOPWORDS]
+
+
+def _names_match(haystack: str, company: str) -> bool:
+    """The firm is named if all tokens of any one of its names occur: the bare
+    name or its acronym/expansion: "ACME (Acmeson)" mails as Acmeson, and
+    "Northwind Fund Management (NFM)" often only as NFM."""
+    for name in company_names(company):
+        tokens = _tokens(name)
+        if tokens and all(_has_word(haystack, t) for t in tokens):
+            return True
+    return False
 
 
 def _has_word(haystack: str, token: str) -> bool:
@@ -373,8 +384,7 @@ def match_job(message: dict, candidates: list[dict]) -> tuple[dict | None, str]:
     hits: list[tuple[dict, list[str], bool]] = []
     for job in candidates:
         why: list[str] = []
-        company_tokens = _tokens(job.get("company", ""))
-        if company_tokens and all(_has_word(haystack, t) for t in company_tokens):
+        if _names_match(haystack, job.get("company", "")):
             why.append("company")
         req = next((r for r in _req_ids(job) if r.lower() in haystack), "")
         if req:
@@ -431,8 +441,7 @@ def suggest_company(db: JobDB, message: dict) -> str:
         "SELECT DISTINCT company FROM seen_jobs WHERE status <> 'ignored' "
         "AND company <> ''"
     ):
-        tokens = _tokens(company)
-        if tokens and all(_has_word(haystack, t) for t in tokens):
+        if _names_match(haystack, company):
             hits.append(company)
     return hits[0] if len(hits) == 1 else ""
 

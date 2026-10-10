@@ -55,7 +55,9 @@ CORPUS_FLOOR = 0.90
 # Sources below this many active rows are too small for a percentage to mean
 # anything.
 MIN_ROWS_FOR_RATE = 15
-SCOPE_THRESHOLD = 85.0
+SCOPE_THRESHOLD = 60.0   # percent of a source's new rows tagged 'other'
+SCOPE_MIN_OTHER = 15     # 'other' rows stored in the window
+SCOPE_DAYS = 14
 STALE_DAYS = 3
 
 findings: list[tuple[str, str, str]] = []
@@ -195,27 +197,47 @@ def check_stale(con: sqlite3.Connection, manual: set[str]) -> None:
             f"reached {newest[:10]}. Source may have stopped producing.")
 
 
-def check_scope(con: sqlite3.Connection) -> None:
+def bank_sources(targets_path: str) -> set[str]:
+    """Banks are whole-board pulls by design (negative scope, AGENTS.md), so
+    their 'other' inflow is expected and they are labelled, not flagged."""
+    try:
+        with open(targets_path) as fh:
+            return {t.get("name") for t in json.load(fh)
+                    if "Banks" in (t.get("category") or "") and t.get("name")}
+    except (OSError, ValueError):
+        return set()
+
+
+def check_scope(con: sqlite3.Connection, banks: set[str]) -> None:
+    # Ranked by 'other' INFLOW over 14 days, not by the active share: on
+    # 2026-10-10 the >=85%-of-active list covered ~390 of the 6,218 'other'
+    # rows stored that fortnight, missing Deloitte, Shell T&S and LSEG.
     sql = """
         SELECT company, COUNT(*) n,
-               ROUND(100.0 * SUM(CASE WHEN area = 'other' THEN 1 ELSE 0 END)
-                     / COUNT(*), 0) pct
-        FROM seen_jobs WHERE delisted_at IS NULL
-        GROUP BY company HAVING n >= ? AND pct >= ?
-        ORDER BY n DESC LIMIT 20
+               SUM(CASE WHEN area = 'other' THEN 1 ELSE 0 END) o
+        FROM seen_jobs WHERE first_seen > datetime('now', ?)
+        GROUP BY company HAVING o >= ? AND 100.0 * o / n >= ?
+        ORDER BY o DESC
     """
-    hits = con.execute(sql, (MIN_ROWS_FOR_RATE, SCOPE_THRESHOLD)).fetchall()
-    if not hits:
-        add("OK", "SCOPE", "no high-volume source is overwhelmingly 'other'")
-        return
-    waste = sum(int(n * pct / 100) for _c, n, pct in hits)
-    add("WARN", "SCOPE",
-        f"{len(hits)} source(s) are >={SCOPE_THRESHOLD:.0f}% 'other', roughly "
-        f"{waste:,} rows. These tags are usually CORRECT: the source is "
-        f"scraping a whole corporate careers board. Narrow the source, do not "
-        f"retag. Every one of these rows costs an LLM call.")
-    for company, n, pct in hits:
-        add("WARN", "SCOPE", f"  {company}: {n} active, {pct:.0f}% other")
+    hits = con.execute(sql, (f"-{SCOPE_DAYS} days", SCOPE_MIN_OTHER,
+                             SCOPE_THRESHOLD)).fetchall()
+    islands = [h for h in hits if h[0] not in banks]
+    if not islands:
+        add("OK", "SCOPE", "no non-bank source has a large 'other' inflow")
+    else:
+        add("WARN", "SCOPE",
+            f"{len(islands)} non-bank source(s) stored >={SCOPE_MIN_OTHER} "
+            f"'other' rows in {SCOPE_DAYS} days ({sum(h[2] for h in islands):,} "
+            f"in all). These tags are usually CORRECT: the source scrapes a "
+            f"whole corporate board. Narrow it (facet, department, noise "
+            f"terms), do not retag.")
+        for company, n, o in islands[:25]:
+            add("WARN", "SCOPE", f"  {company}: {o} of {n} new rows 'other'")
+    bank_hits = [h for h in hits if h[0] in banks]
+    if bank_hits:
+        add("OK", "SCOPE",
+            f"{len(bank_hits)} bank(s) by design (whole board): "
+            + ", ".join(f"{c} {o}" for c, _n, o in bank_hits[:8]))
 
 
 def check_descriptions(con: sqlite3.Connection) -> None:
@@ -264,7 +286,7 @@ def main() -> None:
         check_id_case(con)
         check_stale(con, manual_sources(args.targets))
         check_descriptions(con)
-        check_scope(con)
+        check_scope(con, bank_sources(args.targets))
     finally:
         con.close()
 

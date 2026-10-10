@@ -72,6 +72,7 @@ def _scrape_keyword(base_url: str, site: str, keyword: str,
                 ),
                 "location": requisition.get("PrimaryLocation", ""),
                 "posted": requisition.get("PostedDate", ""),
+                "_fields": {k: requisition.get(k) for k in ("JobFamily", "JobFunction")},
             }
 
         offset += len(requisitions)
@@ -121,4 +122,16 @@ def scrape(config: dict) -> list[dict]:
     session = make_session()
     _scrape_keyword(base_url, site, config.get("keyword", ""), jobs, session,
                     site_number=_site_number(base_url, site, session))
-    return list(jobs.values())
+    # `exclude_values` = {"JobFamily": [...]} drops postings whose field value
+    # is listed, client-side after the complete fetch; a posting with no value
+    # passes. JPMC's "Associate Bankers" family is 600+ Chase branch roles and
+    # no finance one, while the title "Associate Banker" is also a commercial-
+    # banking rung, so the field separates what a title term cannot.
+    exclude = {k: set(v) for k, v in (config.get("exclude_values") or {}).items()}
+    out = []
+    for job in jobs.values():
+        fields = job.pop("_fields")
+        if any(fields.get(k) in vals for k, vals in exclude.items()):
+            continue
+        out.append(job)
+    return out
