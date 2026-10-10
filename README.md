@@ -1,6 +1,6 @@
 # Jobfeed
 
-A self-hosted job-market scanner for finance. It reads about 450 company career
+A self-hosted job-market scanner for finance. It reads about 500 company career
 boards directly at the ATS level (Workday, Greenhouse, Oracle HCM,
 SuccessFactors, Avature, SmartRecruiters and more), stores every role in SQLite,
 tags each one with structured facets through an LLM, and serves a filterable web
