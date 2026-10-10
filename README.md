@@ -45,20 +45,6 @@ a weekly cadence and upcoming deadlines.
 | --- | --- |
 | ![Application funnel, weekly cadence and deadlines](docs/screenshots/application-stats.png) | ![Attended applications, inbox and to-do list](docs/screenshots/applications.png) |
 
-Some firms cap applications per cycle ("one programme per academic year"). The
-Limits page records each cap with the sentence it came from, before the first
-form goes out, because the choice of where to spend a capped application cannot
-be undone.
-
-![Application limits per firm, each with its source sentence](docs/screenshots/limits.png)
-
-### Find programmes that never reach an ATS
-
-Many graduate schemes live only on a firm's own careers page. A sweep
-reads those pages and lists each programme with its application window, quoting
-the page so every line can be checked.
-
-![Graduate schemes found on firms' own pages](docs/screenshots/grad-schemes.png)
 
 ### Watch the pipeline itself
 
