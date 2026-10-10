@@ -7,6 +7,7 @@ from datetime import datetime
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+from jobfeed import search
 from jobfeed.db import JobDB
 
 
@@ -528,18 +529,19 @@ class TagsAndFetchTests(unittest.TestCase):
         self.assertEqual([j["id"] for j in self.db.fetch_jobs(companies=["BlackRock"])], ["b"])
         self.assertEqual(self.db.fetch_jobs(companies=[]), [])
 
-    def test_free_text_search_matches_title_and_company_only(self):
-        # The search bar's contract is "Search title or company" — q must NOT
-        # match location or description, or a city-name search silently turns
-        # into a broken location filter (row 'a' is located in London but has
-        # no 'London' in title/company; 'c' mentions London only in its body).
+    def test_free_text_search_covers_location_and_description(self):
+        # The search's contract since it came back (jobfeed/search.py): the
+        # location always, the description once the index is built. The old
+        # title+company-only box read as a location search and was removed
+        # for missing every "München" role.
         self.db.mark_seen("c", company="UniCredit", title="M&A Intern", url="u3",
                           category="Banks", location="Munich",
                           description="Work with the London coverage team.")
-        hits = [j["id"] for j in self.db.fetch_jobs(q="London")]
-        self.assertEqual(hits, [])
-        # ...while a company-name hit still works.
+        self.assertIn("c", [j["id"] for j in self.db.fetch_jobs(q="Munich")])
         self.assertEqual([j["id"] for j in self.db.fetch_jobs(q="UniCredit")], ["c"])
+        search.backfill(self.db.conn, pause=0, log=None)
+        self.db._search_ready = None
+        self.assertIn("c", [j["id"] for j in self.db.fetch_jobs(q="London")])
 
     def test_distinct_facets_and_whitelist(self):
         self.db.set_tags("a", area="markets")

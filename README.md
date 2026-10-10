@@ -28,7 +28,8 @@ Every stored role is tagged by area (markets, quant, research, IBD, private
 markets and more), desk, seniority, programme type, city and region, working
 mode, language requirements, education and minimum experience. Filters combine
 freely, closing dates are read from the posting itself, and each role opens with
-its full description.
+its full description. A search bar covers titles, firms, locations and the
+posting text, and knows that München and Munich are the same city.
 
 | New York internships | APAC graduate programmes, dark theme |
 | --- | --- |

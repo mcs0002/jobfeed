@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Add a role — Jobfeed{% endblock %}
+{% block main_class %}page{% endblock %}
+{% block content %}
+<div class="cp add-role">
+  <div class="page-head">
+    <h1>Add a role by link</h1>
+    <p class="page-lede">For a posting the boards do not cover: a LinkedIn alert, a referral, a firm marked manual. It is fetched, tagged and stored like a scanned role, and opens on its own page, where you can start an attended application.</p>
+  </div>
+  {% if message %}<p class="ans-msg{% if message.startswith('Not') or message.startswith('Nothing') %} is-bad{% endif %}">{{ message }}</p>{% endif %}
+  <form method="post" action="/add" class="add-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <label>Posting link
+      <input type="url" name="url" required maxlength="2000" value="{{ draft.url or '' }}" placeholder="https://…" autofocus>
+    </label>
+    <details{% if draft.title or draft.company or draft.description or message %} open{% endif %}>
+      <summary>Details (optional; filled from the page when it states them)</summary>
+      <label>Title <input type="text" name="title" maxlength="300" value="{{ draft.title or '' }}"></label>
+      <label>Firm <input type="text" name="company" maxlength="200" value="{{ draft.company or '' }}"></label>
+      <label>Location <input type="text" name="location" maxlength="300" value="{{ draft.location or '' }}"></label>
+      <label>Description <span class="hint">paste it when the page sits behind a login</span>
+        <textarea name="description" rows="10" maxlength="60000">{{ draft.description or '' }}</textarea>
+      </label>
+    </details>
+    <button type="submit">Add role</button>
+  </form>
+  <p class="lp-foot">A link that already matches a stored role opens that role instead. The scan's filters run as warnings: a role you add is kept even where a scan would drop it. Only public http(s) pages are fetched.</p>
+</div>
+{% endblock %}

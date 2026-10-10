@@ -69,8 +69,11 @@ def detail_url(public_url: str, tenant: str, board: str) -> str | None:
 class WorkdayEnricher:
     """Fetches Workday descriptions, priming + caching one session per tenant."""
 
-    def __init__(self, timeout: int = 15):
+    def __init__(self, timeout: int = 15, session_factory=requests.Session):
+        # `session_factory`: the manual add passes jobfeed.safe_fetch's
+        # GuardedSession, so a pasted Workday link is SSRF-checked too.
         self.timeout = timeout
+        self._new_session = session_factory
         self._sessions: dict[tuple[str, str], requests.Session] = {}
 
     def _session(self, base: str, tenant: str, board: str,
@@ -78,7 +81,7 @@ class WorkdayEnricher:
         key = (base, board)
         s = self._sessions.get(key)
         if s is None:
-            s = requests.Session()
+            s = self._new_session()
             # Prime: a 1-row listing POST sets the CALYPSO cookies that
             # authorise subsequent detail GETs. Best-effort — if it fails the
             # detail GETs just 403 and we return "".

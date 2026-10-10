@@ -26,16 +26,11 @@
         Filters<span class="fbadge" id="filters-badge" hidden></span>
         <span class="caret" id="filters-caret">▼</span>
       </button>
-      {# Firm search (2026-09-24): suggestions are firm names, and the
-         choice resolves to the exact `firm` filter (the firm plus its
-         "Firm (…)" source labels). Text that names no single firm falls
-         back to the company-contains filter. Titles are not searched: the
-         old free-text box was removed because it read as a location search
-         while matching only title and company. #}
-      <input type="search" class="firm-search" id="firm-search" list="firm-names"
-        placeholder="Firm…" aria-label="Filter by firm" autocomplete="off"
-        value="{{ params.get('firm') or params.get('company') or '' }}">
+      {# Suggestions for the header search (base.html): a picked or exactly
+         typed firm name becomes the exact `firm` filter (the firm plus its
+         "Firm (…)" source labels). #}
       <datalist id="firm-names">{% for f in firm_names %}<option value="{{ f }}">{% endfor %}</datalist>
+      {% if request.session.get('role') != 'guest' %}<a class="toolbar-add" href="/add" title="Add a role by its posting link">+ Add role</a>{% endif %}
       {% include "_chips.html" %}
       {% include "_list_count.html" %}
       <a class="toolbar-reset" id="browse-reset" href="{{ browse_path|default('/') }}"
@@ -55,6 +50,7 @@
       {# Set by the firm search; hidden so a firm survives every other filter change. #}
       <input type="hidden" name="firm" value="{{ params.get('firm','') }}">
       <input type="hidden" name="company" value="{{ params.get('company','') }}">
+      <input type="hidden" name="q" value="{{ params.get('q','') }}">
 
       {# S3: every control is a .fp-select wrapper (fixed height, own caret,
          and a .set state that is the panel's main affordance). #}
@@ -465,45 +461,51 @@
   var filterForm = document.getElementById("filter-form");
   if (filterForm) filterForm.addEventListener("change", syncFilterStates);
 
-  // ── Firm search: a suggested name, typed exactly or picked, becomes the
-  // exact firm filter; text matching exactly one firm resolves to it; any
-  // other text is a company-contains filter; empty clears both. ────────────
+  // ── Header search (base.html): an exact firm name, picked from the
+  // suggestions or typed, becomes the exact firm filter; any other text is
+  // the free-text `q`. A pause in typing, Enter or the clear button runs it
+  // through the same htmx change path; the chip row names what is active.
+  // Substring firm matching was dropped with the separate firm box: "EY"
+  // must not resolve to Walleye, and free text already searches firms. ────
+  var searchBox = document.getElementById("text-search");
   (function () {
-    var box = document.getElementById("firm-search");
+    var box = searchBox;
     if (!box || !filterForm) return;
     var names = Array.from(document.querySelectorAll("#firm-names option"))
       .map(function (o) { return o.value; });
+    var f = function (n) { return filterForm.querySelector('[name="' + n + '"]'); };
     function resolve(text) {
-      var t = text.trim().toLowerCase();
-      if (!t) return { firm: "", company: "" };
-      var exact = names.filter(function (n) { return n.toLowerCase() === t; });
-      if (exact.length) return { firm: exact[0], company: "" };
-      var hits = names.filter(function (n) { return n.toLowerCase().indexOf(t) !== -1; });
-      if (hits.length === 1) return { firm: hits[0], company: "" };
-      return { firm: "", company: text.trim() };
+      var t = text.trim();
+      var exact = names.filter(function (n) { return n.toLowerCase() === t.toLowerCase(); });
+      return exact.length ? { q: "", firm: exact[0] } : { q: t, firm: "" };
     }
-    var last = null;
+    var timer = null;
     function apply() {
+      clearTimeout(timer);
       var r = resolve(box.value);
-      var key = r.firm + "|" + r.company;
-      if (key === last) return;
-      last = key;
-      filterForm.querySelector('[name="firm"]').value = r.firm;
-      filterForm.querySelector('[name="company"]').value = r.company;
+      if (r.q === f("q").value && r.firm === f("firm").value && !f("company").value) return;
+      f("q").value = r.q;
+      f("firm").value = r.firm;
+      f("company").value = "";
       if (r.firm) box.value = r.firm;
       filterForm.dispatchEvent(new Event("change", { bubbles: true }));
     }
-    last = resolve(box.value).firm + "|" + resolve(box.value).company;
-    box.addEventListener("change", apply);           // picked a suggestion or blurred
+    box.form.addEventListener("submit", function (e) { e.preventDefault(); apply(); });
+    box.addEventListener("input", function () { clearTimeout(timer); timer = setTimeout(apply, 450); });
     box.addEventListener("search", apply);           // Enter, or the clear (x) button
-    box.addEventListener("keydown", function (e) {
-      if (e.key === "Enter") { e.preventDefault(); apply(); }
-    });
+    box.addEventListener("change", apply);           // picked a suggestion or blurred
   })();
+  // Keep the box in step when a chip or Reset all clears the search.
+  function syncSearchBox() {
+    if (!searchBox || !filterForm || document.activeElement === searchBox) return;
+    var v = function (n) { return (filterForm.querySelector('[name="' + n + '"]') || {}).value || ""; };
+    searchBox.value = v("q") || v("firm") || v("company");
+  }
 
   // ── Filters badge + Save-current visibility, refreshed after each swap ───
   function refreshChrome() {
     syncFilterStates();
+    syncSearchBox();
     syncSheetCount();
     var chips = document.querySelectorAll("#chips .chip").length;
     var hasArea = !!(document.querySelector('#filter-form [name="area"]') || {}).value;

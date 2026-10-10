@@ -12,6 +12,7 @@ Deliberately excluded:
   * `seen_jobs.score`, `score_reason`, `scored_at` - personal fit scoring, not
     a property of the job
   * `seen_jobs.applied_at`, `notes`, `favorite` - personal state
+  * every row he added by URL (id prefix `manual_`) - his job search
 
 The safety property that matters is the UNKNOWN-COLUMN ABORT below. A column
 added to `seen_jobs` later is neither shared nor personal until someone
@@ -70,12 +71,22 @@ SHARED_COLUMNS = [
     "education",
     "start_date",
     "deadline",
+    # The tagger's AI & Tech flag (yes/no; NULL = not judged under that
+    # rubric): a property of the posting like `area`, not his search.
+    "ai_tech",
     "tagged_at",
     # tag provenance, so a consumer can tell what produced a label
     "tag_provider",
     "tag_model",
     "tag_rubric_version",
 ]
+
+# Roles he added by URL (jobfeed/manual_add.py) are his job search, not the
+# boards': that he found and added one says he wants it. Their rows are left
+# out entirely. This must equal jobfeed.db.MANUAL_ID_PREFIX; the script runs by
+# path and imports nothing from the package, so tests/test_manual_add.py pins
+# the two together instead.
+MANUAL_ID_PREFIX = "manual_"
 
 # Included only with --with-descriptions.
 OPTIONAL_COLUMNS = ["description"]
@@ -160,7 +171,10 @@ def export(source: str, dest: str, with_descriptions: bool) -> dict:
             placeholders = ", ".join("?" for _ in cols)
 
             rows = 0
-            cur = src.execute(f"SELECT {collist} FROM jobs_with_description")
+            cur = src.execute(
+                f"SELECT {collist} FROM jobs_with_description "
+                "WHERE id NOT LIKE ? ESCAPE '\\'",
+                (MANUAL_ID_PREFIX.replace("_", "\\_") + "%",))
             while True:
                 batch = cur.fetchmany(5000)
                 if not batch:

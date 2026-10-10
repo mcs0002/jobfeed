@@ -279,6 +279,7 @@ def summarise(conv: str) -> None:
 GRANTED_SEARCH_PATHS = (
     ".gemini/antigravity/",                                   # its own workspace
     "secrets/applicant_profile.json",
+    "secrets/screening_answers.json",                         # approved answer bank
     "skills/assisted-apply/SKILL.md",
     "skills/assisted-apply/references/form-filling.md",
     "skills/assisted-apply/references/documents-writing.md",
@@ -294,7 +295,7 @@ SEARCH_TOOLS = ("grep_search", "find_by_name", "list_dir")
 def outside_reads(calls: list) -> list[tuple[int, str]]:
     """view_file calls on a path outside the granted files, as (step, path).
 
-    SKILL.md allows view_file on the four initial files (and its own snapshots),
+    SKILL.md allows view_file on the five initial files (and its own snapshots),
     nothing else. One run opened the applicant's transcript PDF to
     "verify it exists" and sat on a permission prompt for 70 s; the database
     recorded no prompt, only a failed step, so neither check here saw it."""

@@ -11,6 +11,8 @@ import uuid
 from contextlib import contextmanager
 from datetime import datetime, timedelta, timezone
 
+from jobfeed import search
+
 # DB paths whose schema (CREATE TABLE + _migrate) has already run this process.
 # web/app.py builds a fresh JobDB per request; without this gate every request
 # re-ran the full DDL + a commit. The schema is stable within a process once
@@ -421,6 +423,13 @@ DISPLAY_COLUMNS = [
 # senior and hidden from the web app by default.
 YOE_HIDE_THRESHOLD = 3
 
+# Roles he added by URL (jobfeed/manual_add.py, /add). The id prefix is the
+# only marker: no seen_jobs column. No scan ever re-reads their board, so the
+# delist, age-delist and orphan passes, which judge a row by the boards a scan
+# read, must never touch them; MANUAL_EXEMPT_SQL is that guard.
+MANUAL_ID_PREFIX = "manual_"
+MANUAL_EXEMPT_SQL = "id NOT LIKE 'manual\\_%' ESCAPE '\\'"
+
 
 # Deadline (S12). NULL deadline = rolling, which is the common case and a real
 # answer, not missing data — every clause below is written NULL-safe on purpose.
@@ -500,7 +509,12 @@ def _job_filter_sql(f: dict, *, omit: set[str] | None = None,
         else: clauses.append(f"company IN ({','.join('?' * len(companies))})"); params.extend(companies)
     if val("exclude_companies"):
         xs = val("exclude_companies"); clauses.append(f"company NOT IN ({','.join('?' * len(xs))})"); params.extend(xs)
-    if val("q"): clauses.append("(title LIKE ? OR company LIKE ?)"); params.extend([f"%{val('q')}%"] * 2)
+    # Free text (jobfeed/search.py): the FTS5 index over title, company,
+    # location, city and description once it is built, a LIKE without the
+    # description before. `_search_index` is set by the JobDB caller.
+    if val("q"):
+        c, p = (search.fts_clauses if f.get("_search_index") else search.like_clauses)(val("q"))
+        clauses.extend(c); params.extend(p)
     if val("since"): clauses.append("first_seen >= ?"); params.append(val("since"))
     return clauses, params
 
@@ -543,6 +557,7 @@ def ai_title(title) -> int:
 class JobDB:
     def __init__(self, path: str, check_same_thread: bool = True):
         self._transaction_depth = 0
+        self._search_ready: bool | None = None
         self.conn = sqlite3.connect(path, check_same_thread=check_same_thread)
         self.conn.create_function("ai_title", 1, ai_title, deterministic=True)
         # WAL lets the web app read while the scraper writes; busy_timeout
@@ -921,6 +936,41 @@ class JobDB:
                 except sqlite3.OperationalError as exc:
                     if "duplicate column name" not in str(exc).lower():
                         raise
+        # Screening-answer bank (applications/answers.py, /answers): answers
+        # the user gave during attended runs. A capture is only ever
+        # `proposed`; the owner approves. One question key holds a general
+        # row (scope_firm '') and firm-specific overrides, with at most one
+        # approved row per key and scope. Its own table, never seen_jobs
+        # columns: an answer belongs to a question, not to a posting.
+        self.conn.execute("""
+            CREATE TABLE IF NOT EXISTS screening_answers (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                question_key TEXT NOT NULL,
+                question TEXT NOT NULL,
+                answer TEXT NOT NULL,
+                category TEXT NOT NULL DEFAULT 'other',
+                scope_firm TEXT NOT NULL DEFAULT '',
+                state TEXT NOT NULL DEFAULT 'proposed'
+                    CHECK (state IN ('proposed', 'approved', 'retired')),
+                seen_company TEXT NOT NULL DEFAULT '',
+                seen_ats TEXT NOT NULL DEFAULT '',
+                seen_field TEXT NOT NULL DEFAULT '',
+                workflow_id TEXT NOT NULL DEFAULT '',
+                job_id TEXT NOT NULL DEFAULT '',
+                seen_count INTEGER NOT NULL DEFAULT 1,
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL,
+                last_seen_at TEXT,
+                approved_at TEXT,
+                updated_by TEXT NOT NULL DEFAULT ''
+            )
+        """)
+        self.conn.execute(
+            "CREATE UNIQUE INDEX IF NOT EXISTS idx_screening_answers_approved "
+            "ON screening_answers(question_key, scope_firm) WHERE state = 'approved'")
+        self.conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_screening_answers_key "
+            "ON screening_answers(question_key)")
         # ── Campus programmes: the user's marks, not the sweep's data ──
         # `jobfeed/campus_sweep.py` owns what a graduate programme is and what its page
         # said; that stays in results.jsonl and is re-read fresh on every
@@ -965,6 +1015,10 @@ class JobDB:
                 "scripts/split_descriptions.py on this database first")
         # Read-side compatibility: the old shape, for the scripts and health
         # checks that only read. Writes go through the JobDB methods.
+        # Browse free-text index and the triggers that keep it in sync
+        # (jobfeed/search.py). Skipped on an SQLite without FTS5 3.43+; the
+        # search then stays on its LIKE fallback.
+        search.ensure_schema(self.conn)
         self.conn.execute("""
             CREATE VIEW IF NOT EXISTS jobs_with_description AS
             SELECT s.*, d.description AS description,
@@ -1079,6 +1133,17 @@ class JobDB:
         if wanted_title:
             rows = [row for row in rows if _norm_title(row[1]) == wanted_title]
         return rows[0][0] if rows else None
+
+    def find_job_by_urls(self, urls: list[str]) -> str | None:
+        """The id of a row stored under any of these exact URLs, live rows
+        first (the manual add's duplicate check). None when there is none."""
+        urls = [u for u in urls if u]
+        if not urls:
+            return None
+        row = self.conn.execute(
+            f"SELECT id FROM seen_jobs WHERE url IN ({','.join('?' * len(urls))}) "
+            "ORDER BY (delisted_at IS NOT NULL), last_seen DESC LIMIT 1", urls).fetchone()
+        return row[0] if row else None
 
     def fill_description_if_missing(self, job_id: str, text: str) -> bool:
         """Forward-fill a listing-payload description onto a row that has
@@ -2414,6 +2479,107 @@ class JobDB:
         self._commit()
         return verdict
 
+    # ── Screening-answer bank (see applications/answers.py) ──
+
+    def propose_screening_answer(self, *, question: str, question_key: str,
+                                 answer: str, category: str, scope_firm: str = "",
+                                 seen_company: str = "", seen_ats: str = "",
+                                 seen_field: str = "", workflow_id: str = "",
+                                 job_id: str = "") -> str:
+        """Record an answer a run reported, as a proposal and nothing more.
+
+        The same answer seen again is counted on the row that already holds
+        it, approved or proposed, rather than queued twice. A different answer
+        to an approved question becomes a new proposal beside it, so the
+        disagreement shows on /answers instead of overwriting what he approved.
+        Returns "known", "repeat" or "proposed"."""
+        now = datetime.now(timezone.utc).isoformat()
+        same = " ".join(answer.split()).casefold()
+        for row in self.conn.execute(
+                "SELECT id, answer, state FROM screening_answers "
+                "WHERE question_key=? AND scope_firm=? AND state IN ('approved','proposed') "
+                "ORDER BY state='approved' DESC, id", (question_key, scope_firm)):
+            if " ".join(row[1].split()).casefold() == same:
+                self.conn.execute(
+                    "UPDATE screening_answers SET seen_count = seen_count + 1, "
+                    "last_seen_at=? WHERE id=?", (now, row[0]))
+                self._commit()
+                return "known" if row[2] == "approved" else "repeat"
+        self.conn.execute(
+            """INSERT INTO screening_answers
+                 (question_key, question, answer, category, scope_firm, state,
+                  seen_company, seen_ats, seen_field, workflow_id, job_id,
+                  created_at, updated_at, last_seen_at, updated_by)
+               VALUES (?,?,?,?,?,'proposed',?,?,?,?,?,?,?,?,'agent')""",
+            (question_key, question, answer, category, scope_firm, seen_company,
+             seen_ats, seen_field, workflow_id, job_id, now, now, now))
+        self._commit()
+        return "proposed"
+
+    def screening_answers(self, *, state: str = "", category: str = "",
+                          q: str = "") -> list[dict]:
+        sql = "SELECT * FROM screening_answers WHERE 1=1"
+        params: list = []
+        if state:
+            sql += " AND state=?"
+            params.append(state)
+        if category:
+            sql += " AND category=?"
+            params.append(category)
+        if q:
+            sql += (" AND (question LIKE ? OR answer LIKE ? OR question_key LIKE ?"
+                    " OR scope_firm LIKE ? OR seen_company LIKE ?)")
+            params += [f"%{q}%"] * 5
+        sql += (" ORDER BY CASE state WHEN 'proposed' THEN 0 WHEN 'approved' THEN 1"
+                " ELSE 2 END, question_key, scope_firm, id")
+        cur = self.conn.execute(sql, params)
+        cols = [d[0] for d in cur.description]
+        return [dict(zip(cols, r)) for r in cur.fetchall()]
+
+    def get_screening_answer(self, answer_id: int) -> dict | None:
+        cur = self.conn.execute("SELECT * FROM screening_answers WHERE id=?", (answer_id,))
+        row = cur.fetchone()
+        return dict(zip([d[0] for d in cur.description], row)) if row else None
+
+    def edit_screening_answer(self, answer_id: int, *, answer: str, category: str,
+                              scope_firm: str) -> bool:
+        """The owner's edit. Moving an approved row onto a scope that already
+        has an approved answer is refused rather than silently retiring it."""
+        now = datetime.now(timezone.utc).isoformat()
+        try:
+            cur = self.conn.execute(
+                "UPDATE screening_answers SET answer=?, category=?, scope_firm=?, "
+                "updated_at=?, updated_by='owner' WHERE id=?",
+                (answer, category, scope_firm, now, answer_id))
+        except sqlite3.IntegrityError:
+            self.conn.rollback()
+            raise ValueError("an approved answer already exists for that question and firm")
+        self._commit()
+        return cur.rowcount == 1
+
+    def set_screening_answer_state(self, answer_id: int, state: str) -> bool:
+        """Approve or retire. Approving retires the answer it replaces (same
+        question key and firm scope), in one transaction, so there is never
+        more than one approved answer to choose between."""
+        if state not in ("proposed", "approved", "retired"):
+            raise ValueError(f"bad screening answer state {state!r}")
+        row = self.get_screening_answer(answer_id)
+        if row is None:
+            return False
+        now = datetime.now(timezone.utc).isoformat()
+        with self.transaction():
+            if state == "approved":
+                self.conn.execute(
+                    "UPDATE screening_answers SET state='retired', updated_at=?, "
+                    "updated_by='owner' WHERE question_key=? AND scope_firm=? "
+                    "AND state='approved' AND id<>?",
+                    (now, row["question_key"], row["scope_firm"], answer_id))
+            self.conn.execute(
+                "UPDATE screening_answers SET state=?, updated_at=?, updated_by='owner', "
+                "approved_at = CASE WHEN ?='approved' THEN ? ELSE approved_at END "
+                "WHERE id=?", (state, now, state, now, answer_id))
+        return True
+
     def limits_checked_since(self, since_iso: str) -> set[str]:
         """Companies whose cap was looked at on/after `since_iso`. Lets a
         research pass resume without re-fetching what it already checked."""
@@ -2548,7 +2714,8 @@ class JobDB:
         placeholders = ",".join("?" * len(companies))
         cur = self.conn.execute(
             f"SELECT id, company FROM seen_jobs "
-            f"WHERE company IN ({placeholders}) AND delisted_at IS NULL",
+            f"WHERE company IN ({placeholders}) AND delisted_at IS NULL "
+            f"AND {MANUAL_EXEMPT_SQL}",
             companies,
         )
         return [
@@ -2589,7 +2756,8 @@ class JobDB:
         placeholders = ",".join("?" * len(orphans))
         return self._delete_jobs(
             f"company IN ({placeholders}) "
-            f"AND applied_at IS NULL AND status = 'new' AND COALESCE(favorite, 0) = 0",
+            f"AND applied_at IS NULL AND status = 'new' AND COALESCE(favorite, 0) = 0 "
+            f"AND {MANUAL_EXEMPT_SQL}",
             orphans,
         )
 
@@ -2638,7 +2806,7 @@ class JobDB:
         cutoff = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
         cur = self.conn.execute(
             "SELECT id, company FROM seen_jobs WHERE delisted_at IS NULL "
-            "AND last_seen IS NOT NULL AND last_seen < ?",
+            f"AND last_seen IS NOT NULL AND last_seen < ? AND {MANUAL_EXEMPT_SQL}",
             (cutoff,),
         )
         skip = exclude_companies or set()
@@ -2730,7 +2898,8 @@ class JobDB:
         counted (the 'All' view shows them), so the All badge matches the
         view; per-area tabs key off their own code and ignore the '' bucket."""
         clauses, params = _job_filter_sql(
-            locals(), omit={"area", "areas", "desk", "hide_other", "hide_wealth"},
+            {**locals(), "_search_index": self.search_index_ready()},
+            omit={"area", "areas", "desk", "hide_other", "hide_wealth"},
             initial=["area IS NOT NULL"])
         where = " AND ".join(clauses)
         sql = "SELECT area, count(*) FROM seen_jobs WHERE " + where + " GROUP BY area"
@@ -2769,11 +2938,12 @@ class JobDB:
         """Generalized role query used by the web app, JSON API, and jobfeed/query.py.
         All filters are AND-combined; None/empty means 'no constraint'.
         `companies` restricts to an explicit set (e.g. alumni firms).
-        `q` is a free-text LIKE over title + company. Returns dict rows keyed
+        `q` is the Browse free-text search (jobfeed/search.py). Returns dict rows keyed
         by DISPLAY_COLUMNS, plus `description` when with_description is set
         (the list views never render it; the JSON API does)."""
         sql = f"SELECT {', '.join(DISPLAY_COLUMNS)} FROM seen_jobs"
-        clauses, params = _job_filter_sql(locals())
+        clauses, params = _job_filter_sql(
+            {**locals(), "_search_index": self.search_index_ready()})
         if clauses:
             sql += " WHERE " + " AND ".join(clauses)
 
@@ -2812,6 +2982,16 @@ class JobDB:
 
     def _description_lengths(self, ids: list[str]) -> dict[str, int]:
         return self._description_query("length(description)", ids)
+
+    def search_index_ready(self) -> bool:
+        """Whether `q` may use the FTS5 index: this SQLite supports it and the
+        one-off backfill has finished (`python -m jobfeed.search --build`).
+        Until then a half-built index would hide roles, so the LIKE runs."""
+        if not search.supported(self.conn):
+            return False
+        if self._search_ready is None:
+            self._search_ready = search.is_built(self.conn)
+        return self._search_ready
 
     def firm_names(self) -> list[str]:
         """Every firm with a live role, source-label suffixes folded
@@ -2862,7 +3042,8 @@ class JobDB:
         if column not in FACET_COLUMNS:
             raise ValueError(f"not a facet column: {column}")
         clauses, params = _job_filter_sql(
-            f, omit={column}, initial=[f"{column} IS NOT NULL", f"{column} != ''"])
+            {**f, "_search_index": self.search_index_ready()},
+            omit={column}, initial=[f"{column} IS NOT NULL", f"{column} != ''"])
         sql = (f"SELECT DISTINCT {column} FROM seen_jobs "
                f"WHERE {' AND '.join(clauses)} ORDER BY {column}")
         rows = [row[0] for row in self.conn.execute(sql, params).fetchall()]

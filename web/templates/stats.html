@@ -174,14 +174,14 @@
     <section class="panel">
       <div class="panel-head"><h2>New roles per day</h2><span class="panel-meta">{{ "{:,}".format(roles_chart.total) }} in 30 days</span></div>
       <div class="chart-wrap">
-        <div class="chart" data-height="160" data-chart='{{ roles_chart|tojson }}' aria-label="New roles stored per day, last 30 days"></div>
+        <div class="chart" data-height="180" data-chart='{{ roles_chart|tojson }}' aria-label="New roles stored per day, last 30 days"></div>
         <div class="ch-tip" hidden></div>
       </div>
     </section>
     <section class="panel">
       <div class="panel-head"><h2>Noise share per week</h2><span class="panel-meta">new roles tagged other · {{ noise_chart.latest|round|int }}% this week</span></div>
       <div class="chart-wrap">
-        <div class="chart" data-height="160" data-chart='{{ noise_chart|tojson }}' aria-label="Share of new roles tagged other per week, last 12 weeks"></div>
+        <div class="chart" data-height="180" data-chart='{{ noise_chart|tojson }}' aria-label="Share of new roles tagged other per week, last 12 weeks"></div>
         <div class="ch-tip" hidden></div>
       </div>
     </section>
@@ -189,7 +189,7 @@
       <div class="panel-head"><h2>Scan tagging cost per day</h2><span class="panel-meta">{% if cost_chart.has_data %}${{ "%.2f"|format(cost_chart.total) }} in 30 days{% if cost_chart.unpriced_days %} · {{ cost_chart.unpriced_days }} day{{ 's' if cost_chart.unpriced_days != 1 }} partly unpriced{% endif %}{% if other_tag_cost %} · re-tags ${{ "%.2f"|format(other_tag_cost) }} not shown{% endif %}{% else %}no tag runs recorded{% endif %}</span></div>
       {% if cost_chart.has_data %}
       <div class="chart-wrap">
-        <div class="chart" data-height="160" data-chart='{{ cost_chart|tojson }}' aria-label="Scan tagging cost in US dollars per day, last 30 days"></div>
+        <div class="chart" data-height="180" data-chart='{{ cost_chart|tojson }}' aria-label="Scan tagging cost in US dollars per day, last 30 days"></div>
         <div class="ch-tip" hidden></div>
       </div>
       {% else %}<p class="dp-empty">tag_runs.jsonl has no scan runs in the last 30 days on this machine.</p>{% endif %}

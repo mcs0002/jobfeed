@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}Screening answers — Jobfeed{% endblock %}
+{% block main_class %}page{% endblock %}
+{% block content %}
+<div class="cp ans">
+  <div class="page-head">
+    <h1>Screening answers</h1>
+    <p class="page-lede">Answers you gave during attended runs. A run only ever proposes; an approved answer is what the agent reuses instead of asking again. The profile and the standard-question rules outrank every row here.</p>
+    <div class="summary-cards">
+      <div class="scard"><div class="k">To review</div><div class="v{% if counts.proposed %} bad{% endif %}">{{ counts.proposed }}</div></div>
+      <div class="scard"><div class="k">Approved</div><div class="v good">{{ counts.approved }}</div></div>
+      <div class="scard"><div class="k">Retired</div><div class="v">{{ counts.retired }}</div></div>
+    </div>
+  </div>
+
+  {% if msg %}<p class="ans-msg{% if msg.startswith('Not saved') %} is-bad{% endif %}">{{ msg }}</p>{% endif %}
+
+  <form class="cp-filters" method="get" action="/answers">
+    <input type="search" name="q" value="{{ q }}" placeholder="question, answer, firm">
+    <select name="category">
+      <option value="">all categories</option>
+      {% for c in categories %}<option value="{{ c }}"{% if c == category %} selected{% endif %}>{{ c }}</option>{% endfor %}
+    </select>
+    <select name="state">
+      <option value="">all states</option>
+      {% for s in states %}<option value="{{ s }}"{% if s == state %} selected{% endif %}>{{ s }}</option>{% endfor %}
+    </select>
+    <button type="submit">Filter</button>
+  </form>
+
+  {% if rows %}
+  <div class="table-card">
+  <table class="limtable anstable">
+    <thead><tr><th>Question</th><th>Answer</th><th>Where it came from</th><th></th></tr></thead>
+    <tbody>
+    {% for r in rows %}
+      <tr class="ans-{{ r.state }}">
+        <td>
+          <div class="ans-q">{{ r.question }}</div>
+          <div class="ans-meta">
+            <span class="lim-tag {% if r.state == 'approved' %}form{% elif r.state == 'proposed' %}unconfirmed{% else %}manual{% endif %}">{{ r.state }}</span>
+            <span class="lim-tag manual">{{ r.category }}</span>
+            {% if r.scope_firm %}<span class="lim-tag hard" title="Applies only at this firm and replaces the general answer there">{{ r.scope_firm }} only</span>{% endif %}
+          </div>
+          {% if r.blocker %}<div class="ans-block">Not reusable: {{ r.blocker }}.</div>{% endif %}
+        </td>
+        <td>
+          <form method="post" action="/answers/{{ r.id }}/edit" class="ans-edit">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <input type="hidden" name="back" value="{{ back }}">
+            <textarea name="answer" rows="2" maxlength="1000">{{ r.answer }}</textarea>
+            <div class="ans-row">
+              <select name="category">{% for c in categories %}<option value="{{ c }}"{% if c == r.category %} selected{% endif %}>{{ c }}</option>{% endfor %}</select>
+              <input type="text" name="scope_firm" value="{{ r.scope_firm }}" placeholder="all firms" title="Blank = every firm; a firm name = an override for that firm only">
+              <button type="submit">Save</button>
+            </div>
+          </form>
+        </td>
+        <td class="ans-src">
+          {% if r.seen_company %}{% if r.job_id %}<a href="/job/{{ r.job_id|urlencode }}">{{ r.seen_company }}</a>{% else %}{{ r.seen_company }}{% endif %}{% endif %}
+          {% if r.seen_ats %}<div>{{ r.seen_ats }}{% if r.seen_field %} · {{ r.seen_field }}{% endif %}</div>{% elif r.seen_field %}<div>{{ r.seen_field }}</div>{% endif %}
+          {% if r.workflow_id %}<div><code>{{ r.workflow_id }}</code></div>{% endif %}
+          <div>first {{ (r.created_at or '')[:10] }}{% if r.seen_count > 1 %} · seen {{ r.seen_count }}×{% endif %}</div>
+          {% if r.approved_at %}<div>approved {{ r.approved_at[:10] }}</div>{% endif %}
+        </td>
+        <td class="ans-actions">
+          {% if r.state != 'approved' and not r.blocker %}
+          <form method="post" action="/answers/{{ r.id }}/approve">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <input type="hidden" name="back" value="{{ back }}">
+            <button type="submit">Approve</button>
+          </form>
+          {% endif %}
+          {% if r.state != 'retired' %}
+          <form method="post" action="/answers/{{ r.id }}/retire">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <input type="hidden" name="back" value="{{ back }}">
+            <button type="submit">Retire</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% else %}
+    <p class="cp-empty">Nothing here{% if q %} for “{{ q }}”{% endif %}. Runs propose answers through their status report.</p>
+  {% endif %}
+
+  <p class="lp-foot">
+    Demographic and other sensitive questions are never stored, and narrative
+    answers are written for each application. A <b>profile</b> row is a personal
+    fact (education, employment, availability, work authorisation): it cannot be
+    approved; copy it into <code>applicant_profile.json</code> instead.
+    Eligibility answers are reused only as a cross-check against the
+    standard-question truthfulness rules. Approved rows are written to
+    <code>secrets/screening_answers.json</code>, which the agent reads at the start of a run.
+  </p>
+</div>
+{% endblock %}

@@ -45,6 +45,20 @@
     </div>
     <div class="topbar-right">
       {% block topbar_extra %}{% endblock %}
+      {# One search for every page (2026-10-10; replaced the Browse toolbar's
+         text and firm boxes). Off Browse it is a plain GET to Browse with
+         `q`; on Browse, index.html drives it live, and an exact firm name
+         (offered by the firm-names datalist there) becomes the exact `firm`
+         filter instead of free text. Free text: title, company, location,
+         city and posting text with city aliases (jobfeed/search.py). #}
+      {% set _p = params if params is defined else {} %}
+      <form class="top-search" role="search" method="get" action="{{ browse_path|default('/') }}">
+        <input type="search" name="q" class="text-search" id="text-search" list="firm-names"
+          placeholder="Search roles or firms…" aria-label="Search title, firm, location and description"
+          title='Words must all match (prefixes count); "quoted phrase"; -word excludes. Searches the posting text too. An exact firm name filters to that firm.'
+          autocomplete="off" maxlength="200"
+          value="{{ _p.get('q') or _p.get('firm') or _p.get('company') or '' }}">
+      </form>
       <button type="button" class="theme-toggle" onclick="window.__toggleTheme()" title="Toggle dark mode" aria-label="Toggle dark mode"></button>
       {% if request.session.get('role') == 'guest' %}<span class="role-badge" title="Guest access — browsing only, no changes">guest</span>{% endif %}
       <form method="post" action="/logout" class="logout-form"><button type="submit" title="Log out" aria-label="Log out">⏻</button></form>
@@ -82,7 +96,6 @@
         var href = localStorage.getItem("jsui.lastBrowse") || "/";
         if (href.charAt(0) !== "/") href = "/";
         var browseUrl = new URL(href, window.location.origin);
-        browseUrl.searchParams.delete("q");
         if (document.body.classList.contains("guest")) {
           browseUrl.searchParams.delete("status");
           browseUrl.searchParams.delete("fav");

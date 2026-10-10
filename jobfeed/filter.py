@@ -594,9 +594,12 @@ def _location_hit(location: str, terms: set[str]) -> bool:
     return False
 
 
-def is_relevant(job: dict, category: str = "", strict: bool | None = None,
-                extra_drops: set | None = None) -> bool:
-    """Return True if the job should be stored. Negative filter — anything not
+def drop_reason(job: dict, category: str = "", strict: bool | None = None,
+                extra_drops: set | None = None) -> str:
+    """Why a scan would drop this job, as a short label, or "" to store it.
+    `is_relevant` is its negation; the manual add (jobfeed/manual_add.py)
+    shows the label as a warning instead of dropping, because he chose the
+    role. Returns "" if the job should be stored. Negative filter — anything not
     explicitly dropped passes through. `category` is accepted for back-compat
     with jobfeed/main.py but unused.
 
@@ -623,21 +626,21 @@ def is_relevant(job: dict, category: str = "", strict: bool | None = None,
     # Location-based drops first (cheapest, most reductive). Word-boundary
     # matched so 'india' can't swallow 'Indiana'/'Indianapolis'.
     if _location_hit(location, LOCATION_DROPS):
-        return False
+        return "location (back-office hub)"
 
     # Pre-degree / school-level programmes: ALWAYS dropped (out of scope for a
     # master's student). Degree/graduate apprenticeships are exempted.
     if _hits(title, PRE_DEGREE_DROPS):
-        return False
+        return "pre-degree programme"
     if _APPRENTICE_RE.search(title) and not _APPRENTICE_EXEMPT_RE.search(title):
-        return False
+        return "apprenticeship"
 
     # Internships: stored in the store-broad default (browsable in the web app,
     # tagged job_type=internship, hidden behind the show_internships toggle) but
     # dropped in strict scrape mode (JOBS_STRICT_FILTER). the user is a student,
     # so internships are in scope for browsing.
     if strict and _hits(title, INTERNSHIP_MARKERS):
-        return False
+        return "internship (strict mode)"
 
     # Seniority hard gate (always on). "associate" is handled separately below
     # because its rung is firm-dependent.
@@ -645,7 +648,7 @@ def is_relevant(job: dict, category: str = "", strict: bool | None = None,
     senior_title = _NOT_SENIOR_RE.sub(" ", title)
     if (_hits(senior_title, SENIOR_TITLE_DROPS) and not _SENIOR_TITLE_EXEMPT_RE.search(title)
             and not _ENTRY_PROGRAMME_RE.search(title)):
-        return False
+        return "senior title"
 
     # "associate" is the SENIOR rung at banks (post-analyst) but the ENTRY rung
     # at PE / asset managers / consulting. Under the store-broad default we keep
@@ -653,19 +656,19 @@ def is_relevant(job: dict, category: str = "", strict: bool | None = None,
     # associate roles" toggle); strict mode still drops it, except dual-rung
     # "Analyst/Associate" titles which are analyst-level.
     if strict and not dual_rung and _contains_term(title, "associate"):
-        return False
+        return "associate rung (strict mode)"
 
     # Multi-year experience demand in the title → senior.
     if _demands_experience(title):
-        return False
+        return "years of experience in the title"
 
     # --- Unambiguous-noise drops (ALWAYS — never wanted at any source) ---
     if _hits(title, BACK_OFFICE_DROPS) and not _BACK_OFFICE_EXEMPT_RE.search(title):
-        return False
+        return "back-office title"
     if _hits(title, RETAIL_DROPS):
-        return False
+        return "retail title"
     if _RETAIL_WEALTH_RE.search(title):
-        return False
+        return "branch wealth advice title"
     # AI-titled roles pass the tech drop so the AI tab (2026-09-29) can show
     # them: "ai engineer" and "data engineer" had silently removed UBS's
     # "2027 Graduate Talent Program - AI Engineer - Zurich" and "AI & Data
@@ -674,14 +677,20 @@ def is_relevant(job: dict, category: str = "", strict: bool | None = None,
     # ai_title's acronyms are case-sensitive. Plain software/IT titles still drop.
     if (_hits(title, TECH_DROPS) and not ai_title(job.get("title"))
             and not _FINANCE_TECH_RE.search(title)):
-        return False
+        return "technology title"
     if _hits(title, NON_FINANCE_DROPS):
-        return False
+        return "non-finance title"
     if extra_drops and _hits(title, extra_drops):
-        return False
+        return "source noise term"
 
     # --- IBD: opted back IN by default (June 2026 broaden); strict still drops ---
     if strict and _hits(title, IBD_DROPS):
-        return False
+        return "IBD (strict mode)"
 
-    return True
+    return ""
+
+
+def is_relevant(job: dict, category: str = "", strict: bool | None = None,
+                extra_drops: set | None = None) -> bool:
+    """True if the job should be stored: no hard gate in `drop_reason` fires."""
+    return not drop_reason(job, category, strict=strict, extra_drops=extra_drops)

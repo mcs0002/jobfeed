@@ -32,6 +32,11 @@ CITIES = ["London", "New York", "Frankfurt", "Zurich", "Paris", "Amsterdam",
 AREAS = ("markets", "quant", "research", "economics", "ibd", "private-markets",
          "asset-management", "capital-markets", "consulting")
 PER_CITY = 70
+# Technical stats charts the noise share and noisiest sources from area
+# 'other' rows; without some the panels render empty. Spread over twelve weeks
+# so the weekly chart has a shape. Browse hides 'other', so the Browse shots
+# are unaffected.
+OTHER_PER_CITY = 40
 TAGS = ("area", "desk", "seniority", "job_type", "loc_city", "loc_country",
         "loc_region", "work_mode", "lang_req", "education", "start_date", "min_yoe")
 
@@ -52,6 +57,12 @@ for city in CITIES:
            AND length(COALESCE(description, '')) > 800
          ORDER BY (job_type IN ('internship', 'graduate-programme')) DESC,
                   first_seen DESC LIMIT ?""", (city, *AREAS, PER_CITY)).fetchall()
+    rows += src.execute("""
+        SELECT * FROM jobs_with_description
+         WHERE delisted_at IS NULL AND loc_city = ? AND area = 'other'
+           AND first_seen >= datetime('now', '-84 days')
+           AND length(COALESCE(description, '')) > 800
+         ORDER BY random() LIMIT ?""", (city, OTHER_PER_CITY)).fetchall()
     for r in rows:
         db.mark_seen(r["id"], company=r["company"], title=r["title"], url=r["url"],
                      category=r["category"] or "", location=r["location"] or "",
@@ -71,7 +82,8 @@ assert db.conn.execute("SELECT COUNT(*) FROM seen_jobs WHERE status <> 'new' "
                        "OR COALESCE(favorite,0) <> 0 OR notes IS NOT NULL "
                        "OR applied_at IS NOT NULL").fetchone()[0] == 0
 for table in ("application_workflows", "application_mail_events", "applications",
-              "application_runs", "company_limits", "campus_state", "application_accounts"):
+              "application_runs", "company_limits", "campus_state", "application_accounts",
+              "screening_answers"):
     try:
         assert db.conn.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0] == 0, table
     except sqlite3.OperationalError:

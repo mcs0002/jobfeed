@@ -7,6 +7,12 @@
   {% if request.session.get('role') != 'guest' %}{% include "_star.html" %}{% endif %}
   <h1>{{ job.title }}</h1>
   <p class="sub"><strong>{{ job.company }}</strong></p>
+  {% if added %}
+  <div class="added-note" role="status">
+    <strong>{{ added.message }}</strong>
+    {% for w in added.warnings %}<div class="added-warn">⚠ {{ w }}</div>{% endfor %}
+  </div>
+  {% endif %}
   {% if job.delisted_at %}
   <div class="delisted-banner">This posting was delisted {{ days_ago(job.delisted_at) }} ({{ job.delisted_at[:10] }}) — it's no longer on the company's board, so the live link is likely dead. Use the captured description below.</div>
   {% endif %}

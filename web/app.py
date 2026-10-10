@@ -25,6 +25,7 @@ from pathlib import Path
 
 from fastapi import Depends, FastAPI, Form, Request
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
+from starlette.concurrency import run_in_threadpool
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
@@ -39,6 +40,8 @@ from jobfeed.dedup import group_postings
 from jobfeed.tag_telemetry import SCAN_CALLERS, aggregate as tag_telemetry
 from applications import runs as antigravity_runs  # noqa: E402
 from applications import autopilot  # noqa: E402
+from applications import answers as screening_answers  # noqa: E402
+from jobfeed import manual_add  # noqa: E402
 from jobfeed import campus  # noqa: E402
 from applications.handoff import handoff_view, safe_application_url, workflow_token  # noqa: E402
 from applications.launcher import enqueue_launch  # noqa: E402
@@ -177,6 +180,10 @@ NAV_ITEMS = (
      "group": "more"},
     {"href": "/campus", "label": "Grad schemes", "mobile": "Grad", "icon": "🎓",
      "active": "campus", "title": "Graduate schemes that never reach an ATS board",
+     "group": "more"},
+    # Owner-only (no guest=True): his screening answers are his job search.
+    {"href": "/answers", "label": "Answers", "mobile": "Answers", "icon": "✎",
+     "active": "answers", "title": "Screening answers kept from attended runs",
      "group": "more"},
 )
 
@@ -599,7 +606,7 @@ RECENCY_DAYS = {"7": 7, "14": 14, "30": 30}
 ACTED_ON_STATUSES = APPLICATION_MAIL_ORDER
 
 
-def _filters_from_request(request: Request, *, allow_text_search: bool = True) -> dict:
+def _filters_from_request(request: Request) -> dict:
     """Map query params → db.fetch_jobs kwargs. Blank params are dropped."""
     p = _browse_params(request)
     kwargs: dict = {}
@@ -616,8 +623,8 @@ def _filters_from_request(request: Request, *, allow_text_search: bool = True) -
     closing = p.get("closing", "").strip()
     if closing in ("7", "30", "rolling"):
         kwargs["closing"] = closing
-    q = p.get("q", "").strip()
-    if allow_text_search and q:
+    q = p.get("q", "").strip()[:200]
+    if q:
         kwargs["q"] = q
     days = p.get("days", "").strip()
     if days in RECENCY_DAYS:
@@ -907,6 +914,8 @@ def _active_chips(request: Request, base_path: str = "/") -> list[dict]:
     def add(label: str, *keys):
         chips.append({"label": label, "url": without(*keys)})
 
+    if p.get("q", "").strip():
+        add(f"Search: {p['q'].strip()[:60]}", "q")
     if p.get("company", "").strip():
         add(f"Firm: {p['company'].strip()}", "company")
     if p.get("firm", "").strip():
@@ -1378,7 +1387,7 @@ def _present(db: JobDB, jobs: list[dict]) -> list[dict]:
 def _browse_context(request: Request, db: JobDB, *, why_preview: bool = False) -> dict:
     browse_path = WHY_PREVIEW_PATH if why_preview else "/"
     partial_path = WHY_PREVIEW_PARTIAL_PATH if why_preview else "/partials/jobs"
-    filters = _filters_from_request(request, allow_text_search=False)
+    filters = _filters_from_request(request)
     facets = _facets(db, request, filters)
     _reconcile_location(filters, facets)
     pages, limit = _page_limit(request)
@@ -1420,10 +1429,10 @@ def _browse_context(request: Request, db: JobDB, *, why_preview: bool = False) -
 
 @app.get("/", response_class=HTMLResponse)
 def index(request: Request, db: JobDB = Depends(get_db), _=Depends(require_login)):
-    # Free text looked like a location search but only matched title/company.
-    # Strip legacy q links rather than leaving an invisible active filter after
-    # the search box's removal. The JSON API retains q for programmatic use.
-    forbidden = {"q"}
+    # Guests' links never carry his status or favourites filters. Free text
+    # (`q`) is a job-facts filter and allowed for everyone: it searches title,
+    # company, location, city and posting text (jobfeed/search.py).
+    forbidden = set()
     if _is_guest(request):
         forbidden.update(("status", "fav"))
     if any(key in request.query_params for key in forbidden):
@@ -1447,7 +1456,7 @@ def why_this_is_here_preview(request: Request, db: JobDB = Depends(get_db),
 
 @app.get("/partials/jobs", response_class=HTMLResponse)
 def partial_jobs(request: Request, db: JobDB = Depends(get_db), _=Depends(require_login)):
-    filters = _filters_from_request(request, allow_text_search=False)
+    filters = _filters_from_request(request)
     facets = _facets(db, request, filters)
     _reconcile_location(filters, facets)
     pages, limit = _page_limit(request)
@@ -1496,6 +1505,13 @@ def job_detail(job_id: str, request: Request, db: JobDB = Depends(get_db),
     # ?pane=1 → the bare detail-pane fragment loaded into the Browse split view
     # (and the mobile bottom sheet) via htmx. Otherwise the standalone page.
     lim = job["lim_view"]
+    # One-shot note from the URL add (what was read, what a scan would have
+    # dropped), shown once on the role it created or found.
+    added = request.session.get("added_note")
+    if added and added.get("job_id") == job_id and not _is_guest(request):
+        request.session.pop("added_note", None)
+    else:
+        added = None
     if request.query_params.get("pane"):
         return TEMPLATES.TemplateResponse(request, "_detail.html", {
             "request": request, "job": job, "lim": lim,
@@ -1503,7 +1519,7 @@ def job_detail(job_id: str, request: Request, db: JobDB = Depends(get_db),
         })
     return TEMPLATES.TemplateResponse(request, "job.html", {
         "request": request, "job": job, "lim": lim, "active_nav": "browse",
-        "csrf_token": _csrf_token(request),
+        "csrf_token": _csrf_token(request), "added": added,
     })
 
 
@@ -2100,6 +2116,7 @@ def write_agent_application_status(workflow_id: str, request: Request,
                                    limit_verdict: str = Form(""),
                                    limit_max: str = Form(""),
                                    limit_quote: str = Form(""),
+                                   answers: str = Form(""),
                                    db: JobDB = Depends(get_db)):
     workflow = db.get_application_workflow(workflow_id)
     if workflow is None or not _valid_workflow_token(workflow_id, token):
@@ -2134,7 +2151,22 @@ def write_agent_application_status(workflow_id: str, request: Request,
     if limit_verdict:
         message += "; " + _record_form_limit(db, workflow, status, limit_verdict,
                                              limit_max, limit_quote)
+    if answers:
+        message += "; " + _record_screening_answers(db, workflow, status, answers)
     return _agent_workflow_response(request, db, workflow, token, message=message)
+
+
+def _record_screening_answers(db: JobDB, workflow: dict, status: str,
+                              raw: str) -> str:
+    """Store the answers the user gave in this run as bank proposals.
+
+    Like the limit observation, never fails the status it rides on. Nothing
+    from this path is ever approved: approval is the owner's /answers action."""
+    try:
+        items = screening_answers.read_observation(json.loads(raw))
+    except (ValueError, TypeError) as exc:
+        return f"answers not recorded: {exc}"
+    return screening_answers.capture(db, workflow, status, items)
 
 
 def _record_form_limit(db: JobDB, workflow: dict, status: str, verdict: str,
@@ -2285,6 +2317,112 @@ def limits_page(request: Request, db: JobDB = Depends(get_db),
                                  if r["favorites"] and not r["known"]),
         "active_nav": "limits",
     })
+
+
+# ── Add a role by URL (jobfeed/manual_add.py) ──────────────────────────────
+# Owner-only: not in GuestSurfaceMiddleware's allowlist, and require_owner on
+# both routes. The POST carries the session's CSRF token like the other owner
+# forms.
+
+def _add_form(request: Request, *, message: str = "", draft: dict | None = None,
+              status_code: int = 200):
+    return TEMPLATES.TemplateResponse(request, "add_role.html", {
+        "request": request, "message": message, "draft": draft or {},
+        "csrf_token": _csrf_token(request), "active_nav": "browse",
+    }, status_code=status_code)
+
+
+@app.get("/add", response_class=HTMLResponse)
+def add_role_form(request: Request, url: str = "", _=Depends(require_owner)):
+    return _add_form(request, draft={"url": url.strip()[:2000]})
+
+
+@app.post("/add", response_class=HTMLResponse)
+async def add_role(request: Request, db: JobDB = Depends(get_db),
+                   _=Depends(require_owner)):
+    form = await request.form()
+    if not _valid_csrf(request, str(form.get("csrf_token", ""))):
+        return HTMLResponse("invalid request", status_code=403)
+    fields = {k: str(form.get(k, ""))[:limit] for k, limit in
+              (("url", 2000), ("title", 300), ("company", 200),
+               ("location", 300), ("description", 60000))}
+    # The fetch and the tagger are blocking; keep them off the event loop.
+    result = await run_in_threadpool(
+        manual_add.add, db, fields["url"], title=fields["title"],
+        company=fields["company"], location=fields["location"],
+        description=fields["description"])
+    if result.outcome in ("added", "existing"):
+        request.session["added_note"] = {"job_id": result.job_id,
+                                         "message": result.message,
+                                         "warnings": result.warnings[:6]}
+        return RedirectResponse(f"/job/{urllib.parse.quote(result.job_id)}",
+                                status_code=303)
+    return _add_form(request, message=result.message, draft=result.draft,
+                     status_code=400 if result.outcome == "refused" else 200)
+
+
+@app.get("/answers", response_class=HTMLResponse)
+def answers_page(request: Request, q: str = "", category: str = "",
+                 state: str = "", msg: str = "", db: JobDB = Depends(get_db),
+                 _=Depends(require_owner)):
+    """The screening-answer bank: what attended runs captured, for him to
+    review. Proposals first; only an approval here makes an answer reusable."""
+    q = q.strip()[:100]
+    category = category if category in screening_answers.CATEGORIES else ""
+    state = state if state in screening_answers.STATES else ""
+    rows = db.screening_answers(state=state, category=category, q=q)
+    for r in rows:
+        r["blocker"] = screening_answers.approval_blocker(r["question"], r["answer"])
+    counts = {s: 0 for s in screening_answers.STATES}
+    for r in db.screening_answers():
+        counts[r["state"]] += 1
+    back = urllib.parse.urlencode({k: v for k, v in
+                                   (("q", q), ("category", category), ("state", state)) if v})
+    return TEMPLATES.TemplateResponse(request, "answers.html", {
+        "request": request, "rows": rows, "q": q, "category": category,
+        "state": state, "counts": counts, "msg": msg[:200],
+        "categories": screening_answers.CATEGORIES,
+        "states": screening_answers.STATES, "back": back,
+        "csrf_token": _csrf_token(request), "active_nav": "answers",
+    })
+
+
+def _answers_redirect(back: str, msg: str = "") -> RedirectResponse:
+    params = urllib.parse.parse_qs(back or "")
+    query = {k: v[0] for k, v in params.items() if k in ("q", "category", "state")}
+    if msg:
+        query["msg"] = msg
+    return RedirectResponse("/answers" + ("?" + urllib.parse.urlencode(query) if query else ""),
+                            status_code=303)
+
+
+@app.post("/answers/{answer_id}/{action}")
+async def answers_action(answer_id: int, action: str, request: Request,
+                         db: JobDB = Depends(get_db), _=Depends(require_owner)):
+    form = await request.form()
+    if not _valid_csrf(request, str(form.get("csrf_token", ""))):
+        return HTMLResponse("invalid request", status_code=403)
+    back = str(form.get("back", ""))
+    try:
+        if action == "approve":
+            screening_answers.approve(db, answer_id)
+            msg = "Approved; the agent reads it from the next run."
+        elif action == "retire":
+            screening_answers.retire(db, answer_id)
+            msg = "Retired."
+        elif action == "edit":
+            screening_answers.edit(
+                db, answer_id, answer=str(form.get("answer", "")),
+                category=str(form.get("category", "")),
+                scope_firm=str(form.get("scope_firm", "")))
+            msg = "Saved."
+        else:
+            return HTMLResponse("Not found", status_code=404)
+    except KeyError:
+        return HTMLResponse("Not found", status_code=404)
+    except (ValueError, PermissionError) as exc:
+        return _answers_redirect(back, f"Not saved: {exc}")
+    return _answers_redirect(back, msg)
 
 
 @app.get("/campus", response_class=HTMLResponse)

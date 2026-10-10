@@ -22,6 +22,7 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
+from applications.answers import read_observation as _read_answers
 from applications.handoff import read_fixed_request, workflow_token
 from jobfeed.envfile import load_dotenv
 from jobfeed.db import AGENT_WORKFLOW_STATES
@@ -69,10 +70,12 @@ def _read_request(path: Path) -> dict:
     always done this for the request the web service writes; this one, written
     by the agent, went straight to `path.read_text()`."""
     obj = read_fixed_request(path)
-    allowed = {"workflow_id", "run_id", "status", "detail", "application_limit"}
+    allowed = {"workflow_id", "run_id", "status", "detail", "application_limit",
+               "answers"}
     if set(obj) - allowed:
         raise ValueError(
-            "request must hold only workflow_id, run_id, status, detail and application_limit")
+            "request must hold only workflow_id, run_id, status, detail, "
+            "application_limit and answers")
     workflow_id = str(obj.get("workflow_id", ""))
     status = str(obj.get("status", ""))
     if not workflow_id.startswith(ID_PREFIX) or not workflow_id[6:].isalnum():
@@ -90,6 +93,14 @@ def _read_request(path: Path) -> dict:
         request["run_id"] = run_id
     if "application_limit" in obj:
         request.update(_read_limit(obj["application_limit"]))
+    # Answers the user gave in this run, for the screening-answer bank. They
+    # ride the same fixed file as the limit observation, so no new grant.
+    if "answers" in obj:
+        if status not in ("review_ready", "needs_user_action"):
+            raise ValueError("answers ride only on review_ready or needs_user_action")
+        answers = _read_answers(obj["answers"])
+        if answers:
+            request["answers"] = answers
     return request
 
 
@@ -107,6 +118,8 @@ def report(request: dict) -> int:
     if request.get("run_id"):
         fields["run_id"] = request["run_id"]
     fields.update({k: v for k, v in request.items() if k.startswith("limit_")})
+    if request.get("answers"):
+        fields["answers"] = json.dumps(request["answers"], ensure_ascii=False)
     payload = urllib.parse.urlencode(fields).encode()
     url = f"{base}/application/{request['workflow_id']}/agent/status"
     try:

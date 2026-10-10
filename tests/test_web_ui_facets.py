@@ -142,16 +142,23 @@ def test_filter_card_dismissal_and_sticky_seam_guards():
     assert "flex: 1; overflow-y: auto; padding: 0 14px 16px;" in css
 
 
-def test_browse_search_is_removed_and_legacy_query_is_stripped():
+def test_browse_search_is_kept_and_shown_as_a_chip():
+    # The free-text box came back on 2026-10-10 (jobfeed/search.py) searching
+    # location and description too; a q link now filters instead of being
+    # stripped, and the chip row says so. The box lives in the header
+    # (base.html) since the same day, so every page can search.
     root = Path(__file__).resolve().parents[1]
+    base = (root / "web/templates/base.html").read_text()
+    assert 'id="text-search"' in base
+    assert 'list="firm-names"' in base
     index = (root / "web/templates/index.html").read_text()
-    assert 'id="head-search"' not in index
-    assert 'e.key === "/"' not in index
+    assert 'name="q"' in index
+    assert 'id="firm-names"' in index
 
     def body(c):
         r = c.get("/?q=Munich&loc_city=Frankfurt", follow_redirects=False)
-        assert r.status_code == 303
-        assert r.headers["location"] == "/?loc_city=Frankfurt"
+        assert r.status_code == 200
+        assert "Search: Munich" in r.text
     run(body)
 
 

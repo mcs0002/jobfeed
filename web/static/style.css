@@ -343,17 +343,17 @@ body.guest .newbar { display: none !important; }
    count used to sit on their own rows below; merging them reclaims a full row
    of desktop chrome. */
 .list-toolbar { display: flex; align-items: center; gap: 8px; margin-top: 8px; margin-bottom: 8px; }
-.firm-search {
-  flex: 0 1 170px; min-width: 110px; height: 28px; padding: 0 10px;
+/* Header search (base.html), every page. */
+.top-search { flex: 0 1 300px; min-width: 140px; margin: 0; }
+.text-search {
+  width: 100%; height: 30px; padding: 0 10px;
   border: 1px solid var(--bd-input); border-radius: 8px; background: var(--input-bg);
   color: var(--fg); font: inherit; font-size: 12.5px;
 }
-.firm-search:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-bg); }
-/* Phones: the firm box takes the toolbar's remaining width and the count
-   drops to its own line, rather than the row running off the screen. */
+.text-search:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-bg); }
+/* Phones: the count drops to its own line rather than running off screen. */
 @media (max-width: 640px) {
   .list-toolbar { flex-wrap: wrap; row-gap: 6px; }
-  .firm-search { flex: 1 1 120px; }
   .list-toolbar .list-count { flex: 1 1 calc(100% - 100px); text-align: left; }
 }
 .filters-btn {
@@ -1274,6 +1274,7 @@ main.page { padding: 22px 18px 28px; max-width: 1100px; margin: 0 auto; }
      filters + chips) is what sticks, like the always-visible header of the
      desktop split view. */
   .topbar { padding: 8px 14px; position: static; }
+  .top-search { flex: 1 1 auto; }
   .topnav { display: none; }
   /* Stack the split so the list pane is a block, not a flex item that refuses
      to shrink below the intrinsic width of the nowrap .area-tabs row (which
@@ -1989,10 +1990,18 @@ a.btn-open.dead:visited { color: var(--muted); }
 @media (max-width: 859px) { .chart-row, .chart-row.even { grid-template-columns: minmax(0, 1fr); } }
 /* Technical stats: charts stacked left, noisiest sources right (2026-10-10).
    align-items:start keeps each column at its own height. */
-.stats-split { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); gap: 12px; margin-bottom: 18px; align-items: start; }
-.stats-charts { display: grid; gap: 12px; }
+.stats-split { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); gap: 12px; margin-bottom: 18px; align-items: stretch; }
+.stats-charts { display: grid; gap: 12px; align-content: start; }
+/* The charts column alone sets the row height: `contain: size` keeps the list
+   out of the height calculation, so the side card ends level with the last
+   chart and its list scrolls instead of stretching the page. */
+.stats-side { contain: size; display: flex; flex-direction: column; overflow: hidden; }
+.stats-side .telemetry { flex: 1 1 auto; min-height: 0; overflow-y: auto; }
 .stats-split .telemetry-row { grid-template-columns: minmax(0, 1.6fr) auto auto; }
-@media (max-width: 859px) { .stats-split { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 859px) {
+  .stats-split { grid-template-columns: minmax(0, 1fr); }
+  .stats-side { contain: none; }
+}
 
 .chart-wrap { position: relative; }
 .chart { width: 100%; min-height: 180px; }
@@ -2093,3 +2102,34 @@ a.btn-open.dead:visited { color: var(--muted); }
   border: 1px solid var(--bd); border-radius: 10px; color: var(--accent); background: var(--surface);
   text-decoration: none; font-weight: 600; }
 .list-more:hover { background: var(--accent-bg); }
+
+/* Screening answers (/answers) */
+.anstable td { vertical-align: top; }
+.ans-q { font-weight: 500; margin-bottom: 4px; }
+.ans-meta { display: flex; gap: 4px; flex-wrap: wrap; }
+.ans-block { margin-top: 4px; font-size: 11.5px; color: var(--warn); }
+.ans-edit textarea { width: 100%; min-width: 14rem; font: inherit; font-size: 13px; }
+.ans-row { display: flex; gap: 4px; margin-top: 4px; flex-wrap: wrap; }
+.ans-row input[type=text] { flex: 1; min-width: 7rem; }
+.ans-src { font-size: 11.5px; color: var(--muted); }
+.ans-actions form { margin-bottom: 4px; }
+.ans-retired td { opacity: .55; }
+.ans-msg { padding: 8px 10px; border: 1px solid var(--bd2); border-radius: 6px; font-size: 13px; }
+.ans-msg.is-bad { border-color: var(--warn); color: var(--warn); }
+@media (max-width: 720px) {
+  .anstable thead { display: none; }
+  .anstable tr, .anstable td { display: block; }
+}
+
+/* Add a role by link (/add) */
+.toolbar-add { flex: none; font-size: 12.5px; font-weight: 600; color: var(--accent); text-decoration: none; white-space: nowrap; }
+.toolbar-add:hover { text-decoration: underline; }
+.add-form { display: flex; flex-direction: column; gap: 10px; max-width: 46rem; }
+.add-form label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; }
+.add-form input, .add-form textarea { font: inherit; font-size: 13px; padding: 6px 8px; border: 1px solid var(--bd-input); border-radius: 6px; background: var(--input-bg); color: var(--fg); }
+.add-form details { display: flex; flex-direction: column; gap: 8px; }
+.add-form details[open] > label { margin-top: 8px; }
+.add-form .hint { color: var(--faint); font-size: 11.5px; }
+.add-form button { align-self: flex-start; }
+.added-note { margin: 8px 0 12px; padding: 8px 10px; border: 1px solid var(--bd2); border-radius: 6px; font-size: 13px; }
+.added-warn { margin-top: 4px; color: var(--warn); }

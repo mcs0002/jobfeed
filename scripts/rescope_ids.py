@@ -45,6 +45,10 @@ JOB_ID_COLUMNS = [
     ("applications", "job_id"),
     ("application_workflows", "job_id"),
     ("application_mail_events", "job_id"),
+    ("screening_answers", "job_id"),
+    # The search index's id map; seen_jobs' update trigger re-keys it first,
+    # so this UPDATE finds nothing left to move and the counts still agree.
+    ("job_search_ids", "job_id"),
 ]
 
 
