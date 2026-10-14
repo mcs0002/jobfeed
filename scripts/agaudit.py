@@ -352,7 +352,9 @@ def print_search_findings(calls: list, failed_steps: list | None = None) -> None
 # new_page first, and may then act only on tabs it opened itself. The owned set
 # comes from the "[selected]" line in each new_page result, and every later tool
 # result names the selected page, so an action on a foreign tab is visible here.
-_SELECTED_RE = re.compile(r"(\d+): \S+ \[selected\]")
+# chrome-devtools-mcp 1.9.0 lists "N: Title (url) [selected]"; older versions
+# printed "N: url [selected]". Match the whole line either way.
+_SELECTED_RE = re.compile(r"^(\d+): .*\[selected\]\s*$", re.M)
 _PAGE_ID_RE = re.compile(r"^(\d+): ", re.M)
 _PAGE_MUTATIONS = frozenset({
     "navigate_page", "click", "fill", "fill_form", "type_text", "press_key",

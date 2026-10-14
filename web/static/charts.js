@@ -4,7 +4,10 @@
    One series, one colour (the accent), so no legend: the card title names it.
    Thin rounded columns from a single baseline, hairline gridlines, sparse
    x labels, the latest value labelled at its cap, and a hover tooltip on a
-   full-height hit column so small bars are still easy to reach. Re-renders
+   full-height hit column so small bars are still easy to reach. A point with
+   `lo` stacks two segments: `lo` solid at the base, the rest pale on top.
+   A point with `segs` [{slug, v}] stacks one segment per entry from the base,
+   each filled with var(--seg-<slug>), the stats page's area palette. Re-renders
    on resize so it fills whatever width the card has. */
 (function () {
   var NS = "http://www.w3.org/2000/svg";
@@ -48,10 +51,22 @@
     var plotW = W - padL - padR, plotH = H - padT - padB;
     var max = 0;
     pts.forEach(function (p) { if (p.v > max) max = p.v; });
+    // `clip`: bars above clip x the median of the non-zero values are cut at
+    // the top and labelled, so one outlier (a bulk first load) does not flatten
+    // every other bar.
+    if (data.clip) {
+      var nz = pts.map(function (p) { return p.v; }).filter(function (v) { return v > 0; })
+        .sort(function (a, b) { return a - b; });
+      if (nz.length > 2) {
+        var lim = data.clip * nz[Math.floor(nz.length / 2)], fit = 0;
+        nz.forEach(function (v) { if (v <= lim && v > fit) fit = v; });
+        if (fit && fit < max) max = fit;
+      }
+    }
     var sc = niceScale(max, 3, data.format === "int" || data.format === "pct");
-    var y = function (v) { return padT + plotH - (v / sc.max) * plotH; };
+    var y = function (v) { return Math.max(padT - 6, padT + plotH - (v / sc.max) * plotH); };
     var slot = plotW / pts.length;
-    var barW = Math.max(3, Math.min(24, slot * 0.62));
+    var barW = Math.max(3, Math.min(data.barMax || 24, slot * 0.62));
 
     var svg = el("svg", { width: W, height: H, viewBox: "0 0 " + W + " " + H,
       role: "img", "aria-label": box.getAttribute("aria-label") || "" });
@@ -77,6 +92,7 @@
       hit.addEventListener("mouseenter", function () {
         if (!tip) return;
         tip.textContent = p.tip || (p.x + ": " + fmt(p.v, data.format, false));
+        tip.classList.toggle("multi", tip.textContent.indexOf("\n") >= 0);
         tip.hidden = false;
         var tx = Math.min(Math.max(cx - tip.offsetWidth / 2, 0), W - tip.offsetWidth);
         tip.style.left = tx + "px";
@@ -93,19 +109,51 @@
       if (h > 0) {
         var r = Math.min(4, barW / 2, h);
         // Rounded data end, square at the baseline.
-        var d = "M" + x0 + "," + base + "V" + (base - h + r)
-          + "Q" + x0 + "," + (base - h) + " " + (x0 + r) + "," + (base - h)
-          + "H" + (x0 + barW - r)
-          + "Q" + (x0 + barW) + "," + (base - h) + " " + (x0 + barW) + "," + (base - h + r)
-          + "V" + base + "Z";
-        svg.appendChild(el("path", { d: d, class: "ch-bar" + (i === pts.length - 1 ? " is-last" : "") }));
+        if (p.segs && p.segs.length) {
+          var acc = 0;
+          p.segs.forEach(function (sg, k) {
+            var top = y(acc + sg.v), bot = y(acc);
+            acc += sg.v;
+            var sh = bot - top;
+            if (sh <= 0) return;
+            var attrs = { class: "ch-seg", style: "fill:var(--seg-" + sg.slug + ")" };
+            if (k === p.segs.length - 1) {
+              var rr = Math.min(3, barW / 2, sh);
+              attrs.d = "M" + x0 + "," + bot + "V" + (top + rr)
+                + "Q" + x0 + "," + top + " " + (x0 + rr) + "," + top
+                + "H" + (x0 + barW - rr)
+                + "Q" + (x0 + barW) + "," + top + " " + (x0 + barW) + "," + (top + rr)
+                + "V" + bot + "Z";
+              svg.appendChild(el("path", attrs));
+            } else {
+              attrs.x = x0; attrs.y = top; attrs.width = barW; attrs.height = sh;
+              svg.appendChild(el("rect", attrs));
+            }
+          });
+        } else {
+          var d = "M" + x0 + "," + base + "V" + (base - h + r)
+            + "Q" + x0 + "," + (base - h) + " " + (x0 + r) + "," + (base - h)
+            + "H" + (x0 + barW - r)
+            + "Q" + (x0 + barW) + "," + (base - h) + " " + (x0 + barW) + "," + (base - h + r)
+            + "V" + base + "Z";
+          var last = i === pts.length - 1 ? " is-last" : "";
+          var split = typeof p.lo === "number" && p.lo < p.v;
+          var tone = data.tone ? " tone-" + data.tone : "";
+          svg.appendChild(el("path", { d: d, class: "ch-bar" + tone + (split ? " ch-bar-hi" : "") + last }));
+          var lh = split ? Math.max(0, base - y(p.lo)) : 0;
+          if (lh > 0) svg.appendChild(el("rect", { x: x0, y: base - lh, width: barW, height: lh, class: "ch-bar" + last }));
+        }
       }
       if ((pts.length - 1 - i) % every === 0) {
         var xl = el("text", { x: cx, y: H - 6, class: "ch-tick", "text-anchor": "middle" });
         xl.textContent = p.x;
         svg.appendChild(xl);
       }
-      if (i === pts.length - 1 && p.v > 0) {
+      if (p.v > sc.max) {
+        var ol = el("text", { x: cx, y: padT - 10, class: "ch-val", "text-anchor": "middle" });
+        ol.textContent = fmt(p.v, data.format, false) + " ↑";
+        svg.appendChild(ol);
+      } else if (i === pts.length - 1 && p.v > 0) {
         var vl = el("text", { x: cx, y: base - h - 5, class: "ch-val", "text-anchor": "middle" });
         vl.textContent = fmt(p.v, data.format, false);
         svg.appendChild(vl);

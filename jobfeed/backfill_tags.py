@@ -25,6 +25,7 @@ Usage:
   python3 -m jobfeed.backfill_tags --since-days 90  # limit to recent rows
   python3 -m jobfeed.backfill_tags --limit 1000     # cap (quick first pass)
   python3 -m jobfeed.backfill_tags --chunk 30       # rows per Haiku batch
+  python3 -m jobfeed.backfill_tags --ids-file ids.txt  # re-tag exactly these row ids
 """
 import argparse
 import html as _html
@@ -90,7 +91,8 @@ def _rows(db: JobDB, retag_all: bool, since_days: int | None,
           area: str | None = None,
           title_like: list[str] | None = None,
           companies: list[str] | None = None,
-          live: bool = False) -> list[dict]:
+          live: bool = False,
+          ids: list[str] | None = None) -> list[dict]:
     # Nightly desc-facet re-tag: delegate row selection to the precise DB query
     # (tagged_at set, description present, lang_req still NULL) — bounded so the
     # quota can't blow up. Ignores the other scoping flags by design.
@@ -100,6 +102,13 @@ def _rows(db: JobDB, retag_all: bool, since_days: int | None,
         )
     sql = f"SELECT {', '.join(_COLS)} FROM jobs_with_description"
     clauses, params = [], []
+    # --ids-file: repair a known set of bad rows (e.g. the 2026-10-10 batches
+    # Gemini answered in Russian) regardless of delisting; ignores the other
+    # scoping flags by design.
+    if ids:
+        sql += f" WHERE id IN ({','.join('?' * len(ids))}) ORDER BY first_seen DESC"
+        cur = db.conn.execute(sql, ids)
+        return [dict(zip(_COLS, r)) for r in cur.fetchall()]
     # --job-type scopes a re-tag to one job_type (e.g. re-tag every internship
     # after a taxonomy change) without touching the other 27k rows. It implies
     # retag, so it doesn't also require the untagged (area='') gate.
@@ -196,6 +205,8 @@ def main() -> None:
                          "(repeatable, OR-joined; combines with --area)")
     ap.add_argument("--company", action="append",
                     help="Re-tag only live rows of this exact source name (repeatable)")
+    ap.add_argument("--ids-file",
+                    help="Re-tag exactly the row ids listed in this file (one per line)")
     ap.add_argument("--since-days", type=int, help="Only rows first seen in the last N days")
     ap.add_argument("--limit", type=int, help="Cap the number of rows this run")
     ap.add_argument("--live", action="store_true",
@@ -212,12 +223,17 @@ def main() -> None:
     if args.patch_desc_lang:
         patch_desc_lang(db)
         return
+    ids = None
+    if args.ids_file:
+        with open(args.ids_file) as f:
+            ids = [ln.strip() for ln in f if ln.strip()]
     rows = _rows(db, args.retag_all, args.since_days, args.limit, args.job_type,
                  retag_missing_desc_facets=args.retag_missing_desc_facets,
                  area=args.area, title_like=args.title_like,
-                 companies=args.company, live=args.live)
+                 companies=args.company, live=args.live, ids=ids)
     total = len(rows)
     mode = (f"re-tag job_type={args.job_type}" if args.job_type
+            else f"re-tag ids from {args.ids_file}" if ids
             else "re-tag missing desc-facets" if args.retag_missing_desc_facets
             else f"re-tag area={args.area} title~{args.title_like or '*'}"
             if (args.area or args.title_like)
@@ -234,7 +250,7 @@ def main() -> None:
     # from a failed CLI call (quota exhaustion, auth failure, etc.).
     is_retag = bool(args.retag_all or args.job_type
                     or args.retag_missing_desc_facets
-                    or args.area or args.title_like)
+                    or args.area or args.title_like or args.company or ids)
 
     # Circuit-breaker: if N consecutive chunks come back ALL untagged, the CLI is
     # dead and we should stop rather than fan out thousands of subprocess spawns.

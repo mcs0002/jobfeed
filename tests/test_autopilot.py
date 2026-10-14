@@ -358,6 +358,33 @@ class AutopilotTests(unittest.TestCase):
         self.assertEqual(1, held["recovery_required"])
         self.assertIn("tab ownership", self.db.autopilot_settings()["paused_reason"])
 
+    def test_tab_violation_emails_once(self):
+        alerts = []
+        run, _ = self.db.queue_application_run(self.wf["j1"], manual=True)
+        self.tick()
+        start = datetime.fromisoformat(self.db.get_application_run(run["run_id"])["launching_at"])
+        sub = conv("bad-tab", self.wf["j1"], "sub", start, start + timedelta(seconds=30),
+                   run_id=run["run_id"], tab_violations=1)
+        for minutes in (1, 2):
+            autopilot.tick(self.db, runs=[sub], now=start + timedelta(minutes=minutes),
+                           launch=self.launched.append, alert=lambda s, b: alerts.append(s))
+        self.assertEqual(["Run needs recovery: Co"], alerts)
+
+    def test_review_ready_emails(self):
+        alerts = []
+        run, _ = self.db.queue_application_run(self.wf["j1"], manual=True)
+        self.tick()
+        self.finish_launch(self.wf["j1"])
+        start = datetime.fromisoformat(self.db.get_application_run(run["run_id"])["launching_at"])
+        self.tick(now=start + timedelta(seconds=10))
+        self.report(self.wf["j1"], "review_ready")
+        sub = conv("s", self.wf["j1"], "sub", start, start + timedelta(minutes=2),
+                   run_id=run["run_id"])
+        autopilot.tick(self.db, runs=[sub], now=datetime.now(timezone.utc),
+                       launch=self.launched.append, alert=lambda s, b: alerts.append(s))
+        self.assertEqual("draining", self.db.get_application_run(run["run_id"])["state"])
+        self.assertEqual(["Ready for review: Co"], alerts)
+
     # --- 2026-10-01 Capula/Capstone/IMC incident -----------------------------
 
     def start_running(self, key, now=T0):

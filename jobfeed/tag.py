@@ -369,6 +369,149 @@ def _enforce_manager(job: dict) -> None:
         # All 'manager' occurrences were role nouns (Asset/Product Manager).
         job["seniority"] = ""
 
+# Firms where "Associate" is the GRADUATE ENTRY title, not the post-analyst
+# rung the rubric defines (2026-10-10), each with the titles that ARE its entry
+# hires. The one list: matched against the firm name with the source label
+# stripped (db.plain_company), whole name or name plus a qualifier ("KPMG
+# Spain"), so "Bain Capital" (PE, where Associate is post-analyst) is not
+# "Bain & Company". A firm's own tuple replaces the default: at McKinsey plain
+# "Associate" is the post-MBA/PhD title, and its entry hires are Junior
+# Associates, Fellows and Business Analysts. Each entry is a phrase matched on
+# word boundaries, case-insensitive.
+ENTRY_TITLES_DEFAULT = ("associate", "fellow", "analyst", "asistente", "asistentes",
+                        "assistant", "assistent", "assistentin")
+ENTRY_ASSOCIATE_FIRMS = {
+    "PwC": ENTRY_TITLES_DEFAULT,
+    "EY": ENTRY_TITLES_DEFAULT,
+    "KPMG": ENTRY_TITLES_DEFAULT,
+    "Deloitte": ENTRY_TITLES_DEFAULT,
+    "BDO": ENTRY_TITLES_DEFAULT,
+    "BCG": ENTRY_TITLES_DEFAULT,
+    "Boston Consulting Group": ENTRY_TITLES_DEFAULT,
+    "Kearney": ENTRY_TITLES_DEFAULT,
+    "McKinsey": ("junior associate", "fellow", "business analyst"),
+    "Bain & Company": ENTRY_TITLES_DEFAULT,
+    "Oliver Wyman": ENTRY_TITLES_DEFAULT,
+    "Roland Berger": ENTRY_TITLES_DEFAULT,
+}
+# Above-entry titles at those firms: the label stays as tagged even when an
+# entry word also appears ("Consultant or Project Leader"). Bain's entry
+# "Associate Consultant" is not a Consultant.
+_CONSULTING_RUNG_RE = re.compile(
+    r"(?<!associate\s)\bconsultants?\b|\bproject\s+leaders?\b|\bengagement\s+managers?\b"
+    r"|\bprincipals?\b|\bmanagers?\b", re.I)
+# Explicit new-graduate wording: entry evidence at any firm. A bare year is
+# NOT here (Blackstone's post-analyst "2027 Private Equity Associate"), nor is
+# "junior" (bank Junior Associates are post-analyst), nor a bare "Graduate"
+# without a year.
+_NEW_GRAD_TITLE_RE = re.compile(
+    r"\bnew\s+grad(?:uate)?s?\b|\bentry[-\s]level\b|\bintake\b|\btrainee\w*"
+    r"|\bclass\s+of\b|\bcampus\s+hire|\buniversity\s+hire|\babsolvent\w*|\bberufseinsteiger\w*",
+    re.I)
+_GRADUATE_RE = re.compile(r"\bgraduates?\b", re.I)
+_YEAR_RE = re.compile(r"\b20\d\d\b")
+# Senior markers: any one keeps the associate label (and the default hide).
+# "Summer Associate" is the MBA/PhD internship at banks.
+_ASSOCIATE_SENIOR_RE = re.compile(
+    r"\bsummer\s+associates?\b|\bmba\b|\bph\.?\s?d\b|\bj\.?\s?d\.?(?=\W|$)|\bdoctora\w*"
+    r"|\bexperienced\b|\bsenior\b|\bsr\.?(?=\W|$)|\blateral\b|\bpost[-\s]?(?:mba|doc)\w*"
+    r"|\bassociate\s+(?:director|partner|principal|vice\s+president)\b|\bvice\s+president\b"
+    r"|\bdirector\b|\bprincipal\b", re.I)
+# The opening of a posting that names the MBA track: Barclays US "Banking
+# Associate Graduate Program 2027" says it is for MBA graduates in its first
+# lines, not in its title.
+_DESCRIPTION_HEAD_CHARS = 800
+_MBA_RE = re.compile(r"\bm\.?b\.?a\b|master of business administration", re.I)
+# Without the text: a US investment-banking "Banking Associate" programme is
+# the post-MBA track.
+_US_BANKING_ASSOCIATE_RE = re.compile(
+    r"\bbanking\s+associate\b.*\b(?:new\s+york|san\s+francisco|chicago|houston|charlotte"
+    r"|boston|los\s+angeles|menlo\s+park|dallas)\b", re.I)
+
+
+def entry_associate_titles(company: str) -> tuple[str, ...]:
+    """The entry titles of `company`'s firm in ENTRY_ASSOCIATE_FIRMS, or ()."""
+    from jobfeed.db import plain_company
+    name = " ".join(plain_company(company).lower().split())
+    for firm, titles in ENTRY_ASSOCIATE_FIRMS.items():
+        if name == firm.lower() or name.startswith(firm.lower() + " "):
+            return titles
+    return ()
+
+
+def entry_associate_firm(company: str) -> bool:
+    """True when `company` (any source label) is one of ENTRY_ASSOCIATE_FIRMS."""
+    return bool(entry_associate_titles(company))
+
+
+def _campus_board(company: str) -> bool:
+    from jobfeed.db import _PAREN_TEXT_RE
+    m = _PAREN_TEXT_RE.search(str(company or ""))
+    return bool(m and re.search(r"campus|early\s+(?:careers|talent)|graduate|student",
+                                m.group(1), re.I))
+
+
+def _has_phrase(title: str, phrases) -> bool:
+    return any(re.search(r"\b" + re.escape(p).replace(r"\ ", r"\s+") + r"\b", title, re.I)
+               for p in phrases)
+
+
+def _new_grad_title(title: str) -> bool:
+    return bool(_NEW_GRAD_TITLE_RE.search(title)
+                or (_GRADUATE_RE.search(title) and _YEAR_RE.search(title)))
+
+
+def _enforce_entry_associate(job: dict) -> None:
+    """associate -> graduate when the role is an entry hire.
+
+    seniority='associate' is hidden by Browse's default (hide_associates),
+    which is right where Associate is the post-analyst rung. At the Big 4 and
+    the strategy consultancies it is the graduate entry title, and the live DB
+    had ~100 such roles hidden on 2026-10-10 (PwC "Risk Services Associate (July
+    2027 Intake)", BCG "Associate 2027, Belgium", Kearney "Kearney Associate
+    2026"). Entry evidence, after the senior markers, min_yoe >= 3 and the
+    internship type have had their say:
+
+    - explicit new-graduate wording in the title, at any firm ("New Grad",
+      "Entry level", "Graduate Programme 2027", "[2027 Master's graduates]"),
+      unless the posting is the MBA track (an MBA in the title or the opening
+      of the description; a US "Banking Associate" programme);
+    - at an ENTRY_ASSOCIATE_FIRMS firm, a title with one of that firm's entry
+      titles and no above-entry consulting rung (Consultant, Project Leader,
+      Engagement Manager, Principal);
+    - at such a firm's campus board, any title with neither a rung nor an
+      Associate the firm does not count as entry ("Statistician" @ PwC
+      (Campus)).
+
+    A campus label or a year alone is never evidence: banks post MBA Associate
+    programmes on campus boards, and Blackstone's post-analyst Associate
+    carries a start year. The dry run of 2026-10-10 moved 409 rows with the
+    first version, ~30-35 of the 151 live ones wrongly: consultancy Consultant
+    titles, McKinsey's post-MBA Associate, and bank Junior Associates."""
+    if job.get("seniority") != "associate" or job.get("job_type") == "internship":
+        return
+    title = job.get("title") or ""
+    if _ASSOCIATE_SENIOR_RE.search(title):
+        return
+    try:
+        if int(job.get("min_yoe") or 0) >= 3:
+            return
+    except (TypeError, ValueError):
+        pass
+    company = job.get("company") or ""
+    if _new_grad_title(title):
+        head = (job.get("description") or "")[:_DESCRIPTION_HEAD_CHARS]
+        if not (_MBA_RE.search(head) or _US_BANKING_ASSOCIATE_RE.search(title)):
+            job["seniority"] = "graduate"
+        return
+    titles = entry_associate_titles(company)
+    if not titles or _CONSULTING_RUNG_RE.search(title):
+        return
+    if _has_phrase(title, titles) or (
+            _campus_board(company) and not re.search(r"\bassociate\b", title, re.I)):
+        job["seniority"] = "graduate"
+
+
 # Nomura and Deutsche Bank state the rank in a "Corporate Title:" line of the
 # description, not in the job title, so the title guard above cannot see it.
 # On 2026-09-29 18 live roles said Vice President or higher there and still
@@ -598,7 +741,8 @@ _EDUCATION_VALUES = sorted(EDUCATION_LEVELS) + ["-"]
 
 
 def _json_schema(fmt: str, count: int) -> dict:
-    """Return a schema that permits exactly one output row per input row."""
+    """Return the structured-output schema for a batch of `count` roles:
+    json_obj pins the row count; json_rows pins each row's slots instead."""
     if fmt == "json_obj":
         props = {
             "index": {"type": "string", "pattern": "^[0-9]+$"},
@@ -621,8 +765,44 @@ def _json_schema(fmt: str, count: int) -> dict:
                 "additionalProperties": False,
                 "propertyOrdering": list(_FIELD_ORDER)}
     else:
-        item = {"type": "array", "items": {"type": "string"},
+        # Per-position enums. A bare "array of 14 strings" let Gemini rotate a
+        # row (index moved to the end, every field shifted one left) and echo a
+        # posting's text into any slot until max_tokens: 10 of the 11 failed
+        # batches in the 14 days to 2026-10-14. Gemini's OpenAI endpoint
+        # enforces prefixItems enums (probed 2026-10-14); it accepts but
+        # ignores maxLength, so free-text slots stay unbounded and the row
+        # validation in _json_to_pipe remains the backstop. The enums also
+        # stop the whole-batch language switch the old schema let through
+        # (gold v1 batch 1 came back in Russian: "США", seniority blanked).
+        # AREA stays free text, checked per row: enum-constrained it drifted
+        # boundary roles from other into wealth/consulting (gold v1 area 0.88
+        # vs 0.91); free, 0.89 with country 0.83 -> 0.94 and work mode
+        # 0.84 -> 0.96 (2026-10-14).
+        # Enums and a pinned row count together are refused with a 400 ("too
+        # many states for serving") from 13 rows up, and a 400 marks the API
+        # dead for the run; the count pin prevented none of the observed
+        # failures, so it goes and _json_to_pipe checks the count instead.
+        enum = lambda vals: {"type": "string", "enum": list(vals)}
+        free = {"type": "string"}
+        slots = {
+            "index": enum(str(i) for i in range(count)),
+            "area": free, "desk": enum(_DESK_VALUES),
+            "seniority": enum(_SENIORITY_VALUES), "type": enum(_TYPE_VALUES),
+            "city": free, "country": free,
+            "region": enum(_REGION_VALUES), "work_mode": enum(_WORKMODE_VALUES),
+            "lang_req": free, "min_yoe": free,
+            "education": enum(_EDUCATION_VALUES), "start_date": free,
+            "ai_tech": enum(("yes", "no")),
+        }
+        item = {"type": "array",
+                "prefixItems": [slots[k] for k in _FIELD_ORDER],
                 "minItems": len(_FIELD_ORDER), "maxItems": len(_FIELD_ORDER)}
+        return {
+            "type": "object",
+            "properties": {"rows": {"type": "array", "items": item}},
+            "required": ["rows"],
+            "additionalProperties": False,
+        }
     return {
         "type": "object",
         "properties": {"rows": {"type": "array", "items": item,
@@ -632,33 +812,96 @@ def _json_schema(fmt: str, count: int) -> dict:
     }
 
 
-def _json_to_pipe(out_text: str, expected_count: int) -> str:
-    """Validate structured rows, then feed them through the shared parser."""
-    data = json.loads(out_text)
-    rows = data.get("rows", []) if isinstance(data, dict) else data
-    if not isinstance(rows, list) or len(rows) != expected_count:
-        raise ValueError(
-            f"expected {expected_count} structured rows, got "
-            f"{len(rows) if isinstance(rows, list) else 'non-list'}"
-        )
+# Positions in a structured row that must hold a closed-vocabulary value. A
+# row whose length and index are right but whose fields drifted (a dropped
+# column, a copy of row 0) fails here instead of tagging the job with
+# whatever the coercer makes of a city name in the desk slot.
+_ROW_ENUMS = {
+    _FIELD_ORDER.index(field): {v.lower() for v in vals}
+    for field, vals in (("area", _AREA_VALUES), ("desk", _DESK_VALUES),
+                        ("seniority", _SENIORITY_VALUES), ("type", _TYPE_VALUES),
+                        ("region", _REGION_VALUES),
+                        ("work_mode", _WORKMODE_VALUES),
+                        ("education", _EDUCATION_VALUES),
+                        ("ai_tech", ("yes", "no")))
+}
+
+
+def _complete_rows_prefix(out_text: str) -> list:
+    """The complete rows of a reply cut off mid-row (max_tokens), so the rows
+    before a runaway field still count. Raises ValueError if none parse."""
+    start = out_text.find("[", out_text.find('"rows"') + 1
+                          if '"rows"' in out_text else 0)
+    if start < 0:
+        raise ValueError("no rows array in truncated output")
+    dec, pos, rows = json.JSONDecoder(), start + 1, []
+    while True:
+        while pos < len(out_text) and out_text[pos] in " \t\r\n,":
+            pos += 1
+        try:
+            row, pos = dec.raw_decode(out_text, pos)
+        except ValueError:
+            break
+        rows.append(row)
+    return rows
+
+
+def _row_problem(i: int, vals: list[str]) -> str | None:
+    if len(vals) != len(_FIELD_ORDER):
+        return f"row {i} has {len(vals)} fields, expected {len(_FIELD_ORDER)}"
+    if not vals[0].strip().isdigit() or int(vals[0]) != i:
+        return f"row {i} returned invalid index {vals[0]!r}"
+    for pos, allowed in _ROW_ENUMS.items():
+        if vals[pos].lower() not in allowed:
+            return (f"row {i} {_FIELD_ORDER[pos]}={vals[pos][:40]!r} "
+                    "is not an allowed value")
+    return None
+
+
+def _json_to_pipe(out_text: str, expected_count: int) -> tuple[str, list[str]]:
+    """Validate structured rows one at a time and return (pipe lines for the
+    rows that pass, one problem string per row that does not).
+
+    A single bad row used to raise and blank the whole 13-role batch. Now the
+    good rows keep their tags and only the bad ones go to the retry ladder.
+    Raises ValueError only when nothing row-shaped can be recovered."""
+    problems: list[str] = []
+    try:
+        data = json.loads(out_text)
+    except json.JSONDecodeError as exc:
+        rows = _complete_rows_prefix(out_text)
+        problems.append(f"truncated JSON ({exc.msg} at char {exc.pos}); "
+                        f"{len(rows)} complete rows recovered")
+    else:
+        rows = data.get("rows", []) if isinstance(data, dict) else data
+        if not isinstance(rows, list):
+            raise ValueError("structured rows are a non-list")
+        if len(rows) != expected_count:
+            # Rows still prove their own alignment through the index check.
+            problems.append(f"expected {expected_count} structured rows, "
+                            f"got {len(rows)}")
     lines = []
-    for i, row in enumerate(rows):
+    for i, row in enumerate(rows[:expected_count]):
         if isinstance(row, dict):
             vals = [row.get(k, "-") for k in _FIELD_ORDER]
-        else:
+        elif isinstance(row, list):
             vals = list(row)
+        else:
+            problems.append(f"row {i} is not a list or object")
+            continue
         # Collapse whitespace inside every field: the model sometimes ends a
         # value with "\n" ("-\n"), which split each row across lines and the
         # line parser then rejected the whole batch (six 13-role batches in two
         # minutes of the 2026-09-23 re-tag).
         vals = [(" ".join(str(v if v is not None else "").split()) or "-")
                 .replace("|", "/") for v in vals]
-        if len(vals) != len(_FIELD_ORDER):
-            raise ValueError(f"row {i} has {len(vals)} fields, expected {len(_FIELD_ORDER)}")
-        if not vals[0].strip().isdigit() or int(vals[0]) != i:
-            raise ValueError(f"row {i} returned invalid index {vals[0]!r}")
+        if (problem := _row_problem(i, vals)) is not None:
+            problems.append(problem)
+            continue
         lines.append("|".join(vals))
-    return "\n".join(lines)
+    if not lines:
+        raise ValueError("; ".join(problems) or "no structured rows")
+    return "\n".join(lines), problems
 
 
 def _system_for_cfg(cfg: dict) -> str:
@@ -1300,12 +1543,20 @@ def _tag_batch_openai(batch: list[dict], cfg: dict,
     if health is not None:
         health["total_latency_s"] += time.monotonic() - start
     if fmt in ("json_rows", "json_obj") and out_text:
+        raw = out_text
+        # finish_reason="length" is the max_tokens cut-off: every truncated
+        # reply on 2026-10-10 billed 4,085-4,086 of the 4,096 budget.
+        finish = f"finish_reason={choice.get('finish_reason')!r}"
         try:
-            out_text = _json_to_pipe(out_text, len(batch))
+            out_text, problems = _json_to_pipe(raw, len(batch))
         except (ValueError, TypeError, AttributeError) as exc:
-            _log_debug(f"JSON-DECODE-FAIL batch={len(batch)}", out_text,
+            _log_debug(f"JSON-DECODE-FAIL batch={len(batch)} {finish}", raw,
                        f"{type(exc).__name__}: {exc}")
             out_text = ""
+        else:
+            if problems:
+                _log_debug(f"JSON-ROWS-REJECTED batch={len(batch)} {finish}",
+                           raw, "\n".join(problems))
     _apply_parsed(batch, out_text, "", health)
 
 
@@ -1522,6 +1773,7 @@ def tag_jobs(jobs: list[dict]) -> list[dict]:
             _enforce_internship(j)
             _enforce_manager(j)
             _enforce_corporate_title(j)
+            _enforce_entry_associate(j)
             _enforce_ai_tech(j)
         health["failure_reasons"].append(reason)
         _record_run(health)
@@ -1565,6 +1817,7 @@ def tag_jobs(jobs: list[dict]) -> list[dict]:
         _enforce_internship(j)
         _enforce_manager(j)
         _enforce_corporate_title(j)
+        _enforce_entry_associate(j)
         _enforce_ai_tech(j)
         j.pop("_desc_lang", None)  # payload-time scratch, not a tag column
     health["jobs_tagged"] = sum(1 for j in jobs if not _is_untagged(j))
@@ -1626,6 +1879,17 @@ def _judge_batch(batch: list[dict], bin_path: str | None, health: dict,
                  consecutive_blank: int) -> int:
     """Breaker, paid-API rescue and retries for one sent batch. Returns the
     updated consecutive-blank count."""
+    if _provider() == "api" and not _api_transport_is_dead():
+        # The configured API answered, so untagged rows are a content failure
+        # (rotated or truncated rows, a RECITATION block), not a dead
+        # transport: transport deaths mark the API dead and route elsewhere
+        # inside _tag_batch_any. A blank batch here used to feed the CLI
+        # breaker and skip the retries, so all 104 roles of the eight failed
+        # batches in the 2026-10-10 re-tag stayed blank. Retry any miss:
+        # smaller batches usually clear it, and an API call costs cents.
+        if any(_is_untagged(j) for j in batch):
+            _retry_batch(batch, bin_path, health)
+        return 0
     if all(_is_untagged(j) for j in batch):
         # A fully-blank batch signals CLI death, not a partial parse miss —
         # feed the breaker and skip the retry fan-out (retrying a dead CLI

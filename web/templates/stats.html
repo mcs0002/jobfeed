@@ -2,8 +2,19 @@
 {% block title %}{{ "Technical stats" if stats_view == "technical" else "Application stats" }} — Jobfeed{% endblock %}
 {% block main_class %}page{% endblock %}
 {% block content %}
-<div class="page-head">
+{# Day/week switch: every time-series chart follows one grain (2026-10-13). #}
+{% set per = "day" if grain == "day" else "week" %}
+{% set span = "30 days" if grain == "day" else "12 weeks" %}
+{% macro grain_switch(anchor) %}
+<nav class="area-tabs grain-tabs" aria-label="Chart grain">
+  {% for key, label in [("day", "Daily"), ("week", "Weekly")] %}
+  <a class="area-tab {% if grain == key %}on{% endif %}" href="{{ stats_path }}?{% if track %}track={{ track }}&amp;{% endif %}grain={{ key }}{% if anchor %}#{{ anchor }}{% endif %}">{{ label }}</a>
+  {% endfor %}
+</nav>
+{% endmacro %}
+<div class="page-head with-tools">
   <h1>{{ "Technical stats" if stats_view == "technical" else "Application stats" }}</h1>
+  {{ grain_switch("") }}
 </div>
 
 {% if stats_view == "application" %}
@@ -12,13 +23,13 @@
    both. Every block below follows it. #}
 <nav class="area-tabs track-tabs" aria-label="Application track">
   {% for key, label, n in track_tabs %}
-  <a class="area-tab {% if track == key %}on{% endif %}" href="{{ stats_path }}{% if key %}?track={{ key }}{% endif %}">{{ label }} <span class="n">{{ n }}</span></a>
+  <a class="area-tab {% if track == key %}on{% endif %}" href="{{ stats_path }}?{% if key %}track={{ key }}&amp;{% endif %}grain={{ grain }}">{{ label }} <span class="n">{{ n }}</span></a>
   {% endfor %}
 </nav>
 
 <div class="summary-cards wide">
   <div class="scard"><div class="k">Submitted</div><div class="v">{{ conversion[0].n }}</div>
-    <div class="sub">{{ apps_chart.total }} in the last 12 weeks</div>
+    <div class="sub">{{ apps_chart.total }} in the last {{ span }}</div>
   </div>
   <div class="scard"><div class="k">Response rate</div><div class="v">{{ conversion[1].pct }}%</div>
     <div class="sub">{{ conversion[1].n }} heard back</div>
@@ -35,16 +46,17 @@
   </div>
 </div>
 
+<div class="panel-head section"><h2>Submissions</h2><span class="panel-meta">dated by submission, last {{ span }}</span></div>
 <div class="chart-row">
   <section class="panel">
-    <div class="panel-head"><h2>Applications per week</h2><span class="panel-meta">last 12 weeks</span></div>
+    <div class="panel-head"><h3>Applications per {{ per }}</h3></div>
     <div class="chart-wrap">
-      <div class="chart" data-chart='{{ apps_chart|tojson }}' aria-label="Applications submitted per week, last 12 weeks"></div>
+      <div class="chart" data-height="180" data-chart='{{ apps_chart|tojson }}' aria-label="Applications submitted per {{ per }}, last {{ span }}"></div>
       <div class="ch-tip" hidden></div>
     </div>
   </section>
   <section class="panel">
-    <div class="panel-head"><h2>Conversion</h2><span class="panel-meta">by current status</span></div>
+    <div class="panel-head"><h3>Conversion</h3><span class="panel-meta">by current status</span></div>
     {% if conversion[0].n %}
     <div class="hbars">
       {% for c in conversion %}
@@ -61,8 +73,8 @@
 </div>
 
 {% set dl = deadlines %}
+<div class="panel-head section"><h2>Upcoming deadlines</h2><span class="panel-meta">starred and queued, not yet submitted · next {{ dl.window }} days</span></div>
 <section class="panel deadlines">
-  <div class="panel-head"><h2>Upcoming deadlines</h2><span class="panel-meta">starred and queued, not yet submitted · next {{ dl.window }} days</span></div>
   {% if dl.dated %}
   <div class="dl-rows">
     {% for r in dl.dated[:15] %}
@@ -93,11 +105,8 @@
 
 {# S13 — pipeline board: one sideways strip per stage, two cards tall, so a
    long applied list scrolls or swipes instead of pushing the page down. #}
+<div class="panel-head section"><h2>Pipeline</h2><span class="panel-meta">newest first · scroll or swipe sideways for older</span></div>
 <div class="pipeline">
-  <div class="pl-head">
-    <span class="pl-title">Pipeline</span>
-    <span class="pl-hint">newest first · scroll or swipe sideways for older</span>
-  </div>
   {% for st in pipeline_stages %}
   <div class="pl-lane">
     <div class="pl-lanehead st-{{ st }}">
@@ -151,8 +160,8 @@
   {% else %}
   <div class="scard"><div class="k">Raw → pre-filter</div><div class="v">—</div><div class="sub">from next scan</div></div>
   {% endif %}
-  <div class="scard help" title="Rows first discovered and inserted during the latest scan; existing live postings are not counted again."><div class="k">Newly stored</div><div class="v good">{{ run.new_jobs if run else 0 }}</div></div>
-  <div class="scard"><div class="k">New this week</div><div class="v good">{{ weeks[0].total if weeks else 0 }}</div></div>
+  <div class="scard help" title="Rows first discovered and inserted during the latest scan; existing live postings are not counted again."><div class="k">New in last scan</div><div class="v good">{{ run.new_jobs if run else 0 }}</div><div class="sub">first stored at {{ last_run[11:16] if last_run and last_run != 'never' else '—' }}</div></div>
+  <div class="scard help" title="Every role first stored since Monday (Berlin time), across all scans."><div class="k">New this week</div><div class="v good">{{ "{:,}".format(weeks[0].total) if weeks else 0 }}</div><div class="sub">{% if weeks %}{{ "{:,}".format(weeks[0].finance) }} finance · {{ "{:,}".format(weeks[0].other_n) }} other{% endif %}</div></div>
   <div class="scard"><div class="k">Last run</div>
     {% if last_run and last_run != 'never' %}
       <div class="v">{{ last_run[11:16] }}</div><div class="sub">{{ days_ago(last_run) }}</div>
@@ -166,72 +175,7 @@
   </div>
 </div>
 
-{# Three time series stacked on the left, the noisiest-sources list beside
-   them (his layout, 2026-10-10). Side-by-side rows stretched the short noise
-   chart to the list's height and left an empty band under it. #}
-<div class="stats-split">
-  <div class="stats-charts">
-    <section class="panel">
-      <div class="panel-head"><h2>New roles per day</h2><span class="panel-meta">{{ "{:,}".format(roles_chart.total) }} in 30 days</span></div>
-      <div class="chart-wrap">
-        <div class="chart" data-height="180" data-chart='{{ roles_chart|tojson }}' aria-label="New roles stored per day, last 30 days"></div>
-        <div class="ch-tip" hidden></div>
-      </div>
-    </section>
-    <section class="panel">
-      <div class="panel-head"><h2>Noise share per week</h2><span class="panel-meta">new roles tagged other · {{ noise_chart.latest|round|int }}% this week</span></div>
-      <div class="chart-wrap">
-        <div class="chart" data-height="180" data-chart='{{ noise_chart|tojson }}' aria-label="Share of new roles tagged other per week, last 12 weeks"></div>
-        <div class="ch-tip" hidden></div>
-      </div>
-    </section>
-    <section class="panel">
-      <div class="panel-head"><h2>Scan tagging cost per day</h2><span class="panel-meta">{% if cost_chart.has_data %}${{ "%.2f"|format(cost_chart.total) }} in 30 days{% if cost_chart.unpriced_days %} · {{ cost_chart.unpriced_days }} day{{ 's' if cost_chart.unpriced_days != 1 }} partly unpriced{% endif %}{% if other_tag_cost %} · re-tags ${{ "%.2f"|format(other_tag_cost) }} not shown{% endif %}{% else %}no tag runs recorded{% endif %}</span></div>
-      {% if cost_chart.has_data %}
-      <div class="chart-wrap">
-        <div class="chart" data-height="180" data-chart='{{ cost_chart|tojson }}' aria-label="Scan tagging cost in US dollars per day, last 30 days"></div>
-        <div class="ch-tip" hidden></div>
-      </div>
-      {% else %}<p class="dp-empty">tag_runs.jsonl has no scan runs in the last 30 days on this machine.</p>{% endif %}
-    </section>
-  </div>
-  <section class="panel stats-side">
-    <div class="panel-head"><h2>Noisiest sources</h2><span class="panel-meta">other rows stored, last 14 days</span></div>
-    {% if noise_sources %}<div class="telemetry">
-      {% for r in noise_sources %}<div class="telemetry-row">
-        <span><a href="/?firm={{ r.company|urlencode }}&amp;area=other"><b>{{ r.company }}</b></a></span>
-        <span>{{ r.other }} <small>other of {{ r.n }}</small></span>
-        <span>{{ (100 * r.other / r.n)|round|int }}% <small>other</small></span>
-      </div>{% endfor %}
-    </div>{% else %}<p class="dp-empty">No other-tagged roles stored in 14 days.</p>{% endif %}
-  </section>
-</div>
-
-<div class="panel-head section"><h2>Tagger health</h2><span class="panel-meta">last 14 days, per run</span></div>
-{% if telemetry %}
-<div class="telemetry">
-  {% for t in telemetry %}<div class="telemetry-row{% if t.flags or t.coverage < 100 %} warn{% endif %}">
-    <span><b>{{ t.provider }}</b> · {{ t.model }}<small>rubric {{ t.rubric }} · {{ days_ago(t.ts) }}</small></span>
-    <span>{{ t.tagged }}/{{ t.total }} <small>{{ t.coverage }}% coverage</small></span>
-    <span>{{ t.cache_rate }}% <small>cache</small></span>
-    <span>{% if t.priced %}${{ "%.3f"|format(t.cost) }}{% else %}unpriced{% endif %}<small>{{ t.latency_s }}s</small></span>
-    <span>{% if t.flags %}{{ t.flags|join(', ') }}{% elif t.failed_batches %}{{ t.failed_batches }} failed batches{% else %}clean{% endif %}</span>
-  </div>{% endfor %}
-</div>
-{% else %}<p class="dp-empty">No tag runs recorded yet.</p>{% endif %}
-
-{% if evaluation.total %}
-<div class="panel-head section"><h2>Human evaluation</h2><span class="panel-meta">{{ evaluation.total }} labelled · {{ evaluation.corrected }} corrections · {{ evaluation.false_manager }} false-manager · {{ evaluation.false_other }} finance→other misses</span></div>
-{% if evaluation.models %}<div class="telemetry">
-  {% for m in evaluation.models %}<div class="telemetry-row">
-    <span><b>{{ m.provider }}</b> · {{ m.model }}<small>rubric {{ m.rubric }}</small></span>
-    <span>{{ m.n }} <small>labels</small></span><span>{{ m.false_manager }} <small>false-manager</small></span>
-    <span>{{ m.false_other }} <small>finance→other</small></span><span>{{ m.corrected }} corrected</span>
-  </div>{% endfor %}
-</div>{% endif %}
-{% endif %}
-
-<div class="panel-head section"><h2>Weekly intake</h2><span class="panel-meta">new roles by area and region</span></div>
+<div class="panel-head section" id="intake"><h2>Weekly intake</h2><span class="panel-meta">new roles by area and region</span></div>
 <section class="panel wk-panel">
 {% macro stacked(segs, spaced) %}
 <div class="sbar{% if spaced %} spaced{% endif %}">
@@ -254,11 +198,12 @@
 {% endmacro %}
 {% if weeks %}
 <div class="intake-trend">
-  <div class="panel-head"><h3>New finance roles per week</h3><span class="panel-meta">last {{ intake_chart.points|length }} weeks</span></div>
+  <div class="panel-head"><h3>New finance roles per {{ per }}</h3><span class="panel-meta">last {{ intake_chart.points|length }} {{ per }}s</span></div>
   <div class="chart-wrap">
-    <div class="chart" data-height="150" data-chart='{{ intake_chart|tojson }}' aria-label="New finance roles per week, last {{ intake_chart.points|length }} weeks"></div>
+    <div class="chart" data-height="280" data-chart='{{ intake_chart|tojson }}' aria-label="New finance roles per {{ per }} by area, last {{ intake_chart.points|length }} {{ per }}s"></div>
     <div class="ch-tip" hidden></div>
   </div>
+  {% if intake_chart.legend %}<div class="legend ch-legend">{% for k in intake_chart.legend %}<span class="li"><span class="dot seg-{{ k.slug }}"></span>{{ k.label }}</span>{% endfor %}</div>{% endif %}
 </div>
 {{ week(weeks[0]) }}
 {% if weeks|length > 1 %}
@@ -272,7 +217,49 @@
 {% endif %}
 </section>
 
-<div class="panel-head section"><h2>Firm velocity</h2><span class="panel-meta">new finance roles per firm per week · dimmed = none this week</span></div>
+{# Three time series stacked on the left, the noisiest-sources list beside
+   them (his layout, 2026-10-10). Side-by-side rows stretched the short noise
+   chart to the list's height and left an empty band under it. #}
+<div class="panel-head section"><h2>Scans and noise</h2><span class="panel-meta">every new role, last {{ span }}</span></div>
+<div class="stats-split">
+  <div class="stats-charts">
+    <section class="panel">
+      <div class="panel-head"><h3>New roles per {{ per }}</h3><span class="panel-meta">{{ "{:,}".format(roles_chart.total) }} in {{ span }} · <span class="ch-key"></span>finance <span class="ch-key ch-key-hi"></span>other</span></div>
+      <div class="chart-wrap">
+        <div class="chart" data-height="180" data-chart='{{ roles_chart|tojson }}' aria-label="New roles stored per {{ per }}, last {{ span }}"></div>
+        <div class="ch-tip" hidden></div>
+      </div>
+    </section>
+    <section class="panel">
+      <div class="panel-head"><h3>Noise share per {{ per }}</h3><span class="panel-meta">new roles tagged other · {{ noise_chart.latest|round|int }}% {{ "today" if grain == "day" else "this week" }}</span></div>
+      <div class="chart-wrap">
+        <div class="chart" data-height="180" data-chart='{{ noise_chart|tojson }}' aria-label="Share of new roles tagged other per {{ per }}, last {{ span }}"></div>
+        <div class="ch-tip" hidden></div>
+      </div>
+    </section>
+    <section class="panel">
+      <div class="panel-head"><h3>Scan tagging cost per {{ per }}</h3><span class="panel-meta">{% if cost_chart.has_data %}${{ "%.2f"|format(cost_chart.total) }} in {{ span }}{% if cost_chart.unpriced_days %} · {{ cost_chart.unpriced_days }} {{ per }}{{ 's' if cost_chart.unpriced_days != 1 }} partly unpriced{% endif %}{% if other_tag_cost %} · re-tags ${{ "%.2f"|format(other_tag_cost) }} not shown{% endif %}{% else %}no tag runs recorded{% endif %}</span></div>
+      {% if cost_chart.has_data %}
+      <div class="chart-wrap">
+        <div class="chart" data-height="180" data-chart='{{ cost_chart|tojson }}' aria-label="Scan tagging cost in US dollars per {{ per }}, last {{ span }}"></div>
+        <div class="ch-tip" hidden></div>
+      </div>
+      {% else %}<p class="dp-empty">tag_runs.jsonl has no scan runs in the last {{ span }} on this machine.</p>{% endif %}
+    </section>
+  </div>
+  <section class="panel stats-side">
+    <div class="panel-head"><h3>Noisiest sources</h3><span class="panel-meta">other rows stored, last 7 days vs the 7 before</span></div>
+    {% if noise_sources %}<div class="telemetry">
+      {% for r in noise_sources %}<div class="telemetry-row">
+        <span><a href="/?firm={{ r.company|urlencode }}&amp;area=other"><b>{{ r.company }}</b></a></span>
+        <span>{{ r.other }} <small>other of {{ r.n }}</small></span>
+        <span class="{{ 'trend-down' if r.other < r.prev else ('trend-up' if r.other > r.prev else '') }}">{{ '↓' if r.other < r.prev else ('↑' if r.other > r.prev else '=') }} from {{ r.prev }} <small>prior 7 days</small></span>
+      </div>{% endfor %}
+    </div>{% else %}<p class="dp-empty">No other-tagged roles stored in 14 days.</p>{% endif %}
+  </section>
+</div>
+
+<div class="panel-head section"><h2>Firm velocity</h2><span class="panel-meta">new finance roles per firm per week · top 10 · dimmed = none this week</span></div>
 {% if velocity %}
 <div class="velocity">
   <div class="velrow velhead">
@@ -282,7 +269,7 @@
     <span class="vtotal">8w total</span>
   </div>
   {% for v in velocity %}
-  {% if loop.index == 41 %}<details class="wk-earlier"><summary>{{ velocity|length - 40 }} more firms</summary>{% endif %}
+  {% if loop.index == 11 %}<details class="vel-more"><summary>{{ velocity|length - 10 }} more firms</summary>{% endif %}
   <div class="velrow{% if v.recent == 0 %} silent{% endif %}">
     <a class="vco" href="/?company={{ v.company|urlencode }}&amp;area=">{{ v.company }}</a>
     <span class="vrecent">{% if v.recent %}{{ v.recent }}{% else %}—{% endif %}</span>
@@ -293,12 +280,84 @@
     </div>
     <span class="vtotal">{{ v.total }}</span>
   </div>
-  {% if loop.last and loop.index > 40 %}</details>{% endif %}
+  {% if loop.last and loop.index > 10 %}</details>{% endif %}
   {% endfor %}
 </div>
 {% else %}
 <p class="dp-empty">No firm velocity data yet — run a scan first.</p>
 {% endif %}
+<div class="panel-head section"><h2>Tagger health</h2><span class="panel-meta">last {{ tagger_days }} days · {{ telemetry.runs }} run{{ '' if telemetry.runs == 1 else 's' }}, scans and re-tags</span></div>
+{% if telemetry.runs %}
+<div class="summary-cards wide">
+  <div class="scard"><div class="k">Clean runs</div><div class="v{% if telemetry.clean == telemetry.runs %} good{% endif %}">{{ telemetry.clean }}/{{ telemetry.runs }}</div><div class="sub">{{ telemetry.runs - telemetry.clean }} need a look</div></div>
+  <div class="scard"><div class="k">Coverage</div><div class="v{% if telemetry.coverage == 100 %} good{% endif %}">{{ telemetry.coverage }}%</div><div class="sub">{{ "{:,}".format(telemetry.tagged) }}/{{ "{:,}".format(telemetry.total) }} roles tagged</div></div>
+  <div class="scard"><div class="k">Failed batches</div><div class="v">{{ telemetry.failed_batches }}</div><div class="sub">retried within the run</div></div>
+  <div class="scard"><div class="k">Tagging cost</div><div class="v">${{ "%.2f"|format(telemetry.cost) }}</div><div class="sub">{% if telemetry.unpriced %}partly unpriced{% else %}${{ "%.3f"|format(telemetry.cost / telemetry.runs) }} per run{% endif %}</div></div>
+  <div class="scard"><div class="k">Model</div><div class="v sm">{{ telemetry.latest.model }}</div><div class="sub">rubric {{ telemetry.latest.rubric }}{% if telemetry.rubric_since %} since {{ telemetry.rubric_since }}{% endif %}</div></div>
+</div>
+<section class="panel">
+  <div class="panel-head"><h3>Runs</h3><span class="panel-meta">one cell per run, oldest left · hover for detail</span></div>
+  <div class="run-strip" aria-label="One cell per tag run, oldest first">
+    {% for c in telemetry.cells %}<span class="run-cell {{ c.state }}" title="{{ c.tip }}"></span>{% endfor %}
+  </div>
+  <div class="legend run-legend"><span class="li"><span class="dot run-cell ok"></span>clean</span><span class="li"><span class="dot run-cell warn"></span>recovered (retries, fallback)</span><span class="li"><span class="dot run-cell bad"></span>roles left untagged</span></div>
+  {% if telemetry.problems %}
+  <div class="telemetry">
+    {% for t in telemetry.problems %}<div class="telemetry-row warn">
+      <span><b>{{ t.when }}</b><small>{{ t.provider }} · {{ t.model }} · rubric {{ t.rubric }}</small></span>
+      <span>{{ t.tagged }}/{{ t.total }} <small>{{ t.coverage }}% coverage</small></span>
+      <span>{{ t.cache_rate }}% <small>cache</small></span>
+      <span>{% if t.priced %}${{ "%.3f"|format(t.cost) }}{% else %}unpriced{% endif %}<small>{{ t.latency_s }}s</small></span>
+      <span>{% if t.flags %}{{ t.flags|join(', ') }}{% else %}{{ t.failed_batches }} failed batches{% endif %}</span>
+    </div>{% endfor %}
+  </div>
+  {% else %}<p class="stat-sub" style="margin:10px 0 0">Every run in {{ tagger_days }} days tagged all its roles without retries.</p>{% endif %}
+</section>
+{% else %}<p class="dp-empty">No tag runs recorded in {{ tagger_days }} days.</p>{% endif %}
+
+{% if desc_chart %}
+<div class="panel-head section"><h2>Description health</h2><span class="panel-meta">new roles, last {{ desc_chart.points|length }} days · placeholder pages count as missing</span></div>
+<div class="summary-cards wide">
+  <div class="scard"><div class="k">Full description</div><div class="v{% if desc_chart.full_pct >= 97 %} good{% endif %}">{{ desc_chart.full_pct }}%</div><div class="sub">{{ "{:,}".format(desc_chart.totals.full) }}/{{ "{:,}".format(desc_chart.n) }} roles</div></div>
+  <div class="scard"><div class="k">Missing</div><div class="v{% if desc_chart.totals.missing %} bad{% endif %}">{{ desc_chart.totals.missing }}</div><div class="sub">none stored, or a placeholder page</div></div>
+  <div class="scard"><div class="k">Thin</div><div class="v">{{ desc_chart.totals.thin }}</div><div class="sub">under 600 characters</div></div>
+  <div class="scard"><div class="k">Weakest source</div><div class="v sm">{{ desc_sources[0].company if desc_sources else "—" }}</div><div class="sub">{% if desc_sources %}{{ desc_sources[0].missing + desc_sources[0].thin }} of {{ desc_sources[0].n }} in 14 days{% else %}none{% endif %}</div></div>
+</div>
+<div class="stats-split">
+  <div class="stats-charts">
+    <section class="panel">
+      <div class="panel-head"><h3>New roles by description</h3><span class="panel-meta">per day</span></div>
+      <div class="chart-wrap">
+        <div class="chart" data-height="180" data-chart='{{ desc_chart|tojson }}' aria-label="New roles per day by description state, last {{ desc_chart.points|length }} days"></div>
+        <div class="ch-tip" hidden></div>
+      </div>
+      <div class="legend ch-legend">{% for k in desc_chart.legend %}<span class="li"><span class="dot seg-{{ k.slug }}"></span>{{ k.label }}</span>{% endfor %}</div>
+    </section>
+  </div>
+  <section class="panel stats-side">
+    <div class="panel-head"><h3>Weakest sources</h3><span class="panel-meta">thin or missing, last 14 days</span></div>
+    {% if desc_sources %}<div class="telemetry">
+      {% for r in desc_sources %}<div class="telemetry-row">
+        <span><a href="/?firm={{ r.company|urlencode }}"><b>{{ r.company }}</b></a></span>
+        <span>{{ r.missing + r.thin }} <small>of {{ r.n }}</small></span>
+        <span>{{ r.missing }} <small>missing</small></span>
+      </div>{% endfor %}
+    </div>{% else %}<p class="dp-empty">Every new role in 14 days has a full description.</p>{% endif %}
+  </section>
+</div>
+{% endif %}
+
+{% if evaluation.total %}
+<div class="panel-head section"><h2>Human evaluation</h2><span class="panel-meta">{{ evaluation.total }} labelled · {{ evaluation.corrected }} corrections · {{ evaluation.false_manager }} false-manager · {{ evaluation.false_other }} finance→other misses</span></div>
+{% if evaluation.models %}<div class="telemetry">
+  {% for m in evaluation.models %}<div class="telemetry-row">
+    <span><b>{{ m.provider }}</b> · {{ m.model }}<small>rubric {{ m.rubric }}</small></span>
+    <span>{{ m.n }} <small>labels</small></span><span>{{ m.false_manager }} <small>false-manager</small></span>
+    <span>{{ m.false_other }} <small>finance→other</small></span><span>{{ m.corrected }} corrected</span>
+  </div>{% endfor %}
+</div>{% endif %}
+{% endif %}
+
 </section>
 {% endif %}
 {% endblock %}

@@ -76,6 +76,42 @@ class ScanVolumeTests(unittest.TestCase):
             webapp.DB_FILE, webapp.WEB_USER, webapp.WEB_PASSWORD = saved
             os.unlink(tmp.name)
 
+    def test_day_week_switch_sets_every_chart_to_one_grain(self):
+        """The technical page mixed per-day and per-week charts (his catch,
+        2026-10-13); one switch now sets them all, on both stats pages."""
+        tmp = tempfile.NamedTemporaryFile(suffix=".db", delete=False)
+        tmp.close()
+        db = JobDB(tmp.name)
+        db.mark_seen("r1", company="Aldwych Bank", title="Markets Analyst", url="https://x.test/1")
+        db.conn.close()
+        saved = (webapp.DB_FILE, webapp.WEB_USER, webapp.WEB_PASSWORD)
+        webapp.DB_FILE = tmp.name
+        webapp.WEB_USER = "admin"
+        webapp.WEB_PASSWORD = "owner-pw-test"
+        try:
+            client = TestClient(webapp.app, base_url="https://testserver")
+            client.post("/login", data={"username": "admin", "password": "owner-pw-test"},
+                        follow_redirects=False)
+            for path in ("/stats/technical", "/stats/applications"):
+                for grain, per, other in (("day", "per day", "per week"),
+                                          ("week", "per week", "per day")):
+                    page = client.get(f"{path}?grain={grain}")
+                    self.assertEqual(page.status_code, 200, (path, grain))
+                    self.assertIn(per, page.text)
+                    self.assertNotIn(f"<h3>New roles {other}", page.text)
+                    self.assertNotIn(f"<h3>Noise share {other}", page.text)
+                    self.assertNotIn(f"<h3>Applications {other}", page.text)
+                    self.assertIn(f"grain={grain}", page.text)
+            technical = client.get("/stats/technical?grain=day").text
+            self.assertIn("New finance roles per day", technical)
+            self.assertIn("Scan tagging cost per day", technical)
+            # Default and junk values fall back to daily (his call, 2026-10-14).
+            self.assertIn("New roles per day", client.get("/stats/technical").text)
+            self.assertIn("New roles per day", client.get("/stats/technical?grain=x").text)
+        finally:
+            webapp.DB_FILE, webapp.WEB_USER, webapp.WEB_PASSWORD = saved
+            os.unlink(tmp.name)
+
     def test_every_pipeline_card_opens_its_role(self):
         """Tudor (area 'other') and a delisted J.P. Morgan role opened nothing
         from the board, and Deutsche Bank's programme tick was not on it at

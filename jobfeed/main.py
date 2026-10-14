@@ -44,6 +44,7 @@ from scrapers.enrich import (
     talentbrew_enrich, workable_enrich,
 )
 from jobfeed.deadline_text import stated_deadline
+from jobfeed.description_junk import is_junk
 from jobfeed.filter import has_experience_wall, is_relevant
 from jobfeed import notify
 from jobfeed import tag
@@ -332,7 +333,7 @@ def _enrich_new_jobs(new_jobs: list[dict], db: JobDB, dry_run: bool) -> None:
                 db.set_deadline(job["id"], job["deadline"])
             except Exception:
                 pass
-        if not text:
+        if not text or is_junk(text):
             return
         job["description"] = text
         if not dry_run:
@@ -753,6 +754,11 @@ def main():
                     raw_ids_by_company[name].add(existing_id)
                     stored_id = existing_id
                     is_new = False
+            # A placeholder page shipped as the body (a bot check, a
+            # "description only in French" notice) is no body: drop it so the
+            # enrichment pass fetches one and the tagger never reads it.
+            if is_junk(job.get("description")):
+                job["description"] = ""
             # A listing that ships its body (Greenhouse, Ashby, …) can state
             # its closing date only in prose; read it before either branch
             # below stores job["deadline"].
@@ -1034,6 +1040,10 @@ def main():
     # The web app is the only surface — store broad, filter/apply on the site.
     print(f"scan: {len(new_jobs)} new roles stored, {checked} firms checked, "
           f"{len(errors)} errors", flush=True)
+    # verify_state.json keeps only the names; the message is what a health
+    # pass needs, and it was otherwise lost with the run.
+    for name, err in errors:
+        print(f"  error: {name}: {str(err)[:300]}", flush=True)
 
     if _LIGHT_BATCH_TIMED_OUT:
         # See _LIGHT_BATCH_TIMED_OUT: a wedged scraper thread would block the

@@ -1171,6 +1171,7 @@
   "category": "Discretionary Macro HFs",
   "ats": "greenhouse",
   "slug": "point72",
+  "site_bodies": "https://careers.point72.com/",
   "verified": true
  },
  {
@@ -1289,7 +1290,9 @@
   "ats": "talnet",
   "board_url": "https://fidelityinternational.tal.net/vx/lang-en-GB/mobile-0/brand-5/candidate/jobboard/vacancy/1/adv/",
   "talnet_id_scope": "fil",
-  "verified": true
+  "verified": true,
+  "talnet_fetch_detail": false,
+  "notes": "2026-10-13: LISTING-ONLY (talnet_fetch_detail=false). The per-job detail GETs returned an empty location on 35 of 36 stored rows and added ~30 requests per scan to a tenant behind Oleeo Protect."
  },
  {
   "name": "Schroders",
@@ -2058,7 +2061,10 @@
   "grad_scheme_url": "https://www.bundesbank.de/de/karriere/einstiegsoptionen/traineeprogramme/master/traineeprogramm-master--606738",
   "category": "MDBs, Central Banks & IFIs",
   "ats": "bundesbank",
-  "verified": true
+  "verified": true,
+  "career_url": "https://jobportal.bundesbank.de/index.php?ac=search_result&language=1",
+  "scoped_at": "2026-10-13",
+  "notes": "2026-10-13: the Bundesbank is moving its ads to a Milch&Zucker Jobportal (BeeSite API api.jobportal.bundesbank.de, 25 roles) while not-yet-moved ads stay on the old bundesbank.de Jobbörse (1 left, down from 44), so scrapers/bundesbank.py reads both. Rewired, so scoped_at resets the baseline."
  },
  {
   "name": "Euroclear",

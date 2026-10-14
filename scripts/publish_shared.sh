@@ -90,6 +90,19 @@ log "export ok (${SIZE} gzipped)"
 # Upload to a dated key first, then update the stable one, so a consumer
 # mid-download never sees a truncated "latest".
 STAMP=$(date -u '+%Y%m%d')
+
+# Preflight with a short timeout. Spanish ISPs null-route Cloudflare IPs during
+# LaLiga matches (weekend evenings), which has caught the R2 S3 endpoint; rclone
+# then hangs ~66 min in retries before failing. Fail in seconds instead, and say
+# why, so the alert is not mistaken for a credentials or code fault.
+ENDPOINT=$(rclone config show "$REMOTE" 2>/dev/null | awk -F' = ' '$1=="endpoint"{print $2}')
+if [[ -n "$ENDPOINT" ]] && ! curl -s -o /dev/null --max-time 10 "$ENDPOINT"; then
+    if curl -s -o /dev/null --max-time 10 https://www.cloudflare.com; then
+        fail 7 "R2 endpoint unreachable while the internet works: most likely the Spanish ISP block on Cloudflare IPs during LaLiga matches. Nothing to fix; the next scheduled run retries."
+    fi
+    fail 7 "R2 endpoint unreachable (no internet either)"
+fi
+
 log "uploading to ${REMOTE}:${BUCKET}/..."
 
 if ! rclone copyto "${EXPORT_DB}.gz" \

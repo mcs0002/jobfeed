@@ -34,6 +34,21 @@ class TabOwnershipTests(unittest.TestCase):
         self.assertEqual([23], found["owned"])
         self.assertEqual([], found["violations"])
 
+    def test_titled_page_list_is_read(self):
+        # chrome-devtools-mcp 1.9.0 lists "N: Title (url) [selected]"; the old
+        # regex wanted a bare URL and flagged two attended runs of
+        # 2026-10-12 for clicking in the tab they had just opened.
+        listing = ("## Pages\n1: New Tab (chrome://new-tab-page/)\n"
+                   "2: Quantitative Researcher Internship (https://firm-b.example/apply)\n"
+                   "3: Intern - Risk Management in New Yo... "
+                   "(https://careers.example/jobs/40001/job?x=1) [selected]")
+        rows = [call(17, "new_page", url="https://careers.example/jobs/40001/job"),
+                {"step_index": 18, "type": "GENERIC", "content": listing},
+                call(29, "click", uid="7_89")]
+        found = agaudit.tab_ownership(rows)
+        self.assertEqual([3], found["owned"])
+        self.assertEqual([], found["violations"])
+
     def test_adopting_the_preselected_tab_is_one_finding(self):
         # list_pages, then navigate_page on another firm's tab.
         rows = [call(1, "list_pages"), result(2, 22), call(3, "navigate_page", url="u"),

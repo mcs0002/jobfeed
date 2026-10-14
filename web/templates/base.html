@@ -23,7 +23,7 @@
 <body class="{% block body_class %}{% endblock %}{% if request.session.get('role') == 'guest' %} guest{% endif %}">
   <header class="topbar">
     <div class="topbar-left">
-      <a class="brand" href="/">Jobfeed</a>
+      <a class="brand" href="/"><svg class="brand-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6a2 2 0 0 1 2 2v1h3a2 2 0 0 1 2 2v3.5H2V8a2 2 0 0 1 2-2h3V5a2 2 0 0 1 2-2Zm0 3h6V5H9v1ZM2 13h8.5v1a1.5 1.5 0 0 0 3 0v-1H22v5a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-5Z"/></svg>Jobfeed</a>
       {% set nav = nav_items(request) %}
       {% set more = nav|selectattr('group', 'equalto', 'more')|list %}
       {% set more_on = more|selectattr('active', 'equalto', active_nav)|list %}

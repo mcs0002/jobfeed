@@ -48,7 +48,7 @@ from applications.launcher import enqueue_launch  # noqa: E402
 from jobfeed.db import (AGENT_WORKFLOW_STATES, APPLICATION_MAIL_ORDER,
                 APPLICATION_WORKFLOW_STATES, APPLIED_STATUSES, TRACKS, JobDB,
                 _utc_instant,
-                AI_COUNT_KEY, mail_rank, plain_company)  # noqa: E402
+                AI_COUNT_KEY, mail_rank, plain_company, week_index, week_monday)  # noqa: E402
 from scrapers.enrich.descriptions import _extract_text  # noqa: E402
 from web.descfmt import format_description  # noqa: E402
 
@@ -284,7 +284,14 @@ def _days_since(ts: str) -> int:
         return 10 ** 6
 
 
+def _days_into_week() -> int:
+    """Days since this calendar week's Monday (0 on a Monday): the Browse list's
+    "This week" divider covers the calendar week, not the last 7 days."""
+    return datetime.now(timezone.utc).date().weekday()
+
+
 TEMPLATES.env.globals["days_since"] = _days_since
+TEMPLATES.env.globals["days_into_week"] = _days_into_week
 
 
 def _deadline_text(ts: str) -> str:
@@ -2523,6 +2530,11 @@ def stats(request: Request, db: JobDB = Depends(get_db), _=Depends(require_login
         track = ""
     track_kw = ({"hide_internships": True} if track == "fulltime"
                 else {"job_type": "internship"} if track == "intern" else {})
+    # Day/week switch: every time-series chart on the page follows it, so the
+    # page never mixes daily and weekly bars (his ask, 2026-10-13).
+    grain = request.query_params.get("grain", "day")
+    if grain not in ("day", "week"):
+        grain = "day"
     weeks = db.weekly_summary(weeks=4, exclude_companies=hidden)
     for r in weeks:
         area_rows = _area_rows(r["area"])
@@ -2631,7 +2643,7 @@ def stats(request: Request, db: JobDB = Depends(get_db), _=Depends(require_login
                   "pct": round(100 * n / status_max, 1) if status_max else 0}
                  for st, n in touched.items() if n]
     untriaged = status_counts.get("new", 0)
-    telemetry = tag_telemetry(days=14, by_run=True)[:8]
+    telemetry = _tagger_health(tag_telemetry(days=TAGGER_DAYS, by_run=True))
     evaluation = db.tag_evaluation_summary()
     funnels = {
         "Area": db.application_funnel("area", track=track),
@@ -2652,19 +2664,11 @@ def stats(request: Request, db: JobDB = Depends(get_db), _=Depends(require_login
         for st, n in by_track[t].items():
             track_counts[st] = track_counts.get(st, 0) + n
     return TEMPLATES.TemplateResponse(request, "stats.html", {
-        "apps_chart": _apps_week_chart(db.applications_per_week(
-            12, track=track, exclude_companies=hidden)),
+        "grain": grain,
+        **_grain_charts(db, grain, track, hidden, stats_view),
         "conversion": _conversion_steps(track_counts),
         "deadlines": _deadline_board(db, hidden, track_kw),
-        "intake_chart": _intake_week_chart(db.weekly_intake_counts(8, exclude_companies=hidden)),
-        "noise_chart": _noise_week_chart(db.weekly_intake_counts(12, exclude_companies=hidden)),
-        "noise_sources": db.other_inflow(14, 15, exclude_companies=hidden),
-        "roles_chart": _roles_day_chart(db.new_roles_per_day(30, exclude_companies=hidden)),
-        # Scan spend only; re-tags and evaluations are one-off (his call,
-        # 2026-10-10) and shown as a separate total in the card's subtitle.
-        "cost_chart": _cost_day_chart(tag_telemetry(days=30, by_run=False, callers=SCAN_CALLERS)),
-        "other_tag_cost": sum(r["cost"] for r in tag_telemetry(
-            days=30, by_run=False, exclude_callers=SCAN_CALLERS)),
+        "noise_sources": db.other_inflow(7, 15, exclude_companies=hidden),
         "request": request,
         "weeks": weeks,
         "velocity": velocity,
@@ -2684,6 +2688,11 @@ def stats(request: Request, db: JobDB = Depends(get_db), _=Depends(require_login
         "untriaged": untriaged,
         "fav_count": fav_count,
         "telemetry": telemetry,
+        "tagger_days": TAGGER_DAYS,
+        "desc_chart": _description_day_chart(db.description_health_daily(
+            GRAIN_DAYS, exclude_companies=hidden)) if stats_view == "technical" else None,
+        "desc_sources": db.description_gaps_by_source(
+            14, 15, exclude_companies=hidden) if stats_view == "technical" else [],
         "evaluation": evaluation,
         "funnels": funnels,
         "track": track,
@@ -2692,6 +2701,69 @@ def stats(request: Request, db: JobDB = Depends(get_db), _=Depends(require_login
         "stats_view": stats_view,
         "active_nav": f"{stats_view}-stats",
     })
+
+
+DESC_STATES = [("missing", "Missing"), ("thin", "Thin"), ("full", "Full")]
+
+
+def _description_day_chart(days: list[dict]) -> dict:
+    """New roles per local day stacked by description state, missing at the
+    base so a gap is the first thing the eye meets."""
+    points = []
+    for d in days:
+        n = d["full"] + d["thin"] + d["missing"]
+        x = _short_date(d["date"])
+        parts = [f"{lbl} {d[k]:,} ({100 * d[k] / n:.0f}%)" for k, lbl in DESC_STATES if d[k]] if n else []
+        points.append({"x": x, "v": n, "segs": [{"slug": "desc-" + k, "v": d[k]} for k, _ in DESC_STATES],
+                       "tip": "\n".join([f"{x}: {n:,} new"] + parts)})
+    tot = {k: sum(d[k] for d in days) for k, _ in DESC_STATES}
+    n = sum(tot.values())
+    return {"format": "int", "points": points, "barMax": 20, "totals": tot, "n": n,
+            "full_pct": round(100 * tot["full"] / n, 1) if n else 100.0,
+            "legend": [{"slug": "desc-" + k, "label": lbl} for k, lbl in DESC_STATES]}
+
+
+TAGGER_DAYS = 14
+
+
+def _tagger_health(runs: list[dict]) -> dict:
+    """Tagger health over TAGGER_DAYS: totals, one strip cell per run (oldest
+    first) and only the runs that need a look. The old list showed the newest
+    8 runs, about a day and a half, under a "last 14 days" heading (his catch,
+    2026-10-14). bad = a role left untagged or the API transport down;
+    warn = it recovered (failed batches retried, a fallback provider)."""
+    cells = []
+    for r in sorted(runs, key=lambda r: r["ts"]):
+        if r["coverage"] < 100 or "api_transport_down" in r["flags"]:
+            state = "bad"
+        elif r["failed_batches"] or r["flags"]:
+            state = "warn"
+        else:
+            state = "ok"
+        when = datetime.fromisoformat(r["ts"]).astimezone(ZoneInfo("Europe/Berlin"))
+        note = ", ".join(r["flags"]) or (f"{r['failed_batches']} failed batches" if r["failed_batches"] else "clean")
+        cost = f"${r['cost']:.3f}" if r["priced"] else "unpriced"
+        cells.append({**r, "state": state, "when": when.strftime("%d %b %H:%M"),
+                      "tip": f"{when:%d %b %H:%M} · {r['tagged']}/{r['total']} tagged · {cost} · {note}"})
+    total = sum(r["total"] for r in runs)
+    tagged = sum(r["tagged"] for r in runs)
+    latest = cells[-1] if cells else None
+    since = None
+    if latest:
+        for c in reversed(cells):
+            if c["rubric"] != latest["rubric"]:
+                break
+            since = c["when"]
+    return {
+        "runs": len(cells), "cells": cells,
+        "clean": sum(c["state"] == "ok" for c in cells),
+        "problems": [c for c in reversed(cells) if c["state"] != "ok"][:10],
+        "tagged": tagged, "total": total,
+        "coverage": round(100 * tagged / total, 1) if total else 100.0,
+        "failed_batches": sum(r["failed_batches"] for r in runs),
+        "cost": sum(r["cost"] for r in runs), "unpriced": any(not r["priced"] for r in runs),
+        "latest": latest, "rubric_since": since,
+    }
 
 
 TRACK_LABELS = {"fulltime": "Full-time", "intern": "Internships"}
@@ -2710,35 +2782,191 @@ def _apps_week_chart(weeks: list[dict]) -> dict:
         for w in weeks]}
 
 
+# Front-office tabs coloured in the intake chart, base first; every other
+# finance role is one grey "rest" segment on top. Same set and colours as the
+# Jobfeed widget (battery_board/scriptable/jobfeed.js), his call 2026-10-14.
+INTAKE_FRONT = ["markets", "quant", "asset-management", "corporate-banking", "ibd"]
+
+
+def _intake_segs(label: str, area: dict, finance: int) -> tuple[list, str]:
+    """Stacked segments for one intake bar: the front-office tabs, then the
+    rest of finance, and a tooltip with each count and share."""
+    front = [(code, _area_label(code), _group_count(area, code)) for code in INTAKE_FRONT]
+    rest = finance - sum(n for _, _, n in front)
+    rows = [(code, lbl, n) for code, lbl, n in front if n] + ([("rest", "Rest of finance", rest)] if rest else [])
+    segs = [{"slug": "fo-" + code, "v": n} for code, _, n in rows]
+    parts = [f"{lbl} {n:,} ({100 * n / finance:.0f}%)" for _, lbl, n in rows] if finance else []
+    return segs, "\n".join([f"{label}: {finance:,} finance"] + parts)
+
+
 def _intake_week_chart(weeks: list[dict]) -> dict:
-    """New finance roles per rolling week, oldest first. The counts arrive
-    newest first on windows that end tomorrow, so today is in week 0."""
-    end = datetime.now(timezone.utc).date() + timedelta(days=1)
+    """New finance roles per calendar week, oldest first, stacked by area.
+    The counts arrive newest first; week 0 is the current, partial week."""
     points = []
     for w in reversed(weeks):
-        start = (end - timedelta(weeks=w["week_ago"] + 1)).isoformat()
-        points.append({"x": _short_date(start), "v": w["finance"],
-                       "tip": f"Week from {_short_date(start)}: {w['finance']:,} finance"
-                              f" · {w['other_n']:,} other"})
-    return {"format": "int", "points": points}
+        x = _short_date(w["start"])
+        segs, tip = _intake_segs(f"Week of {x}", w.get("area", {}), w["finance"])
+        points.append({"x": x, "v": w["finance"], "segs": segs, "tip": tip})
+    # The bulk first load (late June) is 2-3x a normal week: clip it.
+    return {"format": "int", "points": points, "legend": _intake_keys(weeks),
+            "clip": 2, "barMax": 44}
+
+
+def _intake_keys(buckets: list[dict]) -> list[dict]:
+    """Legend for the stacked intake chart: the front-office tabs, then the rest."""
+    return ([{"slug": "fo-" + code, "label": _area_label(code)} for code in INTAKE_FRONT]
+            + [{"slug": "fo-rest", "label": "Rest of finance"}])
 
 
 def _noise_week_chart(weeks: list[dict]) -> dict:
-    """Share of newly stored roles tagged 'other' per rolling week, oldest
+    """Share of newly stored roles tagged 'other' per calendar week, oldest
     first; the wealth share rides in the tooltip. The trend shows whether
     source narrowing holds: a new noisy board shows up as a step."""
-    end = datetime.now(timezone.utc).date() + timedelta(days=1)
     points = []
     for w in reversed(weeks):
         total = w["finance"] + w["other_n"]
-        start = (end - timedelta(weeks=w["week_ago"] + 1)).isoformat()
+        start = w["start"]
         other = 100 * w["other_n"] / total if total else 0
         wealth = 100 * w.get("wealth_n", 0) / total if total else 0
         points.append({"x": _short_date(start), "v": round(other, 1),
-                       "tip": f"Week from {_short_date(start)}: {other:.0f}% other"
+                       "tip": f"Week of {_short_date(start)}: {other:.0f}% other"
                               f" · {wealth:.0f}% wealth · {total:,} new"})
     latest = points[-1]["v"] if points else 0
-    return {"format": "pct", "latest": latest, "points": points}
+    return {"format": "pct", "latest": latest, "points": points, "tone": "other"}
+
+
+GRAIN_DAYS = 30
+GRAIN_WEEKS = 12
+# The finance intake chart spans the page width, so it shows more (his call,
+# 2026-10-14). Data starts 2026-06-06 with the bulk first load.
+INTAKE_DAYS = 45
+INTAKE_WEEKS = 16
+
+
+def _grain_charts(db: JobDB, grain: str, track: str, hidden: list[str],
+                  stats_view: str) -> dict:
+    """The page's time-series charts at one grain: 30 days or 12 weeks
+    (the intake chart keeps 8 weeks). Only the charts the view shows are
+    queried."""
+    if stats_view == "application":
+        if grain == "day":
+            apps = _roles_day_chart(db.applications_per_day(
+                GRAIN_DAYS, track=track, exclude_companies=hidden))
+            for p in apps["points"]:
+                p["tip"] = p["tip"].replace("new role", "application")
+        else:
+            apps = _apps_week_chart(db.applications_per_week(
+                GRAIN_WEEKS, track=track, exclude_companies=hidden))
+        return {"apps_chart": apps}
+    # Scan spend only; re-tags and evaluations are one-off (his call,
+    # 2026-10-10) and shown as a separate total in the card's subtitle.
+    if grain == "day":
+        days = db.daily_intake_counts(GRAIN_DAYS, exclude_companies=hidden)
+        return {
+            "roles_chart": _roles_split_day_chart(days),
+            "noise_chart": _noise_day_chart(days),
+            "intake_chart": _intake_day_chart(
+                db.daily_intake_counts(INTAKE_DAYS, exclude_companies=hidden)),
+            "cost_chart": _cost_day_chart(tag_telemetry(
+                days=GRAIN_DAYS, by_run=False, callers=SCAN_CALLERS), GRAIN_DAYS),
+            "other_tag_cost": sum(r["cost"] for r in tag_telemetry(
+                days=GRAIN_DAYS, by_run=False, exclude_callers=SCAN_CALLERS)),
+        }
+    weeks = db.weekly_intake_counts(GRAIN_WEEKS, exclude_companies=hidden)
+    return {
+        "roles_chart": _roles_week_chart(weeks),
+        "noise_chart": _noise_week_chart(weeks),
+        "intake_chart": _intake_week_chart(
+            db.weekly_intake_counts(INTAKE_WEEKS, exclude_companies=hidden)),
+        "cost_chart": _cost_week_chart(tag_telemetry(
+            days=7 * GRAIN_WEEKS, by_run=False, callers=SCAN_CALLERS), GRAIN_WEEKS),
+        "other_tag_cost": sum(r["cost"] for r in tag_telemetry(
+            days=7 * GRAIN_WEEKS, by_run=False, exclude_callers=SCAN_CALLERS)),
+    }
+
+
+def _week_start(week_ago: int) -> str:
+    """Monday of calendar week `week_ago` (0 = the current, partial week)."""
+    return week_monday(datetime.now(timezone.utc).date(), week_ago).isoformat()
+
+
+def _roles_week_chart(weeks: list[dict]) -> dict:
+    """Every new role per calendar week, oldest first, finance stacked under
+    other (`lo`), so a scoping change shows as a lower pale cap rather than
+    only as a share that a falling finance count can fake."""
+    points = []
+    for w in reversed(weeks):
+        n = w["finance"] + w["other_n"]
+        start = _short_date(w["start"])
+        points.append({"x": start, "v": n, "lo": w["finance"],
+                       "tip": f"Week of {start}: {n:,} new · {w['finance']:,} finance"
+                              f" · {w['other_n']:,} other"})
+    return {"format": "int", "total": sum(p["v"] for p in points), "points": points}
+
+
+def _roles_split_day_chart(days: list[dict]) -> dict:
+    """The daily face of _roles_week_chart, from daily_intake_counts."""
+    points = []
+    for d in days:
+        n = d["finance"] + d["other_n"]
+        x = _short_date(d["date"])
+        points.append({"x": x, "v": n, "lo": d["finance"],
+                       "tip": f"{x}: {n:,} new · {d['finance']:,} finance · {d['other_n']:,} other"})
+    return {"format": "int", "total": sum(p["v"] for p in points), "points": points}
+
+
+def _noise_day_chart(days: list[dict]) -> dict:
+    """The noise share per UTC day, from daily_intake_counts."""
+    points = []
+    for d in days:
+        total = d["finance"] + d["other_n"]
+        other = 100 * d["other_n"] / total if total else 0
+        wealth = 100 * d["wealth_n"] / total if total else 0
+        points.append({"x": _short_date(d["date"]), "v": round(other, 1),
+                       "tip": f"{_short_date(d['date'])}: {other:.0f}% other"
+                              f" · {wealth:.0f}% wealth · {total:,} new"})
+    latest = points[-1]["v"] if points else 0
+    return {"format": "pct", "latest": latest, "points": points, "tone": "other"}
+
+
+def _intake_day_chart(days: list[dict]) -> dict:
+    """New finance roles per UTC day, stacked by area, from daily_intake_counts."""
+    points = []
+    for d in days:
+        x = _short_date(d["date"])
+        segs, tip = _intake_segs(x, d.get("area", {}), d["finance"])
+        points.append({"x": x, "v": d["finance"], "segs": segs, "tip": tip})
+    return {"format": "int", "points": points, "legend": _intake_keys(days), "barMax": 20}
+
+
+def _cost_week_chart(rows: list[dict], weeks: int = 12) -> dict:
+    """Scan tagging spend per calendar week (Monday to Sunday), oldest first."""
+    today = datetime.now(timezone.utc).date()
+    buckets = [{"cost": 0.0, "tagged": 0, "unpriced": False, "runs": False}
+               for _ in range(weeks)]
+    for r in rows:
+        try:
+            w = week_index(datetime.fromisoformat(r["key"]).date(), today)
+        except (KeyError, TypeError, ValueError):
+            continue
+        if 0 <= w < weeks:
+            b = buckets[w]
+            b["cost"] += r["cost"]
+            b["tagged"] += r.get("tagged", 0)
+            b["runs"] = True
+            b["unpriced"] = b["unpriced"] or not r["priced"]
+    points, total, unpriced = [], 0.0, 0
+    for w in range(weeks - 1, -1, -1):
+        b = buckets[w]
+        start = _short_date(_week_start(w))
+        total += b["cost"]
+        unpriced += b["unpriced"]
+        note = " (partly unpriced)" if b["unpriced"] else ""
+        points.append({"x": start, "v": round(b["cost"], 4),
+                       "tip": f"Week of {start}: ${b['cost']:.2f}{note}"
+                              + (f" · {b['tagged']:,} roles tagged" if b["runs"] else " · no run")})
+    return {"format": "usd", "total": round(total, 2), "unpriced_days": unpriced,
+            "has_data": any(b["runs"] for b in buckets), "points": points}
 
 
 def _roles_day_chart(days: list[dict]) -> dict:
@@ -2946,18 +3174,21 @@ def sources(request: Request, db: JobDB = Depends(get_db), _=Depends(require_log
     # succeeded but collapsed far below its rolling baseline. A verified source
     # in either set is "stalled" — wired and supposed to work, but currently
     # producing nothing. Read defensively: absent/garbage file => 0 stalled.
-    stalled_set: set = set()
+    # Shown apart as failing and collapsed, as the Jobfeed widget does (his
+    # call, 2026-10-14): a source in both sets counts as failing.
+    failing_set: set = set()
+    collapsed_set: set = set()
     _vstate: dict = {}
     try:
         with open(os.path.join(ROOT, "verify_state.json")) as fp:
             _vstate = json.load(fp)
-        stalled_set = (set(_vstate.get("failing", []))
-                       | set(_vstate.get("degraded", [])))
+        failing_set = set(_vstate.get("failing", []))
+        collapsed_set = set(_vstate.get("degraded", [])) - failing_set
     except (OSError, ValueError):
         pass
 
     groups: dict[str, list[dict]] = {}
-    totals = {"sources": 0, "automated": 0, "stalled": 0, "unverified": 0,
+    totals = {"sources": 0, "automated": 0, "failing": 0, "collapsed": 0, "unverified": 0,
               "manual": 0, "finance": 0, "stored": 0}
     for t in targets:
         name = t.get("name", "")
@@ -2978,7 +3209,9 @@ def sources(request: Request, db: JobDB = Depends(get_db), _=Depends(require_log
             "verified": t.get("verified", False),
             # A source moved to manual can remain in verify_state until the
             # next scan rewrites it; it is no longer an automated failure.
-            "stalled": ats not in ("manual", "unknown") and name in stalled_set,
+            "health": ("" if ats in ("manual", "unknown") else
+                       "failing" if name in failing_set else
+                       "collapsed" if name in collapsed_set else ""),
             "total": st.get("total", 0),
             "recent": recent.get(name, 0),
             "finance": st.get("finance", 0),
@@ -3018,10 +3251,10 @@ def sources(request: Request, db: JobDB = Depends(get_db), _=Depends(require_log
             totals["manual"] += 1
         elif not t.get("verified"):
             totals["unverified"] += 1
-        elif name in stalled_set:
+        elif name in failing_set or name in collapsed_set:
             # verified:true but currently broken/collapsed — pulled out of the
             # "scraped" count so a regression can't hide as a healthy 0.
-            totals["stalled"] += 1
+            totals["failing" if name in failing_set else "collapsed"] += 1
         else:
             totals["automated"] += 1
 

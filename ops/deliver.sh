@@ -214,3 +214,25 @@ not being mounted at 03:30."
     echo "[$(date -u +%FT%TZ)] backup stale: ${backup_age_h}h" >>"$LOG"
   fi
 fi
+
+# Same split for the encrypted offsite copy to R2. bin-m1-backup.sh treats an
+# offsite failure as non-fatal (the local snapshot already succeeded) and only
+# logs ERROR, so the stamp above stays fresh while offsite silently falls
+# behind. It stamps this file only after `restic copy` succeeds.
+OFFSITE_STAMP="$HOME/.local/state/m1-offsite-last-success"
+
+if [ ! -f "$OFFSITE_STAMP" ]; then
+  alert "M1 offsite backup: no success stamp" \
+        "$OFFSITE_STAMP does not exist. Either the R2 offsite copy has never
+succeeded since stamping was added, or the stamp was removed. Check
+~/Library/Logs/m1-backup.log."
+else
+  offsite_age_h=$(( ( $(date +%s) - $(stat_mtime "$OFFSITE_STAMP") ) / 3600 ))
+  if [ "$offsite_age_h" -gt "$BACKUP_MAX_AGE_H" ]; then
+    alert "M1 offsite backup stale: ${offsite_age_h}h since last success" \
+          "The last successful restic copy to R2 was ${offsite_age_h} hours ago
+(threshold ${BACKUP_MAX_AGE_H}h). Local snapshots may be fine; the offsite
+copy is behind. Check ~/Library/Logs/m1-backup.log for 'offsite copy failed'."
+    echo "[$(date -u +%FT%TZ)] offsite stale: ${offsite_age_h}h" >>"$LOG"
+  fi
+fi

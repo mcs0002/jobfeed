@@ -12,6 +12,7 @@ from contextlib import contextmanager
 from datetime import datetime, timedelta, timezone
 
 from jobfeed import search
+from jobfeed.description_junk import is_junk
 
 # DB paths whose schema (CREATE TABLE + _migrate) has already run this process.
 # web/app.py builds a fresh JobDB per request; without this gate every request
@@ -110,6 +111,29 @@ APPLIED_STATUSES = ("applied", "oa", "interview", "offer", "rejected", "withdraw
 TRACKS = ("fulltime", "intern")
 _TRACK_SQL = {"fulltime": "COALESCE(job_type, 'job') != 'internship'",
               "intern": "job_type = 'internship'"}
+
+
+def week_monday(today, week_ago: int = 0):
+    """Monday of calendar week `week_ago` (0 = the current, partial week).
+    Every weekly figure uses Monday-to-Sunday weeks, never 7-day windows
+    ending today: those moved every day, so a past bar changed height as days
+    crossed its edge (his catch 2026-10-01, made the rule 2026-10-13)."""
+    return today - timedelta(days=today.weekday() + 7 * week_ago)
+
+
+def week_index(day, today) -> int:
+    """How many calendar weeks before `today`'s week `day` falls (0 = this week)."""
+    return (week_monday(today) - week_monday(day)).days // 7
+
+
+# Intake charts bucket roles by the M1's local day (Europe/Berlin), as the
+# Jobfeed widget does: by UTC day the 01:00 scan fell on the day before, so
+# the web said 43 finance today while the widget said 96 (his catch, 2026-10-14).
+LOCAL_DAY = "date(first_seen, 'localtime')"
+
+
+def local_today():
+    return datetime.now().astimezone().date()
 
 
 def track_clause(track: str | None) -> str:
@@ -553,6 +577,18 @@ def ai_title(title) -> int:
         return 1
     return 1 if _LLM_RE.search(title) and not _LEGAL_TITLE_RE.search(title) else 0
 
+
+
+def _add_intake(row: dict, area: str, n: int) -> None:
+    """Fold one (area, count) group into an intake bucket: finance/other
+    totals, the wealth subset of finance, finance by raw area code."""
+    if area == "other":
+        row["other_n"] += n
+        return
+    row["finance"] += n
+    row["area"][area] = row["area"].get(area, 0) + n
+    if area == "wealth":
+        row["wealth_n"] += n
 
 class JobDB:
     def __init__(self, path: str, check_same_thread: bool = True):
@@ -1151,7 +1187,7 @@ class JobDB:
         their ATS started shipping descriptions inline (e.g. the ~500
         Greenhouse rows predating content=true, 2026-07-01) — the scan's
         already-seen path otherwise discards the freshly fetched text."""
-        if not text:
+        if not text or is_junk(text):
             return False
         cur = self.conn.execute(
             "INSERT INTO job_descriptions (job_id, description, fetched_at) "
@@ -1189,8 +1225,9 @@ class JobDB:
             (job_id, company, title, url, now, category, location, posted,
              now, deadline or None),
         )
-        # No row for an empty description, so enrichment can target the gap.
-        if description:
+        # No row for an empty description, so enrichment can target the gap;
+        # a placeholder page counts as empty (jobfeed/description_junk.py).
+        if description and not is_junk(description):
             self.conn.execute(
                 "INSERT OR IGNORE INTO job_descriptions (job_id, description, fetched_at) "
                 "VALUES (?, ?, ?)", (job_id, description, now))
@@ -1273,7 +1310,7 @@ class JobDB:
         Fixes the freeze where fill_description_if_missing (NULL-only) left an
         inline-capture source permanently stuck on a pre-capability stub even
         though every later scrape returned the full body."""
-        if not text:
+        if not text or is_junk(text):
             return False
         cur = self.conn.execute(
             "INSERT INTO job_descriptions (job_id, description, fetched_at) "
@@ -1289,9 +1326,14 @@ class JobDB:
 
     def set_description(self, job_id: str, description: str) -> bool:
         """Populate or overwrite the description for one job (used by the
-        enrichment pass). Returns True if the row exists."""
+        enrichment pass). Returns True if the row exists. A placeholder page
+        (jobfeed/description_junk.py) is not stored: the row keeps what it had
+        and its next fetch waits out the miss backoff, like an empty fetch."""
         if not self.seen(job_id):
             return False
+        if is_junk(description):
+            self.record_description_miss(job_id)
+            return True
         if description:
             self.conn.execute(
                 "INSERT INTO job_descriptions (job_id, description, fetched_at) "
@@ -3326,60 +3368,158 @@ class JobDB:
         return [{"start": (start + timedelta(days=7 * i)).isoformat(), "n": n}
                 for i, n in enumerate(counts)]
 
-    def weekly_intake_counts(self, weeks: int = 8,
+    def applications_per_day(self, days: int = 30, track: str | None = None,
                              exclude_companies: list[str] | None = None) -> list[dict]:
-        """Finance / other new-role counts per rolling week, newest first, on
-        the same windows as weekly_summary (week 0 = the last 7 days, today
-        included). One grouped scan: weekly_summary costs two scans per week,
-        which doubled the stats page's query time when stretched to 8 weeks."""
+        """Submitted applications per UTC day, oldest first and zero-filled:
+        the daily face of applications_per_week, same rows and same dating."""
         from datetime import timedelta
         exc, exc_p = self._exclude_clause(exclude_companies)
+        tc = track_clause(track)
         today = datetime.now(timezone.utc).date()
+        start = today - timedelta(days=days - 1)
+        q = ",".join("?" * len(APPLIED_STATUSES))
+        got = dict(self.conn.execute(
+            f"SELECT substr(COALESCE(applied_at, first_seen), 1, 10), COUNT(*) FROM seen_jobs "
+            f"WHERE status IN ({q}) AND COALESCE(applied_at, first_seen) >= ?"
+            + (" AND " + tc if tc else "") + exc + " GROUP BY 1",
+            (*APPLIED_STATUSES, start.isoformat(), *exc_p)).fetchall())
+        return [{"date": d, "n": got.get(d, 0)}
+                for d in ((start + timedelta(days=i)).isoformat() for i in range(days))]
+
+    def weekly_intake_counts(self, weeks: int = 8,
+                             exclude_companies: list[str] | None = None) -> list[dict]:
+        """Finance / other new-role counts per calendar week (Monday to
+        Sunday), newest first; week 0 is the current, partial week. Same
+        weeks as weekly_summary. One grouped scan: weekly_summary costs two
+        scans per week, which doubled the stats page's query time when
+        stretched to 8 weeks."""
+        from datetime import timedelta
+        exc, exc_p = self._exclude_clause(exclude_companies)
+        today = local_today()
         end = today + timedelta(days=1)
         # wealth_n is a subset of finance (the noise-share chart reads it).
-        out = [{"week_ago": w, "finance": 0, "other_n": 0, "wealth_n": 0} for w in range(weeks)]
-        for day, is_other, is_wealth, n in self.conn.execute(
-                "SELECT substr(first_seen, 1, 10), COALESCE(NULLIF(area,''),'other') = 'other',"
-                " area = 'wealth', COUNT(*) FROM seen_jobs WHERE first_seen >= ? AND first_seen < ?"
-                + exc + " GROUP BY 1, 2, 3",
-                ((end - timedelta(weeks=weeks)).isoformat(), end.isoformat(), *exc_p)):
+        # `area` holds the finance rows by raw area code (the intake chart
+        # stacks them by tab group).
+        out = [{"week_ago": w, "start": week_monday(today, w).isoformat(),
+                "finance": 0, "other_n": 0, "wealth_n": 0, "area": {}} for w in range(weeks)]
+        for day, area, n in self.conn.execute(
+                "SELECT " + LOCAL_DAY + ", COALESCE(NULLIF(area,''),'other'), COUNT(*)"
+                " FROM seen_jobs WHERE " + LOCAL_DAY + " >= ? AND " + LOCAL_DAY + " < ?"
+                + exc + " GROUP BY 1, 2",
+                (week_monday(today, weeks - 1).isoformat(), end.isoformat(), *exc_p)):
             try:
-                w = (today - datetime.fromisoformat(day).date()).days // 7
+                w = week_index(datetime.fromisoformat(day).date(), today)
             except (TypeError, ValueError):
                 continue
             if 0 <= w < weeks:
-                out[w]["other_n" if is_other else "finance"] += n
-                if is_wealth:
-                    out[w]["wealth_n"] += n
+                _add_intake(out[w], area, n)
         return out
 
-    def other_inflow(self, days: int = 14, limit: int = 10,
-                     exclude_companies: list[str] | None = None) -> list[dict]:
-        """Sources by 'other' rows first stored in the last `days`, most first:
-        where the clutter comes from now (narrow those, do not retag)."""
+    def daily_intake_counts(self, days: int = 30,
+                            exclude_companies: list[str] | None = None) -> list[dict]:
+        """Finance / other / wealth new-role counts per UTC day, oldest first
+        and zero-filled: the daily face of weekly_intake_counts, for the stats
+        page's day/week switch."""
         from datetime import timedelta
         exc, exc_p = self._exclude_clause(exclude_companies)
-        since = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
+        today = local_today()
+        start = today - timedelta(days=days - 1)
+        dates = [(start + timedelta(days=i)).isoformat() for i in range(days)]
+        out = {d: {"date": d, "finance": 0, "other_n": 0, "wealth_n": 0, "area": {}}
+               for d in dates}
+        for day, area, n in self.conn.execute(
+                "SELECT " + LOCAL_DAY + ", COALESCE(NULLIF(area,''),'other'), COUNT(*)"
+                " FROM seen_jobs WHERE " + LOCAL_DAY + " >= ?"
+                + exc + " GROUP BY 1, 2", (start.isoformat(), *exc_p)):
+            row = out.get(day)
+            if row is not None:
+                _add_intake(row, area, n)
+        return [out[d] for d in dates]
+
+    def other_inflow(self, days: int = 7, limit: int = 10,
+                     exclude_companies: list[str] | None = None) -> list[dict]:
+        """Sources by 'other' rows first stored in the last `days`, most first,
+        beside the `days` before: where the clutter comes from now, and whether
+        a scoping change cut it (narrow those, do not retag). Postings removed
+        upstream that were never stored do not show here, by design."""
+        from datetime import timedelta
+        exc, exc_p = self._exclude_clause(exclude_companies)
+        now = datetime.now(timezone.utc)
+        since = (now - timedelta(days=days)).isoformat()
+        before = (now - timedelta(days=2 * days)).isoformat()
         rows = self.conn.execute(
-            "SELECT company, COUNT(*), SUM(area = 'other') FROM seen_jobs"
+            "SELECT company, SUM(first_seen >= ?), SUM(first_seen >= ? AND area = 'other'),"
+            " SUM(first_seen < ? AND area = 'other') FROM seen_jobs"
             " WHERE first_seen >= ? AND area IS NOT NULL AND area != ''" + exc
             + " GROUP BY company HAVING SUM(area = 'other') > 0"
-            " ORDER BY 3 DESC LIMIT ?", (since, *exc_p, limit)).fetchall()
-        return [{"company": c, "n": n, "other": o} for c, n, o in rows]
+            " ORDER BY 3 DESC, 4 DESC LIMIT ?",
+            (since, since, since, before, *exc_p, limit)).fetchall()
+        return [{"company": c, "n": n or 0, "other": o or 0, "prev": p or 0}
+                for c, n, o, p in rows]
 
     def new_roles_per_day(self, days: int = 30,
                           exclude_companies: list[str] | None = None) -> list[dict]:
-        """Roles first stored per UTC day, oldest first and zero-filled."""
+        """Roles first stored per local day, oldest first and zero-filled."""
         from datetime import timedelta
         exc, exc_p = self._exclude_clause(exclude_companies)
-        today = datetime.now(timezone.utc).date()
+        today = local_today()
         start = today - timedelta(days=days - 1)
         got = dict(self.conn.execute(
-            "SELECT substr(first_seen, 1, 10), COUNT(*) FROM seen_jobs "
-            "WHERE first_seen >= ?" + exc + " GROUP BY 1",
+            "SELECT " + LOCAL_DAY + ", COUNT(*) FROM seen_jobs "
+            "WHERE " + LOCAL_DAY + " >= ?" + exc + " GROUP BY 1",
             (start.isoformat(), *exc_p)).fetchall())
         return [{"date": d, "n": got.get(d, 0)}
                 for d in ((start + timedelta(days=i)).isoformat() for i in range(days))]
+
+    # A description under this many characters is "thin": a title, a location
+    # line or a one-sentence stub, too little for the tagger or the
+    # experience-wall check to read.
+    THIN_DESCRIPTION_CHARS = 600
+
+    def _description_rows(self, since_day: str, exclude_companies):
+        exc, exc_p = self._exclude_clause(exclude_companies)
+        return self.conn.execute(
+            "SELECT " + LOCAL_DAY + ", seen_jobs.company, length(d.description),"
+            " CASE WHEN length(d.description) < 1500 THEN d.description END"
+            " FROM seen_jobs LEFT JOIN job_descriptions d ON d.job_id = seen_jobs.id"
+            " WHERE " + LOCAL_DAY + " >= ?" + exc, (since_day, *exc_p))
+
+    def _description_state(self, length, short_text) -> str:
+        if length is None or is_junk(short_text):
+            return "missing"
+        return "thin" if length < self.THIN_DESCRIPTION_CHARS else "full"
+
+    def description_health_daily(self, days: int = 30,
+                                 exclude_companies: list[str] | None = None) -> list[dict]:
+        """New roles per local day by description state, oldest first and
+        zero-filled: full, thin (< THIN_DESCRIPTION_CHARS) or missing (none
+        stored, or a placeholder page stored before description_junk)."""
+        from datetime import timedelta
+        today = local_today()
+        start = today - timedelta(days=days - 1)
+        out = {(start + timedelta(days=i)).isoformat(): {"full": 0, "thin": 0, "missing": 0}
+               for i in range(days)}
+        for day, _, length, short in self._description_rows(start.isoformat(), exclude_companies):
+            if day in out:
+                out[day][self._description_state(length, short)] += 1
+        return [{"date": d, **v} for d, v in out.items()]
+
+    def description_gaps_by_source(self, days: int = 14, limit: int = 15,
+                                   exclude_companies: list[str] | None = None) -> list[dict]:
+        """Sources by new roles of the last `days` with a thin or missing
+        description, most first."""
+        from datetime import timedelta
+        start = (local_today() - timedelta(days=days - 1)).isoformat()
+        by: dict = {}
+        for _, company, length, short in self._description_rows(start, exclude_companies):
+            row = by.setdefault(company, {"company": company, "n": 0, "thin": 0, "missing": 0})
+            row["n"] += 1
+            state = self._description_state(length, short)
+            if state != "full":
+                row[state] += 1
+        rows = [r for r in by.values() if r["thin"] + r["missing"]]
+        rows.sort(key=lambda r: (-(r["thin"] + r["missing"]), -r["missing"], r["company"]))
+        return rows[:limit]
 
     def review_counts(self, exclude_companies: list[str] | None = None
                       ) -> dict[str, int]:
@@ -3396,28 +3536,30 @@ class JobDB:
 
     def weekly_summary(self, weeks: int = 4,
                        exclude_companies: list[str] | None = None) -> list[dict]:
-        """Per-week new-role counts by area and region, newest first."""
+        """Per calendar week (Monday to Sunday) new-role counts by area and
+        region, newest first; week 0 is the current, partial week."""
         from datetime import timedelta
         exc, exc_p = self._exclude_clause(exclude_companies)
-        # Windows end TOMORROW: first_seen is a timestamp, so `< today` (a bare
-        # date string) silently dropped every role stored today from "This week".
-        end = datetime.now(timezone.utc).date() + timedelta(days=1)
+        today = local_today()
         out = []
         for w in range(weeks):
-            lo = (end - timedelta(weeks=w + 1)).isoformat()
-            hi = (end - timedelta(weeks=w)).isoformat()
+            # The upper bound is the next Monday, a bare date: first_seen is a
+            # timestamp, so a bound of today dropped every role stored today.
+            lo = week_monday(today, w).isoformat()
+            hi = (week_monday(today, w) + timedelta(days=7)).isoformat()
             area = dict(self.conn.execute(
                 "SELECT COALESCE(NULLIF(area,''),'other'), COUNT(*) FROM seen_jobs "
-                "WHERE first_seen >= ? AND first_seen < ?" + exc + " GROUP BY 1",
+                "WHERE " + LOCAL_DAY + " >= ? AND " + LOCAL_DAY + " < ?" + exc + " GROUP BY 1",
                 (lo, hi, *exc_p),
             ).fetchall())
             region = dict(self.conn.execute(
                 "SELECT COALESCE(NULLIF(loc_region,''),'Other'), COUNT(*) FROM seen_jobs "
-                "WHERE first_seen >= ? AND first_seen < ?" + exc + " GROUP BY 1",
+                "WHERE " + LOCAL_DAY + " >= ? AND " + LOCAL_DAY + " < ?" + exc + " GROUP BY 1",
                 (lo, hi, *exc_p),
             ).fetchall())
             out.append({
                 "week_ago": w,
+                "start": lo,
                 "label": "This week" if w == 0 else ("Last week" if w == 1 else f"{w}w ago"),
                 "total": sum(area.values()),
                 "finance": sum(n for a, n in area.items() if a != "other"),
@@ -3429,32 +3571,32 @@ class JobDB:
 
     def company_weekly_velocity(self, weeks: int = 8,
                                 exclude_companies: list[str] | None = None) -> list[dict]:
-        """Per-company finance role counts for the last `weeks` weeks.
+        """Per-company finance role counts for the last `weeks` calendar
+        weeks (Monday to Sunday, week 0 the current, partial one).
         Returns [{company, counts[0..weeks-1], total, recent, max_wk}] sorted
         by this-week count desc then total desc. counts[0] = most recent week."""
-        today = datetime.now(timezone.utc).date().isoformat()
-        from datetime import timedelta
         exc, exc_p = self._exclude_clause(exclude_companies)
-        cutoff = (datetime.now(timezone.utc).date() - timedelta(weeks=weeks)).isoformat()
+        today = local_today()
         rows = self.conn.execute(
             """
-            SELECT company,
-                   CAST((julianday(?) - julianday(substr(first_seen,1,10))) / 7 AS INTEGER) AS week_ago,
-                   COUNT(*) AS n
+            SELECT company, """ + LOCAL_DAY + """ AS day, COUNT(*) AS n
             FROM seen_jobs
-            WHERE first_seen >= ? AND area != '' AND area != 'other'""" + exc + """
-            GROUP BY company, week_ago
+            WHERE """ + LOCAL_DAY + """ >= ? AND area != '' AND area != 'other'""" + exc + """
+            GROUP BY company, day
             """,
-            (today, cutoff, *exc_p),
+            (week_monday(today, weeks - 1).isoformat(), *exc_p),
         ).fetchall()
         data: dict[str, list[int]] = {}
-        for company, week_ago, n in rows:
-            w = int(week_ago)
+        for company, day, n in rows:
+            try:
+                w = week_index(datetime.fromisoformat(day).date(), today)
+            except (TypeError, ValueError):
+                continue
             if w < 0 or w >= weeks:
                 continue
             if company not in data:
                 data[company] = [0] * weeks
-            data[company][w] = n
+            data[company][w] += n
         result = []
         for company, counts in data.items():
             total = sum(counts)

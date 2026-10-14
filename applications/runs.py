@@ -26,7 +26,7 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parent.parent
 CACHE_FILE = ROOT / "antigravity_runs_cache.json"
-CACHE_VERSION = 6  # 6: trailing Antigravity errors (2026-10-02)
+CACHE_VERSION = 7  # 7: titled page lists in tab ownership (2026-10-12)
 
 
 def _load_agaudit():

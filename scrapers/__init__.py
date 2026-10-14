@@ -125,7 +125,8 @@ def _greenhouse(company):
     return greenhouse.scrape(company["slug"], eu=company.get("eu", False),
                              url_template=company.get("url_template", ""),
                              departments=company.get("departments"),
-                             exclude_departments=company.get("exclude_departments"))
+                             exclude_departments=company.get("exclude_departments"),
+                             site_bodies=company.get("site_bodies", ""))
 
 
 def _bis(company):

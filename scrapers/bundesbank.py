@@ -1,12 +1,27 @@
-"""Deutsche Bundesbank server-rendered job board scraper."""
+"""Deutsche Bundesbank job boards: the old server-rendered Jobbörse plus the
+new Jobportal.
+
+Since October 2026 the Bundesbank is moving its ads to a Milch&Zucker
+Jobportal (jobportal.bundesbank.de, BeeSite REST API at
+api.jobportal.bundesbank.de, the gjbAddress in /script/gjb_scripts.js). Its
+start page says ads not yet moved stay on the old Jobbörse, so both are read
+and unioned; the old board went from 44 roles to 1 as they migrated. Drop the
+old half once its page lists nothing for good.
+"""
 import re
 from urllib.parse import urljoin
 
 from bs4 import BeautifulSoup
 
+from . import beesite
 from ._http import fix_encoding, make_session
 
 SEARCH_URL = "https://www.bundesbank.de/action/de/729936/bbksearch"
+JOBPORTAL = {
+    "tenant": "bundesbank",
+    "base_url": "https://api.jobportal.bundesbank.de/search/",
+    "language": "DE",
+}
 HEADERS = {"User-Agent": "Mozilla/5.0 (compatible; job-scraper/1.0)"}
 
 
@@ -27,6 +42,10 @@ def _fetch(session, page: int):
 
 
 def scrape() -> list[dict]:
+    return _scrape_jobboerse() + beesite.scrape(JOBPORTAL)
+
+
+def _scrape_jobboerse() -> list[dict]:
     session = make_session()
     first = _fetch(session, 0)
     page_numbers = [0]

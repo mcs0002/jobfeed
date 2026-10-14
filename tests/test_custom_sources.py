@@ -978,8 +978,9 @@ class RadancyTests(unittest.TestCase):
 
 
 class BundesbankTests(unittest.TestCase):
+    @patch("scrapers.bundesbank.beesite.scrape", return_value=[])
     @patch("scrapers.bundesbank.make_session")
-    def test_follows_all_result_pages(self, make_session):
+    def test_follows_all_result_pages(self, make_session, _jobportal):
         get = make_session.return_value.get
         get.side_effect = [
             FakeResponse(text="""
@@ -1003,6 +1004,25 @@ class BundesbankTests(unittest.TestCase):
 
         self.assertEqual(len(jobs), 2)
         self.assertEqual(jobs[1]["location"], "Berlin")
+
+    @patch("scrapers.bundesbank.beesite.scrape")
+    @patch("scrapers.bundesbank.make_session")
+    def test_unions_old_jobboerse_with_new_jobportal(self, make_session, jobportal):
+        make_session.return_value.get.return_value = FakeResponse(text="""
+            <li class="resultlist__item">
+              <div class="teasable__title"><div class="h2">Gastforscher</div></div>
+              <a class="teasable__link" href="/de/karriere/jobportal/gast-723406"></a>
+            </li>
+        """)
+        jobportal.return_value = [{"id": "beesite_bundesbank_J000000290",
+                                   "title": "DLT Specialist", "url": "u",
+                                   "location": "Berlin", "posted": ""}]
+
+        jobs = bundesbank.scrape()
+
+        self.assertEqual([j["id"] for j in jobs],
+                         ["bundesbank_723406", "beesite_bundesbank_J000000290"])
+        self.assertEqual(jobportal.call_args.args[0], bundesbank.JOBPORTAL)
 
 
 class DeutscheBoerseTests(unittest.TestCase):

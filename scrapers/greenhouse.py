@@ -4,7 +4,9 @@ Endpoint: https://boards-api.greenhouse.io/v1/boards/{slug}/jobs
 No auth required — Greenhouse publishes this as a public job board API.
 """
 import html
+import json
 import os
+import re
 import sys
 
 from .enrich.descriptions import _extract_text  # noqa: E402
@@ -16,7 +18,8 @@ HEADERS = {"User-Agent": "Mozilla/5.0 (compatible; job-scraper/1.0)"}
 
 def scrape(slug: str, eu: bool = False, url_template: str = "",
            departments: list[str] | None = None,
-           exclude_departments: list[str] | None = None) -> list[dict]:
+           exclude_departments: list[str] | None = None,
+           site_bodies: str = "") -> list[dict]:
     # `departments` keeps a job listed under any of these department names;
     # `exclude_departments` drops a job only when EVERY department it lists is
     # excluded. A job with no department passes both, and a department the
@@ -33,6 +36,8 @@ def scrape(slug: str, eu: bool = False, url_template: str = "",
     # (job-boards.eu.greenhouse.io) is real, but its API is served from the
     # standard boards-api.greenhouse.io host regardless. EQT/Permira (the
     # only two `eu: true` targets) both 200 there.
+    # `site_bodies` names the firm's own careers page when it, not Greenhouse,
+    # holds the posting text (Point72, see _salesforce_bodies).
     url = BASE.format(slug=slug)
     # content=true makes Greenhouse include the (HTML) description inline so
     # we can store it without a second per-job request.
@@ -59,4 +64,47 @@ def scrape(slug: str, eu: bool = False, url_template: str = "",
             # then strip to clean text so it's readable + good LLM input.
             "description": _extract_text(html.unescape(j.get("content", "") or "")),
         })
+    if site_bodies and any(len(j["description"]) < SHORT_BODY for j in jobs):
+        bodies = _salesforce_bodies(site_bodies)
+        for j in jobs:
+            body = bodies.get(j["id"].removeprefix("gh_"), "")
+            if len(j["description"]) < SHORT_BODY and len(body) > len(j["description"]):
+                j["description"] = body
     return jobs
+
+
+# A Greenhouse `content` this short is the title restated, not a posting.
+SHORT_BODY = 200
+
+_SF_INIT_RE = re.compile(r"CSSearchModule\.init\('((?:[^'\\]|\\.)*)'", re.S)
+_GH_ID_RE = re.compile(r"greenhouse\.io/[^/]+/jobs/(\d+)")
+
+
+def _salesforce_bodies(page_url: str) -> dict[str, str]:
+    """Greenhouse job id -> posting text, read from a Salesforce careers site.
+
+    Point72 keeps only the title in Greenhouse's `content` for some roles (11
+    of 221, 2026-10-14); the body lives in careers.point72.com, whose single
+    page embeds every Job__c record as a JS string passed to
+    CSSearchModule.init, each with its Greenhouse apply link. Empty on any
+    failure, so the Greenhouse text stands."""
+    try:
+        r = make_session().get(page_url, headers=HEADERS, timeout=30)
+        r.raise_for_status()
+        m = _SF_INIT_RE.search(r.text)
+        if not m:
+            return {}
+        # A JS single-quoted literal: drop the escapes JSON lacks (\', \&),
+        # read it as a JSON string, then parse the JSON it holds.
+        literal = re.sub(r"\\([^\"\\/bfnrtu])", r"\1", m.group(1))
+        records = json.loads(json.loads(f'"{literal}"'))
+    except Exception:
+        return {}
+    out = {}
+    for rec in records:
+        job = (rec.get("job") if isinstance(rec, dict) else None) or {}
+        gh = _GH_ID_RE.search(job.get("Apply_Now_URL__c") or "")
+        text = _extract_text(job.get("Job_Description_External__c") or "")
+        if gh and text:
+            out[gh.group(1)] = text
+    return out

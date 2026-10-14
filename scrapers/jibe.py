@@ -49,7 +49,7 @@ def scrape(config: dict) -> list[dict]:
             jobs[job_id] = {
                 "id": f"jibe_{config.get('company_id', 'company')}_{job_id}",
                 "title": title,
-                "url": urljoin(base_url, f"jobs/{job_id}"),
+                "url": _job_url(base_url, job_id, data.get("language")),
                 "location": data.get("full_location") or data.get("short_location", ""),
                 "posted": data.get("posted_date", "")[:10],
                 "_excluded": _excluded(data, config.get("exclude_values")),
@@ -71,6 +71,15 @@ def scrape(config: dict) -> list[dict]:
     # Pagination and completeness count every posting; exclusion applies after.
     assert_complete(len(jobs), total, "Jibe")
     return [j for j in jobs.values() if not j.pop("_excluded")]
+
+
+def _job_url(base_url: str, job_id: str, language: str | None) -> str:
+    """The posting's page in the language it was written in. Without `lang`
+    a multi-language board answers 404 for a posting with no English version:
+    AXA's German and French roles (de-de, fr-fr) did, so the link was dead and
+    the page's JSON-LD body never reached enrichment (2026-10-14)."""
+    url = urljoin(base_url, f"jobs/{job_id}")
+    return f"{url}?lang={language}" if language else url
 
 
 def _excluded(data: dict, exclude: dict | None) -> bool:

@@ -109,7 +109,7 @@ class OpenAICompatibleTests(_Isolated):
         return {"choices": [{"message": {"content": json.dumps({"rows": rows})}}],
                 "usage": usage}
 
-    def test_structured_request_pins_one_row_per_role(self):
+    def test_structured_request_pins_each_slot(self):
         calls = self._post(self._reply([ROW.split("|"), ROW1.split("|")]))
         cfg = {**self.CFG, "extra": {"temperature": None, "thinking": {"type": "off"}}}
         tag._tag_batch_openai(_jobs(2), cfg, health=self.health)
@@ -122,7 +122,10 @@ class OpenAICompatibleTests(_Isolated):
         fmt = body["response_format"]["json_schema"]
         self.assertTrue(fmt["strict"])
         rows = fmt["schema"]["properties"]["rows"]
-        self.assertEqual((rows["minItems"], rows["maxItems"]), (2, 2))
+        # No row-count pin: with per-slot enums Gemini refuses it (400, "too
+        # many states") from 13 rows up. The index slot carries the alignment.
+        self.assertNotIn("minItems", rows)
+        self.assertEqual(rows["items"]["prefixItems"][0]["enum"], ["0", "1"])
 
     def test_structured_reply_tags_the_batch(self):
         self._post(self._reply([ROW.split("|"), ROW1.split("|")],
@@ -139,13 +142,39 @@ class OpenAICompatibleTests(_Isolated):
         tag._tag_batch_openai(_jobs(1), self.CFG, health=self.health)
         self.assertEqual(self.health["tokens_cached"], 7)
 
-    def test_wrong_row_count_blanks_but_keeps_transport_alive(self):
+    def test_short_reply_keeps_good_rows_and_transport_alive(self):
         # A malformed answer is a parse failure, not a dead host: the run must
-        # not abandon a working provider over one bad batch.
+        # not abandon a working provider over one bad batch, and the rows that
+        # did come back aligned keep their tags.
         self._post(self._reply([ROW.split("|")]))
         jobs = _jobs(2)
         tag._tag_batch_openai(jobs, self.CFG, health=self.health)
-        self.assertTrue(all(tag._is_untagged(j) for j in jobs))
+        self.assertEqual(jobs[0]["area"], "markets")
+        self.assertTrue(tag._is_untagged(jobs[1]))
+        self.assertEqual(self.health["batches_failed"], 1)
+        self.assertFalse(tag._api_transport_is_dead())
+
+    def test_rotated_row_blanks_only_that_role(self):
+        # 2026-10-09 05:19: row 12 came back with its index moved to the end
+        # and every field shifted left; the whole 13-role batch was blanked.
+        rotated = ROW1.split("|")[1:] + ["1"]
+        self._post(self._reply([ROW.split("|"), rotated]))
+        jobs = _jobs(2)
+        tag._tag_batch_openai(jobs, self.CFG, health=self.health)
+        self.assertEqual(jobs[0]["area"], "markets")
+        self.assertTrue(tag._is_untagged(jobs[1]))
+
+    def test_truncated_reply_keeps_complete_rows(self):
+        # 2026-10-10: the model echoed a posting into a field until max_tokens
+        # (finish_reason=length) and the unterminated string blanked the batch.
+        text = json.dumps({"rows": [ROW.split("|")]})[:-2] + \
+            ', ["1", "ibd", "Lerne die Commerzbank aus einer neuen'
+        self._post({"choices": [{"message": {"content": text},
+                                 "finish_reason": "length"}]})
+        jobs = _jobs(2)
+        tag._tag_batch_openai(jobs, self.CFG, health=self.health)
+        self.assertEqual(jobs[0]["area"], "markets")
+        self.assertTrue(tag._is_untagged(jobs[1]))
         self.assertFalse(tag._api_transport_is_dead())
 
     def test_transport_failure_marks_provider_dead(self):
@@ -161,7 +190,8 @@ class StructuredRowTests(unittest.TestCase):
     def test_fields_are_cleaned_before_the_line_parser(self):
         row = ROW.split("|")
         row[5], row[9], row[12] = "New\nYork", None, "a|b"
-        line = tag._json_to_pipe(json.dumps({"rows": [row]}), 1)
+        line, problems = tag._json_to_pipe(json.dumps({"rows": [row]}), 1)
+        self.assertEqual(problems, [])
         fields = line.split("|")
         self.assertEqual(len(fields), 14)
         self.assertEqual((fields[5], fields[9], fields[12]), ("New York", "-", "a/b"))
@@ -169,21 +199,34 @@ class StructuredRowTests(unittest.TestCase):
     def test_object_rows_follow_field_order(self):
         obj = dict(zip(tag._FIELD_ORDER, ROW.split("|")))
         shuffled = dict(reversed(list(obj.items())))
-        self.assertEqual(tag._json_to_pipe(json.dumps({"rows": [shuffled]}), 1), ROW)
+        self.assertEqual(tag._json_to_pipe(json.dumps({"rows": [shuffled]}), 1),
+                         (ROW, []))
 
     def test_bare_list_is_accepted(self):
-        self.assertEqual(tag._json_to_pipe(json.dumps([ROW.split("|")]), 1), ROW)
+        self.assertEqual(tag._json_to_pipe(json.dumps([ROW.split("|")]), 1),
+                         (ROW, []))
 
     def test_malformed_rows_are_rejected(self):
+        drifted = ROW.split("|")
+        drifted[2] = "Londen"   # 2026-10-02: a city in the desk slot
         cases = {
-            "count": ({"rows": [ROW.split("|")]}, 2),
             "fields": ({"rows": [ROW.split("|")[:13]]}, 1),
+            "enum": ({"rows": [drifted]}, 1),
+            "garbage": ("not json at all", 1),
             "index": ({"rows": [ROW1.split("|")]}, 1),
             "not a list": ({"rows": "x"}, 1),
         }
         for name, (payload, n) in cases.items():
             with self.subTest(name), self.assertRaises(ValueError):
-                tag._json_to_pipe(json.dumps(payload), n)
+                tag._json_to_pipe(payload if isinstance(payload, str)
+                                  else json.dumps(payload), n)
+
+    def test_bad_rows_are_reported_and_good_rows_kept(self):
+        rows = [ROW.split("|"), ROW.split("|")]   # second row claims index 0
+        line, problems = tag._json_to_pipe(json.dumps({"rows": rows}), 3)
+        self.assertEqual(line, ROW)
+        self.assertEqual(len(problems), 2)       # count mismatch + bad index
+        self.assertIn("invalid index", problems[1])
 
     def test_object_schema_is_closed_and_complete(self):
         schema = tag._json_schema("json_obj", 3)
@@ -197,8 +240,26 @@ class StructuredRowTests(unittest.TestCase):
         self.assertFalse(schema["additionalProperties"])
 
     def test_row_schema_pins_fourteen_fields(self):
-        item = tag._json_schema("json_rows", 1)["properties"]["rows"]["items"]
+        item = tag._json_schema("json_rows", 3)["properties"]["rows"]["items"]
         self.assertEqual((item["minItems"], item["maxItems"]), (14, 14))
+        slots = dict(zip(tag._FIELD_ORDER, item["prefixItems"]))
+        self.assertEqual(len(slots), 14)
+        # Each closed-vocabulary position carries its own enum, so a row
+        # cannot rotate: slot 0 accepts only this batch's indices.
+        self.assertEqual(slots["index"]["enum"], ["0", "1", "2"])
+        self.assertEqual(slots["seniority"]["enum"], sorted(tag.SENIORITIES))
+        self.assertIn("-", slots["desk"]["enum"])
+        self.assertEqual(slots["ai_tech"]["enum"], ["yes", "no"])
+        self.assertNotIn("enum", slots["city"])
+        # Area is free in the schema (an enum cost gold accuracy) and is
+        # validated per row in _json_to_pipe instead.
+        self.assertNotIn("enum", slots["area"])
+
+    def test_area_outside_the_vocabulary_rejects_the_row(self):
+        bad = ROW.split("|")
+        bad[1] = "Lombard Odier"
+        with self.assertRaises(ValueError):
+            tag._json_to_pipe(json.dumps({"rows": [bad]}), 1)
 
 
 if __name__ == "__main__":

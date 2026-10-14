@@ -10,7 +10,8 @@
   <div class="scard"><div class="k">Sources</div><div class="v">{{ totals.sources }}</div></div>
   <div class="scard"><div class="k">Automated</div><div class="v good">{{ totals.automated }}</div></div>
   {% if totals.unverified %}<div class="scard help" title="ATS configured but verified:false — the scheduled scan skips these until a passing scrape flips them live (see docs/SOURCE_HEALTH.md Tier 0b)."><div class="k">Unverified</div><div class="v" style="color:var(--warn)">{{ totals.unverified }}</div></div>{% endif %}
-  <div class="scard help" title="verified:true but the last scan errored or collapsed far below its baseline — wired, was working, now producing nothing. Fix needed (see docs/SOURCE_HEALTH.md)."><div class="k">Stalled</div><div class="v{% if totals.stalled %} bad{% endif %}">{{ totals.stalled }}</div></div>
+  <div class="scard help" title="verified:true but the last scan errored: wired and was working, now producing nothing. Fix needed (see docs/SOURCE_HEALTH.md)."><div class="k">Failing</div><div class="v{% if totals.failing %} bad{% endif %}">{{ totals.failing }}</div><div class="sub">scraper errored</div></div>
+  <div class="scard help" title="verified:true and the scan succeeded, but returned far below its rolling baseline: a board change, a scope that broke, or a real hiring freeze."><div class="k">Collapsed</div><div class="v{% if totals.collapsed %} warn{% endif %}">{{ totals.collapsed }}</div><div class="sub">far below its baseline</div></div>
   <div class="scard help" title="No automated source. Usually there is no public job board and hiring runs through email, LinkedIn, or a prose-only page; a few use a blocked or unsupported system."><div class="k">Manual</div><div class="v">{{ totals.manual }}</div></div>
 </div>
 
@@ -23,6 +24,7 @@
   <br><span class="scope full">Full board</span> every role on the configured board/feed · <span class="scope facet">Positive facet</span> only the board's finance categories (divisions, departments) · <span class="scope exclude">Excluded categories</span> the whole board minus categories that hold only noise (IT, HR, marketing), so new or unfiled roles still arrive · <span class="scope search">Search scope</span> server-side keyword query · <span class="noiseterm">⊘ n</span> this source's own title noise terms (hover) · <span class="scope manual">Manual</span> no automated source; usually email, LinkedIn, or prose-only · <span class="heavy">heavy</span> = isolated execution for big/slow boards. Markers: <span class="ext">↗</span> career site · <span class="srcnote">ⓘ</span> note (hover) · 🎓 separate graduate scheme on the firm's own site.
 </details>
 
+<div class="panel-head section"><h2>Sources by category</h2><span class="panel-meta">a switch hides that firm or category from Browse and stats</span></div>
 <input type="search" id="srcsearch" class="src-search" placeholder="Filter sources… (company, ATS, scope, category)" autocomplete="off">
 
 {% for category, rows in groups %}
@@ -48,7 +50,7 @@
         {% if r.notes %}<span class="srcnote" title="{{ r.notes }}">ⓘ</span>{% endif %}
         {% if r.grad_scheme %}<a class="gradscheme" href="{{ r.grad_scheme_url|safe_url }}" target="_blank" rel="noopener" title="Separate graduate scheme on the firm's own site — not posted on the scraped board. Apply directly.">🎓</a>{% endif %}
         {% if not r.verified and r.ats not in ('manual','unknown') %}<span class="firm-flag unverified"> unverified</span>{% endif %}
-        {% if r.stalled %}<span class="firm-flag stalled"> ⚠ stalled</span>{% endif %}
+        {% if r.health == "failing" %}<span class="firm-flag stalled"> ⚠ failing</span>{% elif r.health == "collapsed" %}<span class="firm-flag collapsed"> ↘ collapsed</span>{% endif %}
         <div class="firmsub">{{ r.ats }}
           {% if r.last_unique is not none %} · last scan {{ r.last_unique }} unique{% if r.expected %} / {{ r.expected }} expected{% if r.baseline_delta %} ({{ "%+d"|format(r.baseline_delta) }}){% endif %}{% endif %}{% if r.last_raw != r.last_unique %} · {{ r.last_raw }} raw{% endif %}
           {% elif r.last_seen %} · last seen {{ r.last_seen }}{% endif %}

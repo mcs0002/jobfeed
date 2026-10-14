@@ -94,8 +94,9 @@ the surface that gets daily eyeballs.
 
 **Known gaps (accepted for now):** per-firm *source* errors still surface only
 via the `/sources` badge until Sunday (the nightly email covers run-level
-failures, not individual source breaks — the scan prints only the error
-*count*; check `verify_state.json` `failing` for names); selfcheck (Sun 03:00)
+failures, not individual source breaks; since 2026-10-13 `deliver.log` has an
+`  error: <name>: <message>` line per failed source under each `scan:` summary,
+and `verify_state.json` `failing` holds the names); selfcheck (Sun 03:00)
 and the nightly scan share no lock (since 2026-09-23 they are two hours apart,
 so they only overlap if selfcheck runs long); the monthly
 `python -m jobfeed.notify --test` heartbeat isn't scheduled.
@@ -145,6 +146,8 @@ so they only overlap if selfcheck runs long); the monthly
 ---
 
 ## Done
+
+- **2026-10-13 (health pass):** 9 failing, 17 collapsed. **Seven failing were tal.net** (Evercore x2, Fidelity, L.E.K., MS/Nomura campus, Rothschild students), all answered with Oleeo Protect's "Quick Check Needed" from both Macs on the shared egress IP; they produced between 11 and 13 Oct, so they stay automated. Bank of America campus, also tal.net, scraped clean from the same IP at 21:21 the same night, so the gate is per tenant, not IP-wide as the signature above assumed. Fidelity was the one tenant still doing per-job detail GETs (location empty on 35 of 36 stored rows), now listing-only. The ALTCHA challenge is not solved by design. BNP (1,568 offers in 553 s) and MSCI (69) re-probed clean: transient. **Bundesbank** is migrating to a Milch&Zucker Jobportal (BeeSite API `api.jobportal.bundesbank.de`, 25 roles; old board 44 -> 1), and `bundesbank.py` now unions both. Genuinely small or seasonal, verified against each board's own count: RBC campus 32, Wellington campus 8, BP S&T early careers 2 (of 12 on the board), Storebrand 2, B2C2 2, Olam 2, Santander Early Talent 0 (Future Talents ads closed 4-11 Oct on Universia; other Banco Santander ads there are covered by Santander CIB), and the baseline-1-to-3 boards Antin, Apax, BayernInvest, Capital Four, Cornerstone, Glencore UK, Handelsbanken CM, Rokos, Walter Scott (same ATS, empty). The scan now logs each failed source's message.
 
 - **2026-10-10 (BNP):** board now 3,141 offers. Entity filter mapped against stored tags; `bnpparibas_paced.scrape(exclude_entities=...)` drops retail banks, consumer credit, leasing, Real Estate and India Solutions by the card's logo alt text, after the full sweep (unassigned offers and new entities kept). ~660 stored 'other' rows retire; CIB, AM, Group, Cardif, Wealth Management and Portzamparc stay.
 

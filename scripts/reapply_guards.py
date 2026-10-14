@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """Re-apply the deterministic tag guards across the whole DB.
 
-_enforce_manager and _enforce_internship are pure functions of the title, and
-_enforce_corporate_title of the description's "Corporate Title:" line — no
-model, no tokens, no network. But they only run at tag time, so every row tagged
+_enforce_manager and _enforce_internship are pure functions of the title,
+_enforce_corporate_title of the description's "Corporate Title:" line, and
+_enforce_entry_associate of title, firm, job type and min_yoe (Associate as the
+graduate entry title at the Big 4 and consultancies, 2026-10-10) — no model, no
+tokens, no network. But they only run at tag time, so every row tagged
 before a guard was tightened keeps whatever label it was given. On 2026-08-20
 the Review page surfaced exactly that: "Project Manager", "Trade Coverage" and
 "Portfolio Manager - Commercial Banking" all still carried seniority='manager',
@@ -38,18 +40,22 @@ def main() -> int:
 
     db = JobDB(args.db)
     cur = db.conn.execute(
-        "SELECT s.id, s.title, s.area, s.seniority, s.job_type, d.description "
+        "SELECT s.id, s.title, s.area, s.seniority, s.job_type, d.description, "
+        "s.company, s.min_yoe "
         "FROM seen_jobs s LEFT JOIN job_descriptions d ON d.job_id = s.id "
         "WHERE COALESCE(s.area, '') != ''")
     rows = cur.fetchall()
 
     changes, kinds = [], Counter()
-    for jid, title, area, seniority, job_type, description in rows:
+    for jid, title, area, seniority, job_type, description, company, min_yoe in rows:
         j = {"title": title or "", "area": area or "", "description": description or "",
-             "seniority": seniority or "", "job_type": job_type or "job"}
+             "seniority": seniority or "", "job_type": job_type or "job",
+             "company": company or "", "min_yoe": min_yoe}
+        # Same guards, same order as tag.tag_jobs.
         tag._enforce_internship(j)
         tag._enforce_manager(j)
         tag._enforce_corporate_title(j)
+        tag._enforce_entry_associate(j)
         if j["seniority"] != (seniority or "") or j["job_type"] != (job_type or "job"):
             kind = (f"seniority {seniority or '-'} -> {j['seniority'] or '-'}"
                     if j["seniority"] != (seniority or "") else

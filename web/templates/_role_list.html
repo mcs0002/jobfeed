@@ -1,17 +1,18 @@
-{# S8: sticky Today / This week / Earlier dividers. The list is always sorted
+{# S8: sticky Today / This week (calendar week, since Monday) / Earlier dividers. The list is always sorted
    newest-first (app.py pins sort=recent), so the groups come out in order and
    a single pass over `jobs` is enough — no regrouping in Python. Empty groups
    are omitted entirely because the header is only emitted on transition. #}
 {% set _d = [] %}{% for j in jobs %}{% set _ = _d.append(days_since(j.first_seen)) %}{% endfor %}
 {% set today_n = _d | select('lt', 1) | list | length %}
-{% set week_n = (_d | select('lt', 8) | list | length) - today_n %}
+{% set _wk = days_into_week() %}
+{% set week_n = (_d | select('le', _wk) | list | length) - today_n %}
 {% set earlier_n = (_d | length) - today_n - week_n %}
 {% set counts = {0: today_n, 1: week_n, 2: earlier_n} %}
 {% set labels = {0: 'Today', 1: 'This week', 2: 'Earlier'} %}
 {% set ns = namespace(group=None) %}
 {% for j in jobs %}
 {% set d = days_since(j.first_seen) %}
-{% set g = 0 if d == 0 else (1 if d <= 7 else 2) %}
+{% set g = 0 if d == 0 else (1 if d <= _wk else 2) %}
 {% if g != ns.group %}
   {% if ns.group is not none %}</div>{% endif %}
   {% set ns.group = g %}

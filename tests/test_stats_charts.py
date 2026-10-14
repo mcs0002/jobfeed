@@ -11,7 +11,7 @@ os.environ.setdefault("WEB_GUEST_PASSWORD", "guest-pw-test")
 os.environ.setdefault("WEB_GUEST_USER", "guest")
 os.environ.setdefault("JOBS_DB", tempfile.NamedTemporaryFile(suffix=".db", delete=False).name)
 
-from jobfeed.db import JobDB  # noqa: E402
+from jobfeed.db import JobDB, week_index, week_monday  # noqa: E402
 import web.app as webapp  # noqa: E402
 
 
@@ -71,15 +71,28 @@ class ChartQueries(unittest.TestCase):
         self.assertEqual(days[-1]["n"], 1)  # d
         self.assertEqual(sum(d["n"] for d in days), 3)  # c, d, e; a and b are 40d old
 
-    def test_weekly_windows_include_today(self):
-        # d was stored today; a bare-date upper bound used to drop it.
-        self.assertEqual(self.db.weekly_summary(weeks=1)[0]["total"], 2)  # d, e
+    def test_weekly_figures_use_calendar_weeks_including_today(self):
+        # Monday-to-Sunday weeks (his rule, 2026-10-13); d was stored today and
+        # a bare-date upper bound used to drop it.
+        today = datetime.now(timezone.utc).date()
+        expected = [0] * 8
+        for days_ago in (40, 40, 20, 0, 3):  # a, b, c, d, e by first_seen
+            w = week_index(today - timedelta(days=days_ago), today)
+            if w < 8:
+                expected[w] += 1
+        self.assertGreaterEqual(expected[0], 1)  # d, stored today
         weeks = self.db.weekly_intake_counts(8)
-        self.assertEqual(len(weeks), 8)
-        self.assertEqual(weeks[0]["finance"] + weeks[0]["other_n"], 2)
-        # c (20d ago) lands in week 2, the same window weekly_summary uses.
-        self.assertEqual(weeks[2]["finance"] + weeks[2]["other_n"], 1)
-        self.assertEqual(self.db.weekly_summary(weeks=3)[2]["total"], 1)
+        self.assertEqual([w["finance"] + w["other_n"] for w in weeks], expected)
+        self.assertEqual([w["start"] for w in weeks],
+                         [week_monday(today, i).isoformat() for i in range(8)])
+        self.assertEqual(datetime.fromisoformat(weeks[0]["start"]).weekday(), 0)
+        self.assertEqual([w["total"] for w in self.db.weekly_summary(weeks=8)], expected)
+
+    def test_week_index_is_calendar_based(self):
+        monday = datetime(2026, 10, 12).date()
+        self.assertEqual(week_index(monday, monday + timedelta(days=6)), 0)   # Sun, same week
+        self.assertEqual(week_index(monday - timedelta(days=1), monday), 1)   # Sun before
+        self.assertEqual(week_monday(monday + timedelta(days=3), 2), monday - timedelta(days=14))
 
     def test_noise_share_chart_and_other_inflow(self):
         weeks = self.db.weekly_intake_counts(12)
@@ -88,8 +101,42 @@ class ChartQueries(unittest.TestCase):
         self.assertEqual(chart["format"], "pct")
         self.assertEqual(len(chart["points"]), 12)
         self.assertTrue(all(0 <= p["v"] <= 100 for p in chart["points"]))
-        rows = self.db.other_inflow(14, 10)
+        rows = self.db.other_inflow(7, 10)
         self.assertTrue(all(r["other"] <= r["n"] for r in rows))
+
+    def test_other_inflow_compares_two_windows(self):
+        rows = [("o1", "N", _day(1), "other"), ("o2", "N", _day(2), "markets"),
+                ("o3", "N", _day(10), "other"), ("o4", "N", _day(11), "other"),
+                ("o5", "N", _day(20), "other")]
+        for jid, co, fs, area in rows:
+            self.db.conn.execute(
+                "INSERT INTO seen_jobs (id, company, title, url, first_seen, last_seen, area)"
+                " VALUES (?,?,?,?,?,?,?)", (jid, co, jid, f"https://x.test/{jid}", fs, fs, area))
+        r = next(r for r in self.db.other_inflow(7, 10) if r["company"] == "N")
+        self.assertEqual((r["other"], r["prev"], r["n"]), (1, 2, 2))
+
+    def test_intake_chart_stacks_front_office_then_rest(self):
+        days = [{"date": "2026-10-13", "finance": 6, "other_n": 9, "wealth_n": 1,
+                 "area": {"markets": 3, "risk": 1, "middle-office": 1, "wealth": 1}}]
+        chart = webapp._intake_day_chart(days)
+        p = chart["points"][0]
+        self.assertEqual(p["v"], 6)
+        self.assertEqual(sum(s["v"] for s in p["segs"]), 6)
+        self.assertEqual([(s["slug"], s["v"]) for s in p["segs"]], [("fo-markets", 3), ("fo-rest", 3)])
+        self.assertIn("Markets 3 (50%)", p["tip"])
+        self.assertIn("Rest of finance 3 (50%)", p["tip"])
+        self.assertEqual(chart["legend"][-1]["slug"], "fo-rest")
+
+    def test_intake_counts_carry_finance_by_area(self):
+        for w in self.db.weekly_intake_counts(8) + self.db.daily_intake_counts(30):
+            self.assertEqual(sum(w["area"].values()), w["finance"])
+
+    def test_roles_chart_stacks_finance_under_other(self):
+        days = [{"date": "2026-10-13", "finance": 3, "other_n": 5, "wealth_n": 0}]
+        p = webapp._roles_split_day_chart(days)["points"][0]
+        self.assertEqual((p["v"], p["lo"]), (8, 3))
+        w = webapp._roles_week_chart([{"start": "2026-10-12", "finance": 2, "other_n": 1}])
+        self.assertEqual((w["points"][0]["v"], w["points"][0]["lo"], w["total"]), (3, 2, 3))
 
     def test_deadline_board_splits_dated_and_undated(self):
         soon = (datetime.now(timezone.utc) + timedelta(days=5)).date().isoformat()
@@ -110,6 +157,20 @@ class ChartQueries(unittest.TestCase):
 
 
 class ChartPayloads(unittest.TestCase):
+    def test_tagger_health_flags_only_runs_that_need_a_look(self):
+        def run(ts, tagged=10, failed=0, flags=()):
+            return {"ts": ts, "provider": "api", "model": "m", "rubric": "r1", "total": 10,
+                    "tagged": tagged, "coverage": 10.0 * tagged, "cache_rate": 0.0,
+                    "cost": 0.01, "priced": True, "latency_s": 1.0,
+                    "failed_batches": failed, "flags": list(flags)}
+        h = webapp._tagger_health([run("2026-10-14T07:00:00+00:00"),
+                                    run("2026-10-13T07:00:00+00:00", failed=1),
+                                    run("2026-10-12T07:00:00+00:00", tagged=8)])
+        self.assertEqual([c["state"] for c in h["cells"]], ["bad", "warn", "ok"])
+        self.assertEqual((h["runs"], h["clean"], h["tagged"], h["total"]), (3, 1, 28, 30))
+        self.assertEqual([p["state"] for p in h["problems"]], ["warn", "bad"])
+        self.assertEqual(webapp._tagger_health([])["runs"], 0)
+
     def test_conversion_counts_at_least_that_stage(self):
         steps = webapp._conversion_steps(
             {"applied": 5, "oa": 1, "interview": 2, "offer": 1, "rejected": 1})

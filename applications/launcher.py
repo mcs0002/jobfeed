@@ -6,6 +6,7 @@ import json
 import os
 import re
 import stat
+import sys
 from pathlib import Path
 
 from applications.handoff import handoff_view, safe_application_url
@@ -91,6 +92,19 @@ def _payload(workflow: dict, *, require_run: bool = False) -> dict:
     }
 
 
+def _ensure_browser() -> None:
+    """Dedicated Chrome up, port file pointing at it, documents staged
+    (applications/browser.py), right before a run starts. The keepalive does
+    the same every five minutes; this closes the gap after a reboot or a main
+    Chrome restart. A failure goes to stderr, never into the payload on stdout:
+    the run then fails at its first browser step, which audit-run diagnoses."""
+    from applications import browser
+    try:
+        browser.ensure()
+    except Exception as exc:
+        print(f"application browser not ready: {type(exc).__name__}: {exc}", file=sys.stderr)
+
+
 def claim_next() -> int:
     _secure_queue()
     for path in sorted(QUEUE.glob("launch_*.json"), key=lambda p: p.stat().st_mtime):
@@ -103,6 +117,7 @@ def claim_next() -> int:
                 db.conn.close()
             path.unlink(missing_ok=True)
             if workflow is not None and workflow["workflow_id"] == request["workflow_id"]:
+                _ensure_browser()
                 print(json.dumps(_payload(workflow, require_run=True), separators=(",", ":")))
                 return 0
         except Exception:

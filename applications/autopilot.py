@@ -260,10 +260,12 @@ def _advance(db: JobDB, run: dict, runs: list[dict], now: datetime,
     breached = next((s for s in subs if int(s.get("tab_violations") or 0) > 0), None)
     if breached:
         reason = f"browser agent {breached['conv'][:8]} violated tab ownership"
+        # Through _flag so the pause emails him: on 2026-10-12 two runs paused
+        # here in silence and he learnt of it only from the board.
         if not run["recovery_required"]:
-            db.update_application_run(
-                rid, recovery_required=1, recovery_reason=reason)
-        db.set_autopilot(paused_reason=reason)
+            _flag(db, run, reason, alert)
+        else:
+            db.set_autopilot(paused_reason=reason)
         return [f"{rid}: tab ownership breach, autopilot paused"]
 
     if run["state"] == "launching":
@@ -302,8 +304,15 @@ def _advance(db: JobDB, run: dict, runs: list[dict], now: datetime,
                 alert(f"Run needs you: {job.get('company', '?')}",
                       f"{job.get('company', '?')} | {job.get('title', '?')}\n"
                       f"{workflow.get('detail') or 'needs user action'}\n"
-                      "Act in the attended Chrome on the M1, then tell the "
+                      "Act in the application Chrome on the M1, then tell the "
                       "Antigravity parent to continue.")
+            elif outcome == "review_ready" and alert is not None:
+                # A filled form waits on him too: his ask, 2026-10-12.
+                job = db.get_job(workflow.get("job_id", "")) or {}
+                alert(f"Ready for review: {job.get('company', '?')}",
+                      f"{job.get('company', '?')} | {job.get('title', '?')}\n"
+                      f"{workflow.get('detail') or 'filled to the final submit'}\n"
+                      "Review and submit in the application Chrome on the M1.")
             return [f"{rid}: draining after {outcome}"]
         running_at = _at(run["running_at"])
         if (not parents and not subs and running_at and now - running_at > CONVERSATION_GRACE

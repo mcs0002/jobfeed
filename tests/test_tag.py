@@ -765,24 +765,70 @@ class ApiTransportTests(unittest.TestCase):
             tag.tag_jobs(jobs)
 
         schema = posted["response_format"]["json_schema"]["schema"]
-        self.assertEqual(schema["properties"]["rows"]["minItems"], 3)
-        self.assertEqual(schema["properties"]["rows"]["maxItems"], 3)
+        slots = schema["properties"]["rows"]["items"]["prefixItems"]
+        self.assertEqual(slots[0]["enum"], ["0", "1", "2"])
         self.assertIn("BOUNDARY CHECK", posted["messages"][0]["content"])
         self.assertTrue(all(j["area"] == "markets" for j in jobs))
+
+    def test_content_failure_on_api_primary_is_split_and_retried(self):
+        # 2026-10-10 re-tag: eight batches came back unparseable, each blank
+        # batch was read as a dead CLI, no retry ran, 104 roles stayed blank.
+        # A batch the working API fails must go down the retry ladder.
+        jobs = self._jobs(tag.BATCH_SIZE)
+        sizes = []
+
+        def fake_openai(batch, cfg, health=None):
+            sizes.append(len(batch))
+            if health is not None:
+                health["batches_total"] += 1
+            if len(batch) == tag.BATCH_SIZE:  # the full batch: unparseable
+                for j in batch:
+                    tag._blank_tags(j)
+            else:
+                for j in batch:
+                    j.update(_MARKETS_TAGS)
+
+        with patch.dict(os.environ, self.CFG, clear=False), \
+             patch.object(tag, "claude_bin", return_value=None), \
+             patch.object(tag, "_tag_batch_openai", side_effect=fake_openai):
+            tag.tag_jobs(jobs)
+        self.assertTrue(all(j["area"] == "markets" for j in jobs))
+        self.assertEqual(sizes[0], tag.BATCH_SIZE)
+        self.assertTrue(all(n <= tag.SUBBATCH_SIZE for n in sizes[1:]))
+        self.assertGreater(tag.LAST_RUN_HEALTH["subbatch_retries"], 0)
+
+    def test_dead_api_transport_skips_the_content_retries(self):
+        jobs = self._jobs(3)
+        calls = []
+
+        def fake_openai(batch, cfg, health=None):
+            calls.append(len(batch))
+            for j in batch:
+                tag._blank_tags(j)
+            tag._mark_api_dead()
+
+        with patch.dict(os.environ, self.CFG, clear=False), \
+             patch.object(tag, "_API_DEAD", False), \
+             patch.object(tag, "claude_bin", return_value=None), \
+             patch.object(tag, "_api_key", return_value=""), \
+             patch.object(tag, "_tag_batch_openai", side_effect=fake_openai):
+            tag.tag_jobs(jobs)
+        self.assertEqual(calls, [3])
+        self.assertEqual(tag.LAST_RUN_HEALTH["subbatch_retries"], 0)
 
     def test_structured_rows_tolerate_newlines_inside_fields(self):
         row = ["0", "economics", "-\n", "analyst", "graduate-programme",
                "Washington, DC", "United States", "Americas", "onsite", "-\n",
                "0", "master", " -", "no\n"]
-        pipe = tag._json_to_pipe(json.dumps({"rows": [row]}), 1)
+        pipe, _ = tag._json_to_pipe(json.dumps({"rows": [row]}), 1)
         self.assertEqual(pipe.count("\n"), 0)
         out = tag.parse_response(pipe, expected_count=1)
         self.assertEqual(out[0]["area"], "economics")
         self.assertEqual(out[0]["loc_city"], "Washington, DC")
 
     def test_structured_rows_reject_wrong_count_shape_or_index(self):
-        valid = [str(i) for i in range(14)]
-        valid[0] = "0"
+        valid = ["0", "markets", "-", "analyst", "job", "London",
+                 "United Kingdom", "Europe", "onsite", "-", "0", "-", "-", "no"]
         with self.assertRaises(ValueError):
             tag._json_to_pipe(json.dumps({"rows": []}), 1)
         with self.assertRaises(ValueError):
@@ -792,7 +838,7 @@ class ApiTransportTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             tag._json_to_pipe(json.dumps({"rows": [invalid_index]}), 1)
         self.assertEqual(len(tag._json_to_pipe(
-            json.dumps({"rows": [valid]}), 1).split("|")), 14)
+            json.dumps({"rows": [valid]}), 1)[0].split("|")), 14)
 
     def test_structured_prompt_changes_rubric_provenance(self):
         pipe_cfg = dict(self.CFG)

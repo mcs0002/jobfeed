@@ -162,7 +162,7 @@ RETAIL_DROPS = {
 # match as plain substrings and "financial advisor" would hit "Financial
 # Advisory" (valuation and transaction consulting at Deloitte and Kroll).
 # Corpus dry-run the same day: ~1,000 active hits, all wealth, 'other' or
-# small-business banking. Rejected then: Polish "doradca" (also ING's junior
+# small-business banking. Rejected then: Polish "doradca" (also a Dutch bank's junior
 # strategic-client financing advisors), "client associate" (Neuberger
 # institutional, Nordea leveraged finance), "client service associate" (JPMC
 # markets client service), bare "financial planning" (FP&A analysts).

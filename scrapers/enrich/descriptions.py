@@ -42,6 +42,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 sys.path.insert(0, ROOT)
 
 from jobfeed.db import JobDB  # noqa: E402
+from jobfeed.description_junk import is_junk  # noqa: E402
 
 DEFAULT_DB = os.environ.get("JOBS_DB", os.path.join(ROOT, "jobs.db"))
 # Browser-realistic header set. A bare UA + Accept gets a 403 "Access Denied"
@@ -300,6 +301,31 @@ def note_deadline(page_html: str, out: dict | None) -> None:
         out["deadline"] = stated
 
 
+def cloudflare_challenge(r) -> bool:
+    """True if `r` is Cloudflare's bot challenge rather than the page.
+
+    Cloudflare answers a plain `requests` GET with a 403 "Just a moment..."
+    page on some career sites (Alvarez & Marsal, Horváth, Citadel: 82 roles
+    with no description in the two weeks to 2026-10-14). The page itself is
+    server-rendered; only the TLS fingerprint is refused."""
+    if r.status_code not in (403, 503):
+        return False
+    return (r.headers.get("cf-mitigated") == "challenge"
+            or "challenges.cloudflare.com" in r.text[:20000])
+
+
+def _cffi_get(url: str, timeout: int):
+    """The same GET through curl_cffi's Chrome impersonation, which clears the
+    challenge, as the listing scrapers for these sites already do. None on
+    any failure."""
+    try:
+        from curl_cffi import requests as cffi
+        return cffi.get(url, impersonate="chrome", timeout=timeout,
+                        allow_redirects=True)
+    except Exception:
+        return None
+
+
 def enrich_one(url: str, session: requests.Session, timeout: int = 15,
                out: dict | None = None) -> str:
     """GET one URL and extract its text. Returns "" on any failure — we want
@@ -319,7 +345,9 @@ def enrich_one(url: str, session: requests.Session, timeout: int = 15,
         return ""
     try:
         r = session.get(url, headers=HEADERS, timeout=timeout, allow_redirects=True)
-        if r.status_code >= 400:
+        if cloudflare_challenge(r):
+            r = _cffi_get(url, timeout)
+        if r is None or r.status_code >= 400:
             return ""
         note_deadline(r.text, out)
         text = _jobposting_description(r.text)
@@ -494,6 +522,10 @@ def main():
             else:
                 bodies.add(digest)
 
+        if is_junk(text):
+            print(f"  [{i}/{len(rows)}] JUNK {row['company']}: placeholder page, "
+                  f"treating as a failed fetch")
+            text = ""
         if not text:
             skipped += 1
             if not args.dry_run:

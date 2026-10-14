@@ -85,7 +85,7 @@ DESCRIPTION_STRATEGY = {
     "phenom_widgets": ENRICHER,  # listing-only; phenom_enrich reads phApp.ddo on the job page
     "teamtailor": HTTP,     # listing-only handler; public detail pages carry real bodies
     "lever": SCRAPER,
-    "citadel": SCRAPER,
+    "citadel": HTTP,  # listing-only; detail pages via enrich_one's curl_cffi retry past Cloudflare
     "radancy": SCRAPER,
     "janestreet": SCRAPER,
     "deutscheboerse": SCRAPER,
